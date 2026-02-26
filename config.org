@@ -62,7 +62,7 @@
 
 #+begin_src emacs-lisp
 (when (require 'ayu-theme nil t)
-  (load-theme 'ayu-mirage t))
+  (load-theme 'ayu-light t))
 
 (set-face-attribute 'default nil :height 130)
 #+end_src
@@ -103,7 +103,7 @@
     "b b" #'switch-to-buffer
     "b d" #'kill-current-buffer
     "p" '(:ignore t :which-key "projects")
-    "p p" #'projectile-switch-project
+    "p p" #'my/projectile-switch-project-recent
     "p f" #'projectile-find-file
     "p d" #'projectile-dired
     "w" '(:ignore t :which-key "windows")
@@ -142,9 +142,26 @@
 #+begin_src emacs-lisp
 (if (require 'projectile nil t)
     (progn
+      (defun my/projectile-switch-project-recent ()
+        (interactive)
+        (let* ((known-projects (projectile-known-projects))
+               (current-project (ignore-errors
+                                  (abbreviate-file-name (projectile-project-root))))
+               (ordered-projects
+                (if (and current-project (member current-project known-projects))
+                    (cons current-project (delete current-project known-projects))
+                  known-projects))
+               (recent-projects (seq-take ordered-projects 5)))
+          (if recent-projects
+              (projectile-completing-read
+               "Switch to recent project: " recent-projects
+               :action (lambda (project)
+                         (projectile-switch-project-by-name project))
+               :caller 'projectile-read-project)
+            (call-interactively #'projectile-switch-project))))
       (projectile-mode 1)
       (setq projectile-completion-system 'default)
-      (define-key global-map (kbd "C-c p p") #'projectile-switch-project)
+      (define-key global-map (kbd "C-c p p") #'my/projectile-switch-project-recent)
       (define-key global-map (kbd "C-c p f") #'projectile-find-file))
   (progn
     (define-key global-map (kbd "C-c p p") #'project-switch-project)

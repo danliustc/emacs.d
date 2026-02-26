@@ -59,9 +59,15 @@
     (should (string-match-p ":prefix \",\"" content))
     (should (string-match-p "\"f f\" #'find-file" content))
     (should (string-match-p "\"f r\" #'recentf-open-files" content))
-    (should (string-match-p "\"p p\" #'projectile-switch-project" content))
+    (should (string-match-p "\"p p\" #'my/projectile-switch-project-recent" content))
     (should (string-match-p "\"p d\" #'projectile-dired" content))
     (should (string-match-p "\"w /\" #'split-window-right" content))))
+
+(ert-deftest config-should-limit-recent-project-list-to-five ()
+  (let ((content (file-content "config.org")))
+    (should (string-match-p "defun my/projectile-switch-project-recent" content))
+    (should (string-match-p "seq-take ordered-projects 5" content))
+    (should (string-match-p "projectile-completing-read" content))))
 
 (ert-deftest config-should-have-local-leader-for-main-modes ()
   (let ((content (file-content "config.org")))
@@ -80,5 +86,5 @@
 (ert-deftest config-should-set-ayu-theme-and-larger-font ()
   (let ((content (file-content "config.org")))
     (should (string-match-p "ayu-theme" content))
-    (should (string-match-p "load-theme 'ayu-mirage t" content))
+    (should (string-match-p "load-theme 'ayu-light t" content))
     (should (string-match-p "set-face-attribute 'default nil :height 130" content))))
