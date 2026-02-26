@@ -1,0 +1,165 @@
+#+TITLE: Emacs Config
+
+* Core
+
+#+begin_src emacs-lisp
+(setq inhibit-startup-screen t
+      ring-bell-function 'ignore
+      make-backup-files nil
+      auto-save-default nil)
+
+(menu-bar-mode -1)
+(tool-bar-mode -1)
+(scroll-bar-mode -1)
+(global-display-line-numbers-mode 1)
+
+(fset 'yes-or-no-p 'y-or-n-p)
+
+(when (eq system-type 'darwin)
+  (setq mac-command-modifier 'super
+        mac-option-modifier 'meta))
+#+end_src
+
+* Packages
+
+#+begin_src emacs-lisp
+(require 'package)
+(setq package-archives
+      '(("gnu" . "https://elpa.gnu.org/packages/")
+        ("melpa" . "https://melpa.org/packages/")))
+(package-initialize)
+
+(defvar my/packages
+  '(evil key-chord general which-key projectile markdown-mode)
+  "Packages for simple Vim-like editing and project workflow.")
+
+(defvar my/auto-install-packages t
+  "When non-nil, install missing packages automatically at startup.")
+
+(defun my/install-missing-packages ()
+  (interactive)
+  (let ((missing
+         (seq-filter (lambda (pkg) (not (package-installed-p pkg))) my/packages)))
+    (when missing
+      (unless package-archive-contents
+        (package-refresh-contents))
+      (dolist (pkg missing)
+        (package-install pkg)))))
+
+(let ((missing
+       (seq-filter (lambda (pkg) (not (package-installed-p pkg))) my/packages)))
+  (when missing
+    (when my/auto-install-packages
+      (my/install-missing-packages))
+    (unless my/auto-install-packages
+      (message "Missing packages: %s. Run M-x my/install-missing-packages"
+               missing))))
+#+end_src
+
+* Vim Editing (Evil)
+
+#+begin_src emacs-lisp
+(when (require 'evil nil t)
+  (evil-mode 1)
+  (setq evil-want-C-u-scroll t))
+
+(when (and (featurep 'evil) (require 'key-chord nil t))
+  (key-chord-mode 1)
+  (setq key-chord-two-keys-delay 0.3)
+  (key-chord-define evil-insert-state-map "jk" 'evil-normal-state))
+
+(when (and (featurep 'evil) (require 'which-key nil t))
+  (which-key-mode 1))
+
+(when (and (featurep 'evil) (require 'general nil t))
+  (general-auto-unbind-keys)
+
+  (general-create-definer my/leader-def
+    :keymaps 'override
+    :states '(normal visual motion)
+    :prefix "SPC")
+
+  (general-create-definer my/local-leader-def
+    :states '(normal visual motion)
+    :prefix ",")
+
+  (my/leader-def
+    "f" '(:ignore t :which-key "files")
+    "f f" #'find-file
+    "f s" #'save-buffer
+    "b" '(:ignore t :which-key "buffers")
+    "b b" #'switch-to-buffer
+    "b d" #'kill-current-buffer
+    "p" '(:ignore t :which-key "projects")
+    "p p" #'projectile-switch-project
+    "p f" #'projectile-find-file
+    "w" '(:ignore t :which-key "windows")
+    "w /" #'split-window-right
+    "w -" #'split-window-below
+    "w d" #'delete-window
+    "q" '(:ignore t :which-key "quit")
+    "q q" #'save-buffers-kill-terminal
+    "h" '(:ignore t :which-key "help")
+    "h f" #'describe-function
+    "h v" #'describe-variable
+    "h k" #'describe-key)
+
+  (with-eval-after-load 'org
+    (my/local-leader-def
+      :keymaps 'org-mode-map
+      "t" #'org-todo
+      "a" #'org-agenda
+      "s" #'org-schedule))
+
+  (with-eval-after-load 'markdown-mode
+    (my/local-leader-def
+      :keymaps 'markdown-mode-map
+      "p" #'markdown-preview
+      "h" #'markdown-insert-header-dwim))
+
+  (with-eval-after-load 'prog-mode
+    (my/local-leader-def
+      :keymaps 'prog-mode-map
+      "g" #'xref-find-definitions
+      "r" #'xref-find-references)))
+#+end_src
+
+* Project / Workspace
+
+#+begin_src emacs-lisp
+(if (require 'projectile nil t)
+    (progn
+      (projectile-mode 1)
+      (setq projectile-completion-system 'default)
+      (define-key global-map (kbd "C-c p p") #'projectile-switch-project)
+      (define-key global-map (kbd "C-c p f") #'projectile-find-file))
+  (progn
+    (define-key global-map (kbd "C-c p p") #'project-switch-project)
+    (define-key global-map (kbd "C-c p f") #'project-find-file)))
+#+end_src
+
+* Status Line
+
+#+begin_src emacs-lisp
+(setq-default mode-line-format
+              '((:eval (format " %s " (buffer-name)))
+                "  " mode-line-position
+                "  " mode-line-modes))
+#+end_src
+
+* Org & Markdown
+
+#+begin_src emacs-lisp
+(with-eval-after-load 'org
+  (setq org-startup-indented t
+        org-hide-emphasis-markers t
+        org-ellipsis " ▾"))
+
+(add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
+
+(if (require 'markdown-mode nil t)
+    (progn
+      (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
+      (add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode)))
+  (add-to-list 'auto-mode-alist '("\\.md\\'" . text-mode)))
+#+end_src

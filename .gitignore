@@ -1,5 +1,24 @@
-elpa
-auto-save-list
-recentf
-projectile-bookmarks.eld
-tutorial
+# Emacs package/cache directories
+/elpa/
+/auto-save-list/
+/eln-cache/
+/tramp/
+/url/
+/var/
+/transient/
+
+# Emacs generated local data
+/recentf
+/projectile-bookmarks.eld
+/bookmarks
+/network-security.data
+/tutorial
+
+# Tangled/compiled artifacts
+/config.el
+*.elc
+
+# Backup/lock/autosave files
+*~
+\#*#
+.\#*

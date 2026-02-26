@@ -1,3 +1,91 @@
-* Personal emacs config
+#+TITLE: Emacs 配置说明
 
-Build it following [[http://book.emacs-china.org/][Learning Emacs in 21 Days]].
+一个轻量的个人 Emacs 配置，主要用于：
+- Org Mode
+- Markdown
+- 偶尔查看 Python/C++ 代码
+
+核心风格：
+- Vim 编辑（=evil=）
+- Space-Emacs 风格快捷键（全局 =SPC=，局部 =,=）
+- macOS 优先（=Command -> Super=，=Option -> Meta=）
+
+* 结构
+
+- [[./init.el][init.el]]: 入口文件，只负责加载 =config.org=
+- [[./config.org][config.org]]: 主配置（literate config）
+- [[./tests/config-tests.el][tests/config-tests.el]]: 基础回归测试（ERT）
+
+* 安装与启动
+
+首次启动会自动安装缺失包（由 =my/auto-install-packages= 控制）：
+- evil
+- key-chord
+- general
+- which-key
+- projectile
+- markdown-mode
+
+启动 Emacs 后会自动把 [[./config.org][config.org]] tangle 成 =config.el= 并加载。
+
+* 快捷键设计
+
+** 全局 Leader (=SPC=)
+
+- =SPC f f=: 打开文件
+- =SPC f s=: 保存文件
+- =SPC b b=: 切换 buffer
+- =SPC b d=: 关闭当前 buffer
+- =SPC p p=: 切换项目
+- =SPC p f=: 项目内找文件
+- =SPC w /=: 垂直分屏
+- =SPC w -=: 水平分屏
+- =SPC w d=: 关闭窗口
+- =SPC q q=: 退出 Emacs
+- =SPC h f=: 查看函数帮助
+- =SPC h v=: 查看变量帮助
+- =SPC h k=: 查看按键帮助
+
+** 局部 Leader (=,=)
+
+- Org Mode
+  - =, t=: 切换 TODO
+  - =, a=: 打开 Agenda
+  - =, s=: 设置 Schedule
+- Markdown Mode
+  - =, p=: 预览
+  - =, h=: 插入标题
+- 编程模式（如 Python/C++）
+  - =, g=: 跳转定义
+  - =, r=: 查找引用
+
+** Vim 习惯
+
+- 插入模式输入 =jk= 退出到 normal state
+
+* UI 与行为
+
+- 关闭 menu/tool/scroll bar
+- 全局显示行号
+- 简洁 mode-line（不依赖 doom-modeline）
+- Org 默认缩进、隐藏强调符号、自定义折叠符号
+
+* macOS 说明
+
+仅在 macOS 下启用：
+- =mac-command-modifier= -> =super=
+- =mac-option-modifier= -> =meta=
+
+这样可以兼顾 Emacs/Vim 操作习惯和 mac 键盘布局。
+
+* 测试
+
+运行回归测试：
+
+#+begin_src sh
+emacs --batch -l tests/config-tests.el -f ert-run-tests-batch-and-exit
+#+end_src
+
+* 备注
+
+这个仓库目标是“稳定、轻量、可维护”，不追求完整 IDE 或重型发行版体验。
