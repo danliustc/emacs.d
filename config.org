@@ -17,6 +17,11 @@
 
 (fset 'yes-or-no-p 'y-or-n-p)
 
+(defun my/confirm-kill-emacs (prompt)
+  (y-or-n-p (or prompt "Really quit Emacs? ")))
+
+(setq confirm-kill-emacs #'my/confirm-kill-emacs)
+
 (when (eq system-type 'darwin)
   (setq mac-command-modifier 'super
         mac-option-modifier 'meta))

@@ -96,3 +96,9 @@
     (should (string-match-p "ayu-theme" content))
     (should (string-match-p "load-theme 'ayu-light t" content))
     (should (string-match-p "set-face-attribute 'default nil :height 130" content))))
+
+(ert-deftest config-should-confirm-before-exit ()
+  (let ((content (file-content "config.org")))
+    (should (string-match-p "defun my/confirm-kill-emacs" content))
+    (should (string-match-p "setq confirm-kill-emacs #'my/confirm-kill-emacs" content))
+    (should (string-match-p "Really quit Emacs\\?" content))))
