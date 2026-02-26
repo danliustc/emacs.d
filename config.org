@@ -12,6 +12,8 @@
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
 (global-display-line-numbers-mode 1)
+(recentf-mode 1)
+(setq recentf-max-saved-items 200)
 
 (fset 'yes-or-no-p 'y-or-n-p)
 
@@ -30,7 +32,7 @@
 (package-initialize)
 
 (defvar my/packages
-  '(evil key-chord general which-key projectile markdown-mode)
+  '(evil key-chord general which-key projectile markdown-mode ayu-theme)
   "Packages for simple Vim-like editing and project workflow.")
 
 (defvar my/auto-install-packages t
@@ -54,6 +56,15 @@
     (unless my/auto-install-packages
       (message "Missing packages: %s. Run M-x my/install-missing-packages"
                missing))))
+#+end_src
+
+* Theme & Font
+
+#+begin_src emacs-lisp
+(when (require 'ayu-theme nil t)
+  (load-theme 'ayu-mirage t))
+
+(set-face-attribute 'default nil :height 130)
 #+end_src
 
 * Vim Editing (Evil)
@@ -86,6 +97,7 @@
   (my/leader-def
     "f" '(:ignore t :which-key "files")
     "f f" #'find-file
+    "f r" #'recentf-open-files
     "f s" #'save-buffer
     "b" '(:ignore t :which-key "buffers")
     "b b" #'switch-to-buffer
@@ -93,6 +105,7 @@
     "p" '(:ignore t :which-key "projects")
     "p p" #'projectile-switch-project
     "p f" #'projectile-find-file
+    "p d" #'projectile-dired
     "w" '(:ignore t :which-key "windows")
     "w /" #'split-window-right
     "w -" #'split-window-below
@@ -153,7 +166,14 @@
 (with-eval-after-load 'org
   (setq org-startup-indented t
         org-hide-emphasis-markers t
-        org-ellipsis " ▾"))
+        org-ellipsis " ▾")
+  (define-key org-mode-map (kbd "<tab>") #'org-cycle)
+  (define-key org-mode-map (kbd "TAB") #'org-cycle)
+  (define-key org-mode-map (kbd "<backtab>") #'org-shifttab)
+  (when (featurep 'evil)
+    (evil-define-key '(normal motion) org-mode-map
+      (kbd "<tab>") #'org-cycle
+      (kbd "<backtab>") #'org-shifttab)))
 
 (add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
 

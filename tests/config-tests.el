@@ -38,6 +38,7 @@
 (ert-deftest config-should-support-org-and-markdown ()
   (let ((content (file-content "config.org")))
     (should (string-match-p "org-mode" content))
+    (should (string-match-p "org-cycle" content))
     (should (or (string-match-p "markdown" content)
                 (string-match-p "\\.md\\'" content)))))
 
@@ -57,7 +58,9 @@
     (should (string-match-p ":prefix \"SPC\"" content))
     (should (string-match-p ":prefix \",\"" content))
     (should (string-match-p "\"f f\" #'find-file" content))
+    (should (string-match-p "\"f r\" #'recentf-open-files" content))
     (should (string-match-p "\"p p\" #'projectile-switch-project" content))
+    (should (string-match-p "\"p d\" #'projectile-dired" content))
     (should (string-match-p "\"w /\" #'split-window-right" content))))
 
 (ert-deftest config-should-have-local-leader-for-main-modes ()
@@ -73,3 +76,9 @@
   (let ((content (file-content "config.org")))
     (should (string-match-p "mac-command-modifier" content))
     (should (string-match-p "mac-option-modifier" content))))
+
+(ert-deftest config-should-set-ayu-theme-and-larger-font ()
+  (let ((content (file-content "config.org")))
+    (should (string-match-p "ayu-theme" content))
+    (should (string-match-p "load-theme 'ayu-mirage t" content))
+    (should (string-match-p "set-face-attribute 'default nil :height 130" content))))
