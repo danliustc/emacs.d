@@ -142,6 +142,23 @@
 #+begin_src emacs-lisp
 (if (require 'projectile nil t)
     (progn
+      (defun my/projectile-find-recent-file-in-project (project-root)
+        (let* ((default-directory project-root)
+               (recent-files (seq-take (projectile-recently-active-files) 8)))
+          (if recent-files
+              (let ((selected-file
+                     (minibuffer-with-setup-hook
+                         (lambda ()
+                           (when (active-minibuffer-window)
+                             (minibuffer-completion-help)))
+                       (completing-read "Recent file in project: "
+                                        recent-files nil t nil nil
+                                        (car recent-files)))))
+                (when (and selected-file (not (string= selected-file "")))
+                  (find-file (expand-file-name selected-file project-root))))
+            (let ((default-directory project-root))
+              (call-interactively #'projectile-find-file)))))
+
       (defun my/projectile-switch-project-recent ()
         (interactive)
         (let* ((known-projects (projectile-known-projects))
@@ -153,11 +170,19 @@
                   known-projects))
                (recent-projects (seq-take ordered-projects 5)))
           (if recent-projects
-              (projectile-completing-read
-               "Switch to recent project: " recent-projects
-               :action (lambda (project)
-                         (projectile-switch-project-by-name project))
-               :caller 'projectile-read-project)
+              (let ((selected-project
+                     (minibuffer-with-setup-hook
+                         (lambda ()
+                           (when (active-minibuffer-window)
+                             (minibuffer-completion-help)))
+                       (completing-read "Switch to recent project: "
+                                        recent-projects nil t nil nil
+                                        (car recent-projects)))))
+                (when (and selected-project (not (string= selected-project "")))
+                  (let ((project-root (expand-file-name selected-project)))
+                    (let ((projectile-switch-project-action #'ignore))
+                      (projectile-switch-project-by-name project-root))
+                    (my/projectile-find-recent-file-in-project project-root))))
             (call-interactively #'projectile-switch-project))))
       (projectile-mode 1)
       (setq projectile-completion-system 'default)

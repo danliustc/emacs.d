@@ -126,22 +126,6 @@ emacs --batch -l tests/config-tests.el -f ert-run-tests-batch-and-exit
 emacs --batch -l init.el
 #+end_src
 
-* 常见问题
-
-** 1) 主题报错找不到
-
-如果报“找不到某主题”，先确认 =elpa= 里对应主题文件是否存在。
-当前配置使用 =ayu-light=，不是 =ayu-mirage=。
-
-** 2) =SPC p p= 没有候选
-
-这通常是因为还没有已知项目。
-先使用一次 projectile 打开/添加项目，再使用 =SPC p p=。
-
-** 3) Org 的 TAB 不折叠
-
-确认当前 buffer 是 =org-mode=，并检查是否有外部配置覆盖了 =TAB= 绑定。
-本配置已显式绑定 =org-cycle / org-shifttab=。
 
 * 维护说明
 

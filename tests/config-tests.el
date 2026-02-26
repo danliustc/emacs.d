@@ -67,7 +67,15 @@
   (let ((content (file-content "config.org")))
     (should (string-match-p "defun my/projectile-switch-project-recent" content))
     (should (string-match-p "seq-take ordered-projects 5" content))
-    (should (string-match-p "projectile-completing-read" content))))
+    (should (string-match-p "minibuffer-with-setup-hook" content))
+    (should (string-match-p "minibuffer-completion-help" content))))
+
+(ert-deftest config-should-prompt-recent-files-after-project-selection ()
+  (let ((content (file-content "config.org")))
+    (should (string-match-p "defun my/projectile-find-recent-file-in-project" content))
+    (should (string-match-p "seq-take (projectile-recently-active-files) 8" content))
+    (should (string-match-p "my/projectile-find-recent-file-in-project project-root" content))
+    (should (string-match-p "let ((projectile-switch-project-action #'ignore))" content))))
 
 (ert-deftest config-should-have-local-leader-for-main-modes ()
   (let ((content (file-content "config.org")))
