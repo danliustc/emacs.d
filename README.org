@@ -41,6 +41,12 @@
 - projectile
 - markdown-mode
 - ayu-theme
+- vertico
+- orderless
+- consult
+- marginalia
+- embark
+- embark-consult
 
 * 功能总览
 
@@ -51,6 +57,7 @@
 - 行号默认开启
 - 关闭 menu/tool/scroll bar
 - 简洁 mode-line（不依赖 doom-modeline）
+- 现代补全栈：Vertico + Orderless + Consult + Marginalia + Embark
 
 ** 主题与字体
 
@@ -61,7 +68,7 @@
 
 - recentf 已启用（最近文件）
 - projectile 已启用（项目管理）
-- =SPC p p= 显示“最近 5 个项目”候选
+- =SPC p p= 项目切换（Projectile）
 
 ** Org/Markdown
 
@@ -73,13 +80,17 @@
 
 ** 全局 Leader（=SPC=）
 
-- =SPC f f= 打开文件
-- =SPC f r= 最近文件列表
+- =SPC f f= 文件查找（Consult）
+- =SPC f r= 最近文件（Consult）
+- =SPC f g= 项目内全文检索（ripgrep）
+- =SPC f l= 当前 buffer 行内搜索
 - =SPC f s= 保存
-- =SPC b b= 切换 buffer
+- =SPC b b= Consult buffer 列表
+- =SPC b s= 原生 buffer 切换
 - =SPC b d= 关闭当前 buffer
-- =SPC p p= 最近 5 个项目切换
+- =SPC p p= 项目切换
 - =SPC p f= 项目内找文件
+- =SPC p r= 项目最近文件
 - =SPC p d= 打开项目 Dired 列表
 - =SPC w /= 垂直分屏
 - =SPC w -= 水平分屏
@@ -88,6 +99,11 @@
 - =SPC h f= 查看函数帮助
 - =SPC h v= 查看变量帮助
 - =SPC h k= 查看按键帮助
+- =C-s= Consult 行搜索
+- =C-x b= Consult buffer 切换
+- =C-.= Embark 动作菜单
+- =C-;= Embark DWIM 动作
+- =C-h B= Embark 按键绑定帮助
 
 ** 局部 Leader（=,=）
 

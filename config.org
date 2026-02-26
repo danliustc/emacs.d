@@ -37,7 +37,8 @@
 (package-initialize)
 
 (defvar my/packages
-  '(evil key-chord general which-key projectile markdown-mode ayu-theme)
+  '(evil key-chord general which-key projectile markdown-mode ayu-theme
+         vertico orderless consult marginalia embark embark-consult)
   "Packages for simple Vim-like editing and project workflow.")
 
 (defvar my/auto-install-packages t
@@ -72,6 +73,37 @@
 (set-face-attribute 'default nil :height 140)
 #+end_src
 
+* Completion
+
+#+begin_src emacs-lisp
+(when (require 'vertico nil t)
+  (vertico-mode 1))
+
+(when (require 'orderless nil t)
+  (setq completion-styles '(orderless basic)
+        completion-category-defaults nil
+        completion-category-overrides
+        '((file (styles basic partial-completion)))))
+
+(when (require 'consult nil t)
+  (setq completion-in-region-function #'consult-completion-in-region)
+  (define-key global-map (kbd "C-s") #'consult-line)
+  (define-key global-map (kbd "C-x b") #'consult-buffer))
+
+(when (require 'marginalia nil t)
+  (marginalia-mode 1))
+
+(when (require 'embark nil t)
+  (setq prefix-help-command #'embark-prefix-help-command)
+  (define-key global-map (kbd "C-.") #'embark-act)
+  (define-key global-map (kbd "C-;") #'embark-dwim)
+  (define-key global-map (kbd "C-h B") #'embark-bindings))
+
+(with-eval-after-load 'embark
+  (when (require 'embark-consult nil t)
+    (add-hook 'embark-collect-mode-hook #'consult-preview-at-point-mode)))
+#+end_src
+
 * Vim Editing (Evil)
 
 #+begin_src emacs-lisp
@@ -101,15 +133,19 @@
 
   (my/leader-def
     "f" '(:ignore t :which-key "files")
-    "f f" #'find-file
-    "f r" #'recentf-open-files
+    "f f" #'consult-find
+    "f g" #'consult-ripgrep
+    "f l" #'consult-line
+    "f r" #'consult-recent-file
     "f s" #'save-buffer
     "b" '(:ignore t :which-key "buffers")
-    "b b" #'switch-to-buffer
+    "b b" #'consult-buffer
+    "b s" #'switch-to-buffer
     "b d" #'kill-current-buffer
     "p" '(:ignore t :which-key "projects")
-    "p p" #'my/projectile-switch-project-recent
+    "p p" #'projectile-switch-project
     "p f" #'projectile-find-file
+    "p r" #'projectile-recentf
     "p d" #'projectile-dired
     "w" '(:ignore t :which-key "windows")
     "w /" #'split-window-right
@@ -147,51 +183,9 @@
 #+begin_src emacs-lisp
 (if (require 'projectile nil t)
     (progn
-      (defun my/projectile-find-recent-file-in-project (project-root)
-        (let* ((default-directory project-root)
-               (recent-files (seq-take (projectile-recently-active-files) 8)))
-          (if recent-files
-              (let ((selected-file
-                     (minibuffer-with-setup-hook
-                         (lambda ()
-                           (when (active-minibuffer-window)
-                             (minibuffer-completion-help)))
-                       (completing-read "Recent file in project: "
-                                        recent-files nil t nil nil
-                                        (car recent-files)))))
-                (when (and selected-file (not (string= selected-file "")))
-                  (find-file (expand-file-name selected-file project-root))))
-            (let ((default-directory project-root))
-              (call-interactively #'projectile-find-file)))))
-
-      (defun my/projectile-switch-project-recent ()
-        (interactive)
-        (let* ((known-projects (projectile-known-projects))
-               (current-project (ignore-errors
-                                  (abbreviate-file-name (projectile-project-root))))
-               (ordered-projects
-                (if (and current-project (member current-project known-projects))
-                    (cons current-project (delete current-project known-projects))
-                  known-projects))
-               (recent-projects (seq-take ordered-projects 5)))
-          (if recent-projects
-              (let ((selected-project
-                     (minibuffer-with-setup-hook
-                         (lambda ()
-                           (when (active-minibuffer-window)
-                             (minibuffer-completion-help)))
-                       (completing-read "Switch to recent project: "
-                                        recent-projects nil t nil nil
-                                        (car recent-projects)))))
-                (when (and selected-project (not (string= selected-project "")))
-                  (let ((project-root (expand-file-name selected-project)))
-                    (let ((projectile-switch-project-action #'ignore))
-                      (projectile-switch-project-by-name project-root))
-                    (my/projectile-find-recent-file-in-project project-root))))
-            (call-interactively #'projectile-switch-project))))
       (projectile-mode 1)
       (setq projectile-completion-system 'default)
-      (define-key global-map (kbd "C-c p p") #'my/projectile-switch-project-recent)
+      (define-key global-map (kbd "C-c p p") #'projectile-switch-project)
       (define-key global-map (kbd "C-c p f") #'projectile-find-file))
   (progn
     (define-key global-map (kbd "C-c p p") #'project-switch-project)
