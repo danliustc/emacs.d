@@ -80,7 +80,7 @@
 
 ** 全局 Leader（=SPC=）
 
-- =SPC f f= 文件查找（Consult）
+- =SPC f f= 打开或新建文件
 - =SPC f r= 最近文件（Consult）
 - =SPC f g= 项目内全文检索（ripgrep）
 - =SPC f l= 当前 buffer 行内搜索

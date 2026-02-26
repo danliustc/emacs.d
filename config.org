@@ -133,7 +133,7 @@
 
   (my/leader-def
     "f" '(:ignore t :which-key "files")
-    "f f" #'consult-find
+    "f f" #'find-file
     "f g" #'consult-ripgrep
     "f l" #'consult-line
     "f r" #'consult-recent-file

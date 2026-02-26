@@ -57,7 +57,7 @@
     (should (string-match-p "which-key" content))
     (should (string-match-p ":prefix \"SPC\"" content))
     (should (string-match-p ":prefix \",\"" content))
-    (should (string-match-p "\"f f\" #'consult-find" content))
+    (should (string-match-p "\"f f\" #'find-file" content))
     (should (string-match-p "\"f g\" #'consult-ripgrep" content))
     (should (string-match-p "\"f l\" #'consult-line" content))
     (should (string-match-p "\"f r\" #'consult-recent-file" content))
