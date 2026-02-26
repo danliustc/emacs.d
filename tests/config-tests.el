@@ -95,7 +95,7 @@
   (let ((content (file-content "config.org")))
     (should (string-match-p "ayu-theme" content))
     (should (string-match-p "load-theme 'ayu-light t" content))
-    (should (string-match-p "set-face-attribute 'default nil :height 130" content))))
+    (should (string-match-p "set-face-attribute 'default nil :height 140" content))))
 
 (ert-deftest config-should-confirm-before-exit ()
   (let ((content (file-content "config.org")))

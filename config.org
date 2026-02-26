@@ -69,7 +69,7 @@
 (when (require 'ayu-theme nil t)
   (load-theme 'ayu-light t))
 
-(set-face-attribute 'default nil :height 130)
+(set-face-attribute 'default nil :height 140)
 #+end_src
 
 * Vim Editing (Evil)
