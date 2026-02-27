@@ -140,3 +140,9 @@
     (should (string-match-p "defun my/confirm-kill-emacs" content))
     (should (string-match-p "setq confirm-kill-emacs #'my/confirm-kill-emacs" content))
     (should (string-match-p "Really quit Emacs\\?" content))))
+
+(ert-deftest config-should-provide-manual-reload-command ()
+  (let ((content (file-content "config.org")))
+    (should (string-match-p "defun load-my-config" content))
+    (should (string-match-p "org-babel-load-file" content))
+    (should (string-match-p "expand-file-name \"config\\.org\" user-emacs-directory" content))))

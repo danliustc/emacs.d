@@ -22,6 +22,12 @@
 
 (setq confirm-kill-emacs #'my/confirm-kill-emacs)
 
+(defun load-my-config ()
+  (interactive)
+  (let ((org-confirm-babel-evaluate nil))
+    (org-babel-load-file (expand-file-name "config.org" user-emacs-directory))
+    (message "Reloaded config.org")))
+
 (when (eq system-type 'darwin)
   (setq mac-command-modifier 'super
         mac-option-modifier 'meta))
@@ -236,7 +242,6 @@
     "f s" #'save-buffer
     "b" '(:ignore t :which-key "buffers")
     "b b" #'consult-buffer
-    "b s" #'switch-to-buffer
     "b d" #'kill-current-buffer
     "p" '(:ignore t :which-key "projects")
     "p p" #'projectile-switch-project

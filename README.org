@@ -97,7 +97,6 @@
 - =SPC a o l= Org Store Link
 - =SPC a o t= Org Todo List
 - =SPC b b= Consult buffer 列表
-- =SPC b s= 原生 buffer 切换
 - =SPC b d= 关闭当前 buffer
 - =SPC p p= 项目切换
 - =SPC p f= 项目内找文件
@@ -111,10 +110,10 @@
 - =SPC h v= 查看变量帮助
 - =SPC h k= 查看按键帮助
 - =C-s= Consult 行搜索
-- =C-x b= Consult buffer 切换
 - =C-.= Embark 动作菜单
 - =C-;= Embark DWIM 动作
 - =C-h B= Embark 按键绑定帮助
+- =SPC SPC= -> 输入 =load-my-config= 可手动重载配置
 
 ** 局部 Leader（=,=）
 
