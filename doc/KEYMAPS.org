@@ -1,0 +1,54 @@
+#+TITLE: Keymaps Reference
+
+完整快捷键参考。README 只保留了高频入口，这里放全量映射。
+
+* Global Leader (=SPC=)
+
+- =SPC SPC= -> =execute-extended-command=
+- =SPC a o a= -> =org-agenda=
+- =SPC a o c= -> =my/orgfiles-capture-dispatch=
+- =SPC a o l= -> =org-store-link=
+- =SPC a o t= -> =org-todo-list=
+- =SPC f f= -> =find-file=
+- =SPC f g= -> =consult-ripgrep=
+- =SPC f l= -> =consult-line=
+- =SPC f r= -> =consult-recent-file=
+- =SPC f s= -> =save-buffer=
+- =SPC b b= -> =consult-buffer=
+- =SPC b d= -> =kill-current-buffer=
+- =SPC p p= -> =projectile-switch-project=
+- =SPC p f= -> =projectile-find-file=
+- =SPC p r= -> =projectile-recentf=
+- =SPC p d= -> =projectile-dired=
+- =SPC w /= -> =split-window-right=
+- =SPC w -= -> =split-window-below=
+- =SPC w d= -> =delete-window=
+- =SPC q q= -> =save-buffers-kill-terminal=
+- =SPC h f= -> =describe-function=
+- =SPC h v= -> =describe-variable=
+- =SPC h k= -> =describe-key=
+
+* Global Non-Leader Keys
+
+- =C-s= -> =consult-line=
+- =C-x b= -> =consult-buffer=
+- =C-.= -> =embark-act=
+- =C-;= -> =embark-dwim=
+- =C-h B= -> =embark-bindings=
+- =C-c p p= -> =projectile-switch-project= (fallback: =project-switch-project=)
+- =C-c p f= -> =projectile-find-file= (fallback: =project-find-file=)
+
+* Local Leader (=,=)
+
+** Org Mode
+- =, t= -> =org-todo=
+- =, a= -> =org-agenda=
+- =, s= -> =org-schedule=
+
+** Markdown Mode
+- =, p= -> =markdown-preview=
+- =, h= -> =markdown-insert-header-dwim=
+
+** Prog Mode
+- =, g= -> =xref-find-definitions=
+- =, r= -> =xref-find-references=

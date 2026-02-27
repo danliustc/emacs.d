@@ -204,14 +204,11 @@ Before declaring done:
   - `SPC p d -> projectile-dired`
 - Org application prefix:
   - `SPC a o a -> org-agenda`
-  - `SPC a o c -> org-capture`
-  - `SPC a o c i -> my/orgfiles-capture-idea`
-  - `SPC a o c j -> my/orgfiles-capture-journal`
-  - `SPC a o c m -> my/orgfiles-new-note`
+  - `SPC a o c -> my/orgfiles-capture-dispatch`
   - `SPC a o l -> org-store-link`
   - `SPC a o t -> org-todo-list`
 - Meeting note capture workflow:
   - root directory: `~/code/orgfiles/`
   - meeting directory: `~/code/orgfiles/meetings/`
-  - prompt order: note type -> meeting name
+  - prompt order: capture type -> meeting name
   - first-create behavior: instantiate template sections (背景/结论/待办/风险/下次会议前要准备)

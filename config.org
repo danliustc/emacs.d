@@ -1,17 +1,22 @@
 #+TITLE: Emacs Config
 
-* Core
+* Foundation: Runtime & Safety
 
 #+begin_src emacs-lisp
 (setq inhibit-startup-screen t
       ring-bell-function 'ignore
       make-backup-files nil
-      auto-save-default nil)
+      auto-save-default nil
+      create-lockfiles nil
+      auto-save-list-file-prefix nil)
 
 (menu-bar-mode -1)
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
 (global-display-line-numbers-mode 1)
+(global-visual-line-mode 1)
+(setq-default truncate-lines nil
+              word-wrap t)
 (recentf-mode 1)
 (setq recentf-max-saved-items 200)
 
@@ -33,7 +38,7 @@
         mac-option-modifier 'meta))
 #+end_src
 
-* Packages
+* Foundation: Package Bootstrap
 
 #+begin_src emacs-lisp
 (require 'package)
@@ -70,16 +75,18 @@
                missing))))
 #+end_src
 
-* Theme & Font
+* Scenario: Editing UX
+
+** Visual Baseline
 
 #+begin_src emacs-lisp
 (when (require 'ayu-theme nil t)
   (load-theme 'ayu-light t))
 
-(set-face-attribute 'default nil :height 140)
+(set-face-attribute 'default nil :height 160)
 #+end_src
 
-* Completion
+** Search & Completion
 
 #+begin_src emacs-lisp
 (when (require 'vertico nil t)
@@ -110,7 +117,9 @@
     (add-hook 'embark-collect-mode-hook #'consult-preview-at-point-mode)))
 #+end_src
 
-* Notes
+* Scenario: Notes Workflow
+
+** Capture System
 
 #+begin_src emacs-lisp
 (require 'subr-x)
@@ -138,7 +147,7 @@
   (let ((today (format-time-string "%Y-%m-%d %a"))
         (deadline (format-time-string "%Y-%m-%d %a"
                                       (time-add (current-time) (days-to-time 7)))))
-    (format "#+TITLE: %s\n#+DATE: <%s>\n\n* 背景\n\n* 结论（Decision）\n\n* 待办（Action Items）\n** TODO [@A] xxx（负责人）\nDEADLINE: <%s>\n\n* 风险/阻塞\n\n* 下次会议前要准备\n"
+    (format "#+TITLE: %s\n#+DATE: <%s>\n\n* 背景\n\n* 结论（Decision）\n\n* 待办（Action Items）\n** TODO [#A] xxx\nOWNER: 负责人\nDEADLINE: <%s>\n\n* 风险/阻塞\n\n* 下次会议前要准备\n"
             meeting-name today deadline)))
 
 (defun my/orgfiles--today-journal-file ()
@@ -169,20 +178,27 @@
   (my/orgfiles--ensure-journal-file)
   (org-capture nil "j"))
 
+(defun my/orgfiles-capture-dispatch ()
+  (interactive)
+  (let ((capture-type (completing-read "Capture type: "
+                                       '("idea" "journal" "meeting")
+                                       nil t nil nil "idea")))
+    (pcase capture-type
+      ("idea" (my/orgfiles-capture-idea))
+      ("journal" (my/orgfiles-capture-journal))
+      ("meeting" (my/orgfiles-new-note)))))
+
 (defun my/orgfiles-new-note ()
   (interactive)
-  (let ((note-type (completing-read "Org file type: " '("meeting") nil t nil nil "meeting")))
-    (pcase note-type
-      ("meeting"
-       (let* ((meeting-name (read-string "Meeting name: "))
-              (filename (my/orgfiles--normalize-name meeting-name))
-              (target-dir (expand-file-name "meetings/" my/orgfiles-root))
-              (target-file (expand-file-name filename target-dir)))
-         (my/orgfiles--ensure-dir target-dir)
-         (unless (file-exists-p target-file)
-           (with-temp-file target-file
-             (insert (my/orgfiles--meeting-template meeting-name))))
-         (find-file target-file))))))
+  (let* ((meeting-name (read-string "Meeting name: "))
+         (filename (my/orgfiles--normalize-name meeting-name))
+         (target-dir (expand-file-name "meetings/" my/orgfiles-root))
+         (target-file (expand-file-name filename target-dir)))
+    (my/orgfiles--ensure-dir target-dir)
+    (unless (file-exists-p target-file)
+      (with-temp-file target-file
+        (insert (my/orgfiles--meeting-template meeting-name))))
+    (find-file target-file)))
 
 (with-eval-after-load 'org
   (setq org-directory my/orgfiles-root
@@ -196,7 +212,33 @@
            "* %U %?\n"))))
 #+end_src
 
-* Vim Editing (Evil)
+** Writing Modes (Org/Markdown)
+
+#+begin_src emacs-lisp
+(with-eval-after-load 'org
+  (setq org-startup-indented t
+        org-hide-emphasis-markers t
+        org-ellipsis " ▾")
+  (define-key org-mode-map (kbd "<tab>") #'org-cycle)
+  (define-key org-mode-map (kbd "TAB") #'org-cycle)
+  (define-key org-mode-map (kbd "<backtab>") #'org-shifttab)
+  (when (featurep 'evil)
+    (evil-define-key '(normal motion) org-mode-map
+      (kbd "<tab>") #'org-cycle
+      (kbd "<backtab>") #'org-shifttab)))
+
+(add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
+
+(if (require 'markdown-mode nil t)
+    (progn
+      (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
+      (add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode)))
+  (add-to-list 'auto-mode-alist '("\\.md\\'" . text-mode)))
+#+end_src
+
+* Scenario: Editing UX
+
+** Keybinding Model (Evil + Leader)
 
 #+begin_src emacs-lisp
 (when (require 'evil nil t)
@@ -228,10 +270,7 @@
     "a" '(:ignore t :which-key "applications")
     "a o" '(:ignore t :which-key "org")
     "a o a" #'org-agenda
-    "a o c" #'org-capture
-    "a o c i" #'my/orgfiles-capture-idea
-    "a o c j" #'my/orgfiles-capture-journal
-    "a o c m" #'my/orgfiles-new-note
+    "a o c" #'my/orgfiles-capture-dispatch
     "a o l" #'org-store-link
     "a o t" #'org-todo-list
     "f" '(:ignore t :which-key "files")
@@ -279,7 +318,7 @@
       "r" #'xref-find-references)))
 #+end_src
 
-* Project / Workspace
+** Project Navigation
 
 #+begin_src emacs-lisp
 (if (require 'projectile nil t)
@@ -293,35 +332,11 @@
     (define-key global-map (kbd "C-c p f") #'project-find-file)))
 #+end_src
 
-* Status Line
+** Status Line
 
 #+begin_src emacs-lisp
 (setq-default mode-line-format
               '((:eval (format " %s " (buffer-name)))
                 "  " mode-line-position
                 "  " mode-line-modes))
-#+end_src
-
-* Org & Markdown
-
-#+begin_src emacs-lisp
-(with-eval-after-load 'org
-  (setq org-startup-indented t
-        org-hide-emphasis-markers t
-        org-ellipsis " ▾")
-  (define-key org-mode-map (kbd "<tab>") #'org-cycle)
-  (define-key org-mode-map (kbd "TAB") #'org-cycle)
-  (define-key org-mode-map (kbd "<backtab>") #'org-shifttab)
-  (when (featurep 'evil)
-    (evil-define-key '(normal motion) org-mode-map
-      (kbd "<tab>") #'org-cycle
-      (kbd "<backtab>") #'org-shifttab)))
-
-(add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
-
-(if (require 'markdown-mode nil t)
-    (progn
-      (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
-      (add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode)))
-  (add-to-list 'auto-mode-alist '("\\.md\\'" . text-mode)))
 #+end_src
