@@ -218,6 +218,7 @@
     :prefix ",")
 
   (my/leader-def
+    "SPC" #'execute-extended-command
     "a" '(:ignore t :which-key "applications")
     "a o" '(:ignore t :which-key "org")
     "a o a" #'org-agenda

@@ -57,6 +57,7 @@
     (should (string-match-p "which-key" content))
     (should (string-match-p ":prefix \"SPC\"" content))
     (should (string-match-p ":prefix \",\"" content))
+    (should (string-match-p "\"SPC\" #'execute-extended-command" content))
     (should (string-match-p "\"a o a\" #'org-agenda" content))
     (should (string-match-p "\"a o c\" #'org-capture" content))
     (should (string-match-p "\"a o c i\" #'my/orgfiles-capture-idea" content))
