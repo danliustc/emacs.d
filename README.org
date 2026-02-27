@@ -9,6 +9,7 @@
 - 全文检索：=SPC f g=
 - 切项目：=SPC p p=
 - 统一捕获：=SPC a o c=（选择 =idea/journal/meeting=）
+- 搜索候选动作：=C-.=（动作） / =C-c C-o=（导出为可批处理列表）
 
 * 笔记工作流
 

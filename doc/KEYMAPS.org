@@ -38,6 +38,12 @@
 - =C-c p p= -> =projectile-switch-project= (fallback: =project-switch-project=)
 - =C-c p f= -> =projectile-find-file= (fallback: =project-find-file=)
 
+* Minibuffer Actions (Consult/Embark Flow)
+
+- =C-.= -> =embark-act=
+- =C-;= -> =embark-dwim=
+- =C-c C-o= -> =embark-export=
+
 * Local Leader (=,=)
 
 ** Org Mode

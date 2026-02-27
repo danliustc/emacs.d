@@ -99,7 +99,13 @@
         '((file (styles basic partial-completion)))))
 
 (when (require 'consult nil t)
-  (setq completion-in-region-function #'consult-completion-in-region)
+  (setq completion-in-region-function #'consult-completion-in-region
+        register-preview-delay 0.5
+        register-preview-function #'consult-register-format
+        xref-show-xrefs-function #'consult-xref
+        xref-show-definitions-function #'consult-xref)
+  (unless (advice-member-p #'consult-register-window #'register-preview)
+    (advice-add #'register-preview :override #'consult-register-window))
   (define-key global-map (kbd "C-s") #'consult-line)
   (define-key global-map (kbd "C-x b") #'consult-buffer))
 
@@ -111,6 +117,16 @@
   (define-key global-map (kbd "C-.") #'embark-act)
   (define-key global-map (kbd "C-;") #'embark-dwim)
   (define-key global-map (kbd "C-h B") #'embark-bindings))
+
+(with-eval-after-load 'minibuffer
+  (dolist (map (list minibuffer-local-map
+                     minibuffer-local-ns-map
+                     minibuffer-local-completion-map
+                     minibuffer-local-must-match-map
+                     minibuffer-local-filename-completion-map))
+    (define-key map (kbd "C-.") #'embark-act)
+    (define-key map (kbd "C-;") #'embark-dwim)
+    (define-key map (kbd "C-c C-o") #'embark-export)))
 
 (with-eval-after-load 'embark
   (when (require 'embark-consult nil t)

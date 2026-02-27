@@ -193,6 +193,7 @@ Before declaring done:
   - `C-x b -> consult-buffer`
   - `C-. -> embark-act`
   - `C-; -> embark-dwim`
+  - `C-c C-o -> embark-export` (inside minibuffer)
   - `C-h B -> embark-bindings`
 - File/project bindings:
   - `SPC f f -> find-file`
