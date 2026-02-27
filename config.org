@@ -33,6 +33,18 @@
     (org-babel-load-file (expand-file-name "config.org" user-emacs-directory))
     (message "Reloaded config.org")))
 
+(defun my/revert-current-buffer-on-switch ()
+  "When entering a buffer, refresh it from disk if possible and safe."
+  (when (and (not (minibufferp))
+             (not (buffer-modified-p))
+             (or (and buffer-file-name
+                      (file-exists-p buffer-file-name)
+                      (not (verify-visited-file-modtime (current-buffer))))
+                 (derived-mode-p 'dired-mode)))
+    (revert-buffer :ignore-auto :noconfirm :preserve-modes)))
+
+(add-hook 'buffer-list-update-hook #'my/revert-current-buffer-on-switch)
+
 (when (eq system-type 'darwin)
   (setq mac-command-modifier 'super
         mac-option-modifier 'meta))
