@@ -104,6 +104,47 @@
     (add-hook 'embark-collect-mode-hook #'consult-preview-at-point-mode)))
 #+end_src
 
+* Notes
+
+#+begin_src emacs-lisp
+(require 'subr-x)
+
+(defvar my/orgfiles-root (expand-file-name "~/code/orgfiles/")
+  "Root directory for personal Org notes.")
+
+(defun my/orgfiles--ensure-dir (dir)
+  (unless (file-directory-p dir)
+    (make-directory dir t)))
+
+(defun my/orgfiles--normalize-name (name)
+  (let ((clean-name (string-trim name)))
+    (if (string-suffix-p ".org" clean-name t)
+        clean-name
+      (concat clean-name ".org"))))
+
+(defun my/orgfiles--meeting-template (meeting-name)
+  (let ((today (format-time-string "%Y-%m-%d %a"))
+        (deadline (format-time-string "%Y-%m-%d %a"
+                                      (time-add (current-time) (days-to-time 7)))))
+    (format "#+TITLE: %s\n#+DATE: <%s>\n\n* 背景\n\n* 结论（Decision）\n\n* 待办（Action Items）\n** TODO [@A] xxx（负责人）\nDEADLINE: <%s>\n\n* 风险/阻塞\n\n* 下次会议前要准备\n"
+            meeting-name today deadline)))
+
+(defun my/orgfiles-new-note ()
+  (interactive)
+  (let ((note-type (completing-read "Org file type: " '("meeting") nil t nil nil "meeting")))
+    (pcase note-type
+      ("meeting"
+       (let* ((meeting-name (read-string "Meeting name: "))
+              (filename (my/orgfiles--normalize-name meeting-name))
+              (target-dir (expand-file-name "meetings/" my/orgfiles-root))
+              (target-file (expand-file-name filename target-dir)))
+         (my/orgfiles--ensure-dir target-dir)
+         (unless (file-exists-p target-file)
+           (with-temp-file target-file
+             (insert (my/orgfiles--meeting-template meeting-name))))
+         (find-file target-file))))))
+#+end_src
+
 * Vim Editing (Evil)
 
 #+begin_src emacs-lisp
@@ -132,6 +173,13 @@
     :prefix ",")
 
   (my/leader-def
+    "a" '(:ignore t :which-key "applications")
+    "a o" '(:ignore t :which-key "org")
+    "a o a" #'org-agenda
+    "a o c" #'org-capture
+    "a o l" #'org-store-link
+    "a o t" #'org-todo-list
+    "a o n" #'my/orgfiles-new-note
     "f" '(:ignore t :which-key "files")
     "f f" #'find-file
     "f g" #'consult-ripgrep

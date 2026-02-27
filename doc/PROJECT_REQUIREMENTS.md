@@ -1,9 +1,14 @@
 # Project Requirements and Collaboration Guide
 
-This file defines the mandatory collaboration rules for this repository.
-It is the source of truth for both human contributors and AI agents.
+This document is the source of truth for contributors and AI agents in this repository.
+It is organized as:
+1. Design Philosophy
+2. Testing Standards
+3. Concrete Design Details
 
-## 1. Product Direction
+## 1. Design Philosophy
+
+### 1.1 Product Direction
 
 - Keep the config lightweight, stable, and easy to maintain.
 - Primary workloads:
@@ -14,56 +19,36 @@ It is the source of truth for both human contributors and AI agents.
   - Vim-first (`evil`)
   - Space-style key system (`SPC` + `,`)
 - Explicit non-goal:
-  - Do not turn this repo into a heavy full-IDE distribution unless requested.
+  - Do not turn this repo into a heavy full-IDE distribution unless explicitly requested.
 
-## 2. Architecture Baseline
+### 1.2 Core Principles
 
-- `init.el`
-  - bootstrap only
-  - loads `config.org` via org-babel
-- `config.org`
-  - single source of behavior
-  - tangled output is `config.el`
-- `tests/config-tests.el`
-  - repository-level regression checks
+- Minimalism first:
+  - prefer built-in Emacs capability where practical
+  - add packages only when they provide clear daily value
+- Predictability:
+  - keybindings should be stable and mnemonic
+  - avoid surprising mode-specific overrides
+- Low maintenance:
+  - keep configuration understandable in one pass
+  - avoid unnecessary abstractions
 
-## 3. Platform Policy
+### 1.3 Scope and Change Control
 
-- Primary platform is macOS.
-- Modifier mapping on macOS must remain:
-  - `Command -> Super`
-  - `Option -> Meta`
-- Any keymap change must be checked for macOS compatibility.
+- Prefer small, local patches.
+- Do not rewrite unrelated areas while fixing one issue.
+- Do not silently change project direction (style/workflow) without explicit user request.
 
-## 4. Keybinding Policy
+### 1.4 Documentation Governance
 
-- Global leader: `SPC`
-- Local leader: `,`
-- Keep discoverability through `which-key`.
-- Keep these guaranteed entries:
-  - `SPC f r` recent files
-  - `SPC p p` recent project switch flow
-  - `SPC p f` project file find
-  - `SPC p d` project dired
-- Avoid introducing conflicting global keymaps that break leader prefixes.
+- If behavior or collaboration rules change, update docs in the same change set.
+- Keep docs consistent across:
+  - `README.org`
+  - `doc/PROJECT_REQUIREMENTS.md`
 
-## 5. Org/Markdown Policy
+## 2. Testing Standards
 
-- Org and Markdown are first-class modes and must not regress.
-- Org fold keys must remain functional:
-  - `TAB -> org-cycle`
-  - `<backtab> -> org-shifttab`
-- Keep local-leader commands for Org and Markdown.
-
-## 6. Theme/UI Policy
-
-- Theme direction currently uses Ayu (`ayu-light`).
-- Font size is intentionally one step larger than default.
-- Keep UI minimal:
-  - no mandatory heavy modeline packages
-  - no unnecessary visual plugin bloat
-
-## 7. Delivery Workflow (Mandatory TDD)
+### 2.1 Mandatory Delivery Workflow (TDD)
 
 All behavior changes follow Red/Green/Refactor:
 
@@ -83,13 +68,7 @@ Every change summary must include:
 - green implementation summary
 - final test result
 
-## 8. Scope and Change Control
-
-- Prefer small, local patches.
-- Do not rewrite unrelated areas while fixing one issue.
-- Do not silently change project direction (style/workflow) without explicit user request.
-
-## 9. Validation Checklist
+### 2.2 Validation Checklist
 
 Before declaring done:
 
@@ -102,52 +81,68 @@ Before declaring done:
   - `,` local leader works
   - Org `TAB` fold works
 
-## 10. Implementation Design Standards
+### 2.3 Test Design Rules
 
-Use the following standards when modifying `config.org` and tests.
+- Tests live in `tests/config-tests.el`.
+- Behavioral changes require test updates.
+- Keep tests focused and avoid overfitting to unrelated formatting.
+- Prefer assertions on meaningful behavior contracts and stable symbols.
 
-### 10.1 Design Principles
+## 3. Concrete Design Details
 
-- Minimalism first
-  - prefer built-in Emacs capability where practical
-  - add packages only when they provide clear daily value
-- Predictability
-  - keybindings should be stable and mnemonic
-  - avoid surprising mode-specific overrides
-- Low maintenance
-  - keep configuration understandable in one pass
-  - avoid clever abstractions that hide simple behavior
+### 3.1 Architecture Baseline
 
-### 10.2 Configuration Organization
+- `init.el`
+  - bootstrap only
+  - loads `config.org` via org-babel
+- `config.org`
+  - single source of behavior
+  - tangled output is `config.el`
+- `tests/config-tests.el`
+  - repository-level regression checks
+
+### 3.2 Platform Policy
+
+- Primary platform is macOS.
+- Modifier mapping on macOS must remain:
+  - `Command -> Super`
+  - `Option -> Meta`
+- Any keymap change must be checked for macOS compatibility.
+
+### 3.3 Configuration Organization
 
 - Keep behavior sections explicit in `config.org`:
   - Core
   - Packages
   - Theme/Font
+  - Completion
+  - Notes
   - Evil/Keybindings
   - Project Workflow
   - Org/Markdown
 - Put related settings close together.
 - Prefer small named helper functions when behavior is non-trivial.
 
-### 10.3 Keybinding Standards
+### 3.4 Keybinding Standards
 
 - Global interaction model:
   - `SPC` for global workflows
   - `,` for mode-local workflows
 - Group naming should stay consistent:
+  - `a` applications
   - `f` files
   - `b` buffers
   - `p` projects
   - `w` windows
   - `h` help
   - `q` quit/session
+- Org global workflows should be grouped under `SPC a o`.
 - New keybindings must:
   - match existing group semantics
   - avoid conflicts with Org critical keys (`TAB`, `<backtab>`)
   - remain discoverable through `which-key`
 
-### 10.4 Package Standards
+### 3.5 Package and UI Standards
 
 - Allowed reasons to add a package:
   - clear user-facing workflow improvement
@@ -159,47 +154,62 @@ Use the following standards when modifying `config.org` and tests.
   - add it to `my/packages`
   - guard feature usage with `(require 'pkg nil t)` where needed
   - provide graceful fallback when package is unavailable
+- Theme/UI constraints:
+  - use one active theme at startup
+  - keep font changes intentional and documented
+  - avoid mandatory heavy modeline/visual bloat
 
-### 10.5 Org/Markdown UX Standards
+### 3.6 Org/Markdown and Project Standards
 
-- Org behavior prioritizes writing flow and fold reliability.
-- Markdown behavior remains lightweight (edit/preview/header insert).
-- Keep mode-local actions on `,` prefixes.
-- Avoid noisy UI changes in writing buffers.
-
-### 10.6 Theme/Visual Standards
-
-- Use one active theme at startup.
-- Font changes should be intentional and documented.
-- If theme symbols differ by package version, choose stable names and fallback.
-
-### 10.7 Project Navigation Standards
-
-- Optimize common flows:
+- Org and Markdown are first-class modes and must not regress.
+- Org fold keys must remain functional:
+  - `TAB -> org-cycle`
+  - `<backtab> -> org-shifttab`
+- Keep local-leader commands for Org/Markdown.
+- Project navigation should prioritize:
   - switch project
   - find file
-  - inspect file list/tree
-- For recent-project UX:
-  - present constrained candidate sets when requested
-  - fallback to standard Projectile behavior if list is empty
+  - inspect project files/tree
+- Keep project switching close to Projectile default behavior unless explicitly requested otherwise.
 
-### 10.8 Testing Standards
-
-- Tests live in `tests/config-tests.el`.
-- Behavioral changes require test updates.
-- Keep tests focused and avoid overfitting to unrelated formatting.
-
-### 10.9 Error Handling Standards
+### 3.7 Error Handling Standards
 
 - Prefer safe fallbacks over startup hard-fail.
 - Typical fallback cases:
   - package missing -> skip feature with default behavior
-  - empty recent list -> fallback to default selector
 - Startup must remain robust in fresh environments.
 
-## 11. Documentation Governance
+### 3.8 Current Baseline (2026-02-27)
 
-- If behavior or collaboration rules change, update docs in the same change set.
-- Keep docs consistent across:
-  - `README.org`
-  - `doc/PROJECT_REQUIREMENTS.md`
+- Completion stack:
+  - `vertico`
+  - `orderless`
+  - `consult`
+  - `marginalia`
+  - `embark`
+  - `embark-consult`
+- Global completion/search bindings:
+  - `C-s -> consult-line`
+  - `C-x b -> consult-buffer`
+  - `C-. -> embark-act`
+  - `C-; -> embark-dwim`
+  - `C-h B -> embark-bindings`
+- File/project bindings:
+  - `SPC f f -> find-file`
+  - `SPC f g -> consult-ripgrep`
+  - `SPC f l -> consult-line`
+  - `SPC f r -> consult-recent-file`
+  - `SPC p p -> projectile-switch-project`
+  - `SPC p f -> projectile-find-file`
+  - `SPC p d -> projectile-dired`
+- Org application prefix:
+  - `SPC a o a -> org-agenda`
+  - `SPC a o c -> org-capture`
+  - `SPC a o l -> org-store-link`
+  - `SPC a o t -> org-todo-list`
+  - `SPC a o n -> my/orgfiles-new-note`
+- Meeting note capture workflow:
+  - root directory: `~/code/orgfiles/`
+  - meeting directory: `~/code/orgfiles/meetings/`
+  - prompt order: note type -> meeting name
+  - first-create behavior: instantiate template sections (背景/结论/待办/风险/下次会议前要准备)
