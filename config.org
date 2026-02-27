@@ -112,6 +112,12 @@
 (defvar my/orgfiles-root (expand-file-name "~/code/orgfiles/")
   "Root directory for personal Org notes.")
 
+(defvar my/orgfiles-idea-file (expand-file-name "ideas.org" my/orgfiles-root)
+  "Single file for daily idea capture.")
+
+(defvar my/orgfiles-journal-dir (expand-file-name "journal/" my/orgfiles-root)
+  "Directory for daily journal files.")
+
 (defun my/orgfiles--ensure-dir (dir)
   (unless (file-directory-p dir)
     (make-directory dir t)))
@@ -129,6 +135,34 @@
     (format "#+TITLE: %s\n#+DATE: <%s>\n\n* 背景\n\n* 结论（Decision）\n\n* 待办（Action Items）\n** TODO [@A] xxx（负责人）\nDEADLINE: <%s>\n\n* 风险/阻塞\n\n* 下次会议前要准备\n"
             meeting-name today deadline)))
 
+(defun my/orgfiles--today-journal-file ()
+  (expand-file-name (format-time-string "%Y-%m-%d.org") my/orgfiles-journal-dir))
+
+(defun my/orgfiles--ensure-journal-file ()
+  (let ((journal-file (my/orgfiles--today-journal-file)))
+    (my/orgfiles--ensure-dir my/orgfiles-journal-dir)
+    (unless (file-exists-p journal-file)
+      (with-temp-file journal-file
+        (insert (format "#+TITLE: Journal %s\n#+DATE: <%s>\n\n* Journal\n"
+                        (format-time-string "%Y-%m-%d")
+                        (format-time-string "%Y-%m-%d %a")))))
+    journal-file))
+
+(defun my/orgfiles-capture-idea ()
+  (interactive)
+  (require 'org-capture)
+  (my/orgfiles--ensure-dir my/orgfiles-root)
+  (unless (file-exists-p my/orgfiles-idea-file)
+    (with-temp-file my/orgfiles-idea-file
+      (insert "#+TITLE: Ideas\n\n* Inbox\n")))
+  (org-capture nil "i"))
+
+(defun my/orgfiles-capture-journal ()
+  (interactive)
+  (require 'org-capture)
+  (my/orgfiles--ensure-journal-file)
+  (org-capture nil "j"))
+
 (defun my/orgfiles-new-note ()
   (interactive)
   (let ((note-type (completing-read "Org file type: " '("meeting") nil t nil nil "meeting")))
@@ -143,6 +177,17 @@
            (with-temp-file target-file
              (insert (my/orgfiles--meeting-template meeting-name))))
          (find-file target-file))))))
+
+(with-eval-after-load 'org
+  (setq org-directory my/orgfiles-root
+        org-default-notes-file my/orgfiles-idea-file
+        org-capture-templates
+        '(("i" "Idea" entry
+           (file+headline my/orgfiles-idea-file "Inbox")
+           "* %U %?\n")
+          ("j" "Journal" entry
+           (file+headline (lambda () (my/orgfiles--ensure-journal-file)) "Journal")
+           "* %U %?\n"))))
 #+end_src
 
 * Vim Editing (Evil)
@@ -177,9 +222,11 @@
     "a o" '(:ignore t :which-key "org")
     "a o a" #'org-agenda
     "a o c" #'org-capture
+    "a o c i" #'my/orgfiles-capture-idea
+    "a o c j" #'my/orgfiles-capture-journal
+    "a o c m" #'my/orgfiles-new-note
     "a o l" #'org-store-link
     "a o t" #'org-todo-list
-    "a o n" #'my/orgfiles-new-note
     "f" '(:ignore t :which-key "files")
     "f f" #'find-file
     "f g" #'consult-ripgrep

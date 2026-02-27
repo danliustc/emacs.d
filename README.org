@@ -75,7 +75,9 @@
 - Org：缩进、强调符隐藏、自定义折叠符号
 - Org 折叠：=TAB -> org-cycle=，=<backtab> -> org-shifttab=
 - Markdown：自动识别 =.md= / =.markdown=
-- 会议笔记捕获：=SPC a o n= 选择类型并实例化模板
+- Idea 捕获：=SPC a o c i= 统一写入 =~/code/orgfiles/ideas.org=
+- 日记捕获：=SPC a o c j= 统一写入 =~/code/orgfiles/journal/=
+- 会议笔记捕获：=SPC a o c m= 选择类型并实例化模板
 
 * 快捷键参考
 
@@ -88,9 +90,11 @@
 - =SPC f s= 保存
 - =SPC a o a= Org Agenda
 - =SPC a o c= Org Capture
+- =SPC a o c i= 快速捕获 idea（单文件）
+- =SPC a o c j= 快速捕获日记（按天文件）
+- =SPC a o c m= 新建会议笔记（目前支持 meeting）
 - =SPC a o l= Org Store Link
 - =SPC a o t= Org Todo List
-- =SPC a o n= 新建会议笔记（目前支持 meeting）
 - =SPC b b= Consult buffer 列表
 - =SPC b s= 原生 buffer 切换
 - =SPC b d= 关闭当前 buffer
@@ -144,11 +148,19 @@ emacs --batch -l tests/config-tests.el -f ert-run-tests-batch-and-exit
 
 * 会议笔记工作流
 
-- 入口：=SPC a o n=
+- 入口：=SPC a o c m=
 - 类型：先选择 =meeting=
 - 名称：输入会议名（自动补 =.org= 后缀）
 - 目录：=~/code/orgfiles/meetings/=
 - 行为：文件不存在时自动写入模板；存在时直接打开
+
+* Idea / 日记工作流
+
+- Idea 入口：=SPC a o c i=
+- Idea 文件：=~/code/orgfiles/ideas.org=（统一写入 =Inbox=）
+- 日记入口：=SPC a o c j=
+- 日记目录：=~/code/orgfiles/journal/=
+- 日记文件：按日期自动创建，如 =2026-02-27.org=
 
 如果只验证配置可加载：
 

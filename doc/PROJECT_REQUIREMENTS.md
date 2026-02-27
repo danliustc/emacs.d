@@ -205,9 +205,11 @@ Before declaring done:
 - Org application prefix:
   - `SPC a o a -> org-agenda`
   - `SPC a o c -> org-capture`
+  - `SPC a o c i -> my/orgfiles-capture-idea`
+  - `SPC a o c j -> my/orgfiles-capture-journal`
+  - `SPC a o c m -> my/orgfiles-new-note`
   - `SPC a o l -> org-store-link`
   - `SPC a o t -> org-todo-list`
-  - `SPC a o n -> my/orgfiles-new-note`
 - Meeting note capture workflow:
   - root directory: `~/code/orgfiles/`
   - meeting directory: `~/code/orgfiles/meetings/`
