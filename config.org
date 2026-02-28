@@ -13,10 +13,10 @@
 (menu-bar-mode -1)
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
-(global-display-line-numbers-mode 1)
 (global-visual-line-mode 1)
 (setq-default truncate-lines nil
               word-wrap t)
+(add-hook 'prog-mode-hook #'display-line-numbers-mode)
 (recentf-mode 1)
 (setq recentf-max-saved-items 200)
 
@@ -95,7 +95,28 @@
 (when (require 'ayu-theme nil t)
   (load-theme 'ayu-light t))
 
-(set-face-attribute 'default nil :height 160)
+(defvar my/default-font-height
+  (if (>= (display-pixel-width) 2200) 160 145)
+  "Default font height selected from display width.")
+
+(set-face-attribute 'default nil :height my/default-font-height)
+
+(defun my/font-size-reset ()
+  (interactive)
+  (set-face-attribute 'default nil :height my/default-font-height)
+  (message "Font reset to %d" my/default-font-height))
+
+(defun my/font-size-increase ()
+  (interactive)
+  (let ((new-height (+ (face-attribute 'default :height nil 'default) 5)))
+    (set-face-attribute 'default nil :height new-height)
+    (message "Font size %d" new-height)))
+
+(defun my/font-size-decrease ()
+  (interactive)
+  (let ((new-height (max 100 (- (face-attribute 'default :height nil 'default) 5))))
+    (set-face-attribute 'default nil :height new-height)
+    (message "Font size %d" new-height)))
 #+end_src
 
 ** Search & Completion
@@ -275,8 +296,8 @@
 
 (when (and (featurep 'evil) (require 'key-chord nil t))
   (key-chord-mode 1)
-  (setq key-chord-two-keys-delay 0.3)
-  (key-chord-define evil-insert-state-map "jk" 'evil-normal-state))
+  (setq key-chord-two-keys-delay 0.2)
+  (key-chord-define evil-insert-state-map "fd" 'evil-normal-state))
 
 (when (and (featurep 'evil) (require 'which-key nil t))
   (which-key-mode 1))
@@ -301,6 +322,8 @@
     "a o c" #'my/orgfiles-capture-dispatch
     "a o l" #'org-store-link
     "a o t" #'org-todo-list
+    "a ." #'embark-act
+    "a ," #'embark-dwim
     "f" '(:ignore t :which-key "files")
     "f f" #'find-file
     "f g" #'consult-ripgrep
@@ -316,6 +339,10 @@
     "p r" #'projectile-recentf
     "p d" #'projectile-dired
     "w" '(:ignore t :which-key "windows")
+    "w h" #'windmove-left
+    "w j" #'windmove-down
+    "w k" #'windmove-up
+    "w l" #'windmove-right
     "w /" #'split-window-right
     "w -" #'split-window-below
     "w d" #'delete-window
@@ -324,7 +351,10 @@
     "h" '(:ignore t :which-key "help")
     "h f" #'describe-function
     "h v" #'describe-variable
-    "h k" #'describe-key)
+    "h k" #'describe-key
+    "q -" #'my/font-size-decrease
+    "q =" #'my/font-size-increase
+    "q 0" #'my/font-size-reset)
 
   (with-eval-after-load 'org
     (my/local-leader-def
