@@ -179,7 +179,7 @@ Before declaring done:
   - package missing -> skip feature with default behavior
 - Startup must remain robust in fresh environments.
 
-### 3.8 Current Baseline (2026-02-27)
+### 3.8 Current Baseline (2026-02-28)
 
 - Completion stack:
   - `vertico`
@@ -193,6 +193,8 @@ Before declaring done:
   - `C-x b -> consult-buffer`
   - `C-. -> embark-act`
   - `C-; -> embark-dwim`
+  - `SPC a . -> embark-act`
+  - `SPC a , -> embark-dwim`
   - `C-c C-o -> embark-export` (inside minibuffer)
   - `C-h B -> embark-bindings`
 - File/project bindings:
@@ -203,6 +205,17 @@ Before declaring done:
   - `SPC p p -> projectile-switch-project`
   - `SPC p f -> projectile-find-file`
   - `SPC p d -> projectile-dired`
+  - `SPC w h/j/k/l -> windmove-left/down/up/right`
+  - `SPC w / -> split-window-right`
+  - `SPC w - -> split-window-below`
+  - `SPC w d -> delete-window`
+- Ergonomics baseline:
+  - line numbers are enabled via `prog-mode-hook`, not globally
+  - insert-state escape chord is `fd` with `key-chord-two-keys-delay 0.2`
+  - font size is adaptive by display width and adjustable with:
+    - `SPC q = -> my/font-size-increase`
+    - `SPC q - -> my/font-size-decrease`
+    - `SPC q 0 -> my/font-size-reset`
 - Org application prefix:
   - `SPC a o a -> org-agenda`
   - `SPC a o c -> my/orgfiles-capture-dispatch`

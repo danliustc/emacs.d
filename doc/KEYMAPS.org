@@ -9,6 +9,8 @@
 - =SPC a o c= -> =my/orgfiles-capture-dispatch=
 - =SPC a o l= -> =org-store-link=
 - =SPC a o t= -> =org-todo-list=
+- =SPC a .= -> =embark-act=
+- =SPC a ,= -> =embark-dwim=
 - =SPC f f= -> =find-file=
 - =SPC f g= -> =consult-ripgrep=
 - =SPC f l= -> =consult-line=
@@ -20,9 +22,16 @@
 - =SPC p f= -> =projectile-find-file=
 - =SPC p r= -> =projectile-recentf=
 - =SPC p d= -> =projectile-dired=
+- =SPC w h= -> =windmove-left=
+- =SPC w j= -> =windmove-down=
+- =SPC w k= -> =windmove-up=
+- =SPC w l= -> =windmove-right=
 - =SPC w /= -> =split-window-right=
 - =SPC w -= -> =split-window-below=
 - =SPC w d= -> =delete-window=
+- =SPC q -= -> =my/font-size-decrease=
+- =SPC q == -> =my/font-size-increase=
+- =SPC q 0= -> =my/font-size-reset=
 - =SPC q q= -> =save-buffers-kill-terminal=
 - =SPC h f= -> =describe-function=
 - =SPC h v= -> =describe-variable=
@@ -43,6 +52,12 @@
 - =C-.= -> =embark-act=
 - =C-;= -> =embark-dwim=
 - =C-c C-o= -> =embark-export=
+
+* Ergonomics Notes
+
+- Line numbers are enabled in =prog-mode= only.
+- Writing modes keep visual wrapping enabled and avoid global line-number noise.
+- Insert-state escape chord is =fd= with =0.2s= timeout.
 
 * Local Leader (=,=)
 
