@@ -148,7 +148,7 @@
 (when (require 'embark nil t)
   (setq prefix-help-command #'embark-prefix-help-command)
   (define-key global-map (kbd "C-.") #'embark-act)
-  (define-key global-map (kbd "C-;") #'embark-dwim)
+  (define-key global-map (kbd "C-,") #'embark-dwim)
   (define-key global-map (kbd "C-h B") #'embark-bindings))
 
 (with-eval-after-load 'minibuffer
@@ -158,7 +158,7 @@
                      minibuffer-local-must-match-map
                      minibuffer-local-filename-completion-map))
     (define-key map (kbd "C-.") #'embark-act)
-    (define-key map (kbd "C-;") #'embark-dwim)
+    (define-key map (kbd "C-,") #'embark-dwim)
     (define-key map (kbd "C-c C-o") #'embark-export)))
 
 (with-eval-after-load 'embark
@@ -302,6 +302,31 @@
 (when (and (featurep 'evil) (require 'which-key nil t))
   (which-key-mode 1))
 
+(defun my/project-switch-project ()
+  (interactive)
+  (if (fboundp 'projectile-switch-project)
+      (projectile-switch-project)
+    (project-switch-project)))
+
+(defun my/project-find-file ()
+  (interactive)
+  (if (fboundp 'projectile-find-file)
+      (projectile-find-file)
+    (project-find-file)))
+
+(defun my/project-recent-file ()
+  (interactive)
+  (if (fboundp 'projectile-recentf)
+      (projectile-recentf)
+    (consult-recent-file)))
+
+(defun my/project-dired ()
+  (interactive)
+  (cond
+   ((fboundp 'projectile-dired) (projectile-dired))
+   ((fboundp 'project-dired) (project-dired))
+   (t (dired default-directory))))
+
 (when (and (featurep 'evil) (require 'general nil t))
   (general-auto-unbind-keys)
 
@@ -316,7 +341,7 @@
 
   (my/leader-def
     "SPC" #'execute-extended-command
-    "a" '(:ignore t :which-key "applications")
+    "a" '(:ignore t :which-key "actions")
     "a o" '(:ignore t :which-key "org")
     "a o a" #'org-agenda
     "a o c" #'my/orgfiles-capture-dispatch
@@ -334,10 +359,10 @@
     "b b" #'consult-buffer
     "b d" #'kill-current-buffer
     "p" '(:ignore t :which-key "projects")
-    "p p" #'projectile-switch-project
-    "p f" #'projectile-find-file
-    "p r" #'projectile-recentf
-    "p d" #'projectile-dired
+    "p p" #'my/project-switch-project
+    "p f" #'my/project-find-file
+    "p r" #'my/project-recent-file
+    "p d" #'my/project-dired
     "w" '(:ignore t :which-key "windows")
     "w h" #'windmove-left
     "w j" #'windmove-down
@@ -348,19 +373,20 @@
     "w d" #'delete-window
     "q" '(:ignore t :which-key "quit")
     "q q" #'save-buffers-kill-terminal
+    "z" '(:ignore t :which-key "zoom")
+    "z -" #'my/font-size-decrease
+    "z =" #'my/font-size-increase
+    "z 0" #'my/font-size-reset
     "h" '(:ignore t :which-key "help")
     "h f" #'describe-function
     "h v" #'describe-variable
-    "h k" #'describe-key
-    "q -" #'my/font-size-decrease
-    "q =" #'my/font-size-increase
-    "q 0" #'my/font-size-reset)
+    "h k" #'describe-key)
 
   (with-eval-after-load 'org
     (my/local-leader-def
       :keymaps 'org-mode-map
       "t" #'org-todo
-      "a" #'org-agenda
+      "a" #'org-archive-subtree
       "s" #'org-schedule))
 
   (with-eval-after-load 'markdown-mode
@@ -379,15 +405,12 @@
 ** Project Navigation
 
 #+begin_src emacs-lisp
-(if (require 'projectile nil t)
-    (progn
-      (projectile-mode 1)
-      (setq projectile-completion-system 'default)
-      (define-key global-map (kbd "C-c p p") #'projectile-switch-project)
-      (define-key global-map (kbd "C-c p f") #'projectile-find-file))
-  (progn
-    (define-key global-map (kbd "C-c p p") #'project-switch-project)
-    (define-key global-map (kbd "C-c p f") #'project-find-file)))
+(when (require 'projectile nil t)
+  (projectile-mode 1)
+  (setq projectile-completion-system 'default))
+
+(define-key global-map (kbd "C-c p p") #'my/project-switch-project)
+(define-key global-map (kbd "C-c p f") #'my/project-find-file)
 #+end_src
 
 ** Status Line

@@ -29,10 +29,10 @@
 - =SPC w /= -> =split-window-right=
 - =SPC w -= -> =split-window-below=
 - =SPC w d= -> =delete-window=
-- =SPC q -= -> =my/font-size-decrease=
-- =SPC q == -> =my/font-size-increase=
-- =SPC q 0= -> =my/font-size-reset=
 - =SPC q q= -> =save-buffers-kill-terminal=
+- =SPC z -= -> =my/font-size-decrease=
+- =SPC z == -> =my/font-size-increase=
+- =SPC z 0= -> =my/font-size-reset=
 - =SPC h f= -> =describe-function=
 - =SPC h v= -> =describe-variable=
 - =SPC h k= -> =describe-key=
@@ -42,7 +42,7 @@
 - =C-s= -> =consult-line=
 - =C-x b= -> =consult-buffer=
 - =C-.= -> =embark-act=
-- =C-;= -> =embark-dwim=
+- =C-,= -> =embark-dwim=
 - =C-h B= -> =embark-bindings=
 - =C-c p p= -> =projectile-switch-project= (fallback: =project-switch-project=)
 - =C-c p f= -> =projectile-find-file= (fallback: =project-find-file=)
@@ -50,7 +50,7 @@
 * Minibuffer Actions (Consult/Embark Flow)
 
 - =C-.= -> =embark-act=
-- =C-;= -> =embark-dwim=
+- =C-,= -> =embark-dwim=
 - =C-c C-o= -> =embark-export=
 
 * Ergonomics Notes
@@ -63,7 +63,7 @@
 
 ** Org Mode
 - =, t= -> =org-todo=
-- =, a= -> =org-agenda=
+- =, a= -> =org-archive-subtree=
 - =, s= -> =org-schedule=
 
 ** Markdown Mode

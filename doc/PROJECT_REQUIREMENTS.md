@@ -129,13 +129,14 @@ Before declaring done:
   - `SPC` for global workflows
   - `,` for mode-local workflows
 - Group naming should stay consistent:
-  - `a` applications
+  - `a` actions
   - `f` files
   - `b` buffers
   - `p` projects
   - `w` windows
+  - `z` zoom
   - `h` help
-  - `q` quit/session
+  - `q` quit
 - Org global workflows should be grouped under `SPC a o`.
 - New keybindings must:
   - match existing group semantics
@@ -192,7 +193,7 @@ Before declaring done:
   - `C-s -> consult-line`
   - `C-x b -> consult-buffer`
   - `C-. -> embark-act`
-  - `C-; -> embark-dwim`
+  - `C-, -> embark-dwim`
   - `SPC a . -> embark-act`
   - `SPC a , -> embark-dwim`
   - `C-c C-o -> embark-export` (inside minibuffer)
@@ -213,9 +214,9 @@ Before declaring done:
   - line numbers are enabled via `prog-mode-hook`, not globally
   - insert-state escape chord is `fd` with `key-chord-two-keys-delay 0.2`
   - font size is adaptive by display width and adjustable with:
-    - `SPC q = -> my/font-size-increase`
-    - `SPC q - -> my/font-size-decrease`
-    - `SPC q 0 -> my/font-size-reset`
+    - `SPC z = -> my/font-size-increase`
+    - `SPC z - -> my/font-size-decrease`
+    - `SPC z 0 -> my/font-size-reset`
 - Org application prefix:
   - `SPC a o a -> org-agenda`
   - `SPC a o c -> my/orgfiles-capture-dispatch`
