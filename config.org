@@ -304,7 +304,7 @@
 
 #+begin_src emacs-lisp
 (with-eval-after-load 'org
-  (setq org-startup-indented t
+  (setq org-startup-indented nil
         org-hide-emphasis-markers t
         org-ellipsis " ▾")
   (define-key org-mode-map (kbd "<tab>") #'org-cycle)

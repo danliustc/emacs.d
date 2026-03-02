@@ -38,6 +38,7 @@
 (ert-deftest config-should-support-org-and-markdown ()
   (let ((content (file-content "config.org")))
     (should (string-match-p "org-mode" content))
+    (should (string-match-p "org-startup-indented nil" content))
     (should (string-match-p "org-cycle" content))
     (should (or (string-match-p "markdown" content)
                 (string-match-p "\\.md\\'" content)))))
