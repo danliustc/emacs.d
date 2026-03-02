@@ -33,17 +33,17 @@
     (org-babel-load-file (expand-file-name "config.org" user-emacs-directory))
     (message "Reloaded config.org")))
 
-(defun my/revert-current-buffer-on-switch ()
-  "When entering a buffer, refresh it from disk if possible and safe."
+(defun my/revert-current-buffer-on-focus ()
+  "On focus-in, refresh current local file buffer when stale and safe."
   (when (and (not (minibufferp))
+             buffer-file-name
+             (not (file-remote-p buffer-file-name))
+             (file-exists-p buffer-file-name)
              (not (buffer-modified-p))
-             (or (and buffer-file-name
-                      (file-exists-p buffer-file-name)
-                      (not (verify-visited-file-modtime (current-buffer))))
-                 (derived-mode-p 'dired-mode)))
+             (not (verify-visited-file-modtime (current-buffer))))
     (revert-buffer :ignore-auto :noconfirm :preserve-modes)))
 
-(add-hook 'buffer-list-update-hook #'my/revert-current-buffer-on-switch)
+(add-hook 'focus-in-hook #'my/revert-current-buffer-on-focus)
 
 (when (eq system-type 'darwin)
   (setq mac-command-modifier 'super
@@ -72,10 +72,24 @@
   (let ((missing
          (seq-filter (lambda (pkg) (not (package-installed-p pkg))) my/packages)))
     (when missing
-      (unless package-archive-contents
-        (package-refresh-contents))
-      (dolist (pkg missing)
-        (package-install pkg)))))
+      (condition-case err
+          (progn
+            (unless package-archive-contents
+              (package-refresh-contents))
+            (dolist (pkg missing)
+              (condition-case pkg-err
+                  (package-install pkg)
+                (error
+                 (display-warning
+                  'my/init
+                  (format "Failed to install %s: %s"
+                          pkg (error-message-string pkg-err))
+                  :warning)))))
+        (error
+         (display-warning
+          'my/init
+          (format "Package bootstrap failed: %s" (error-message-string err))
+          :warning))))))
 
 (let ((missing
        (seq-filter (lambda (pkg) (not (package-installed-p pkg))) my/packages)))
@@ -190,10 +204,17 @@
     (make-directory dir t)))
 
 (defun my/orgfiles--normalize-name (name)
-  (let ((clean-name (string-trim name)))
-    (if (string-suffix-p ".org" clean-name t)
-        clean-name
-      (concat clean-name ".org"))))
+  (let* ((raw-name (string-trim name))
+         (base-name (file-name-nondirectory raw-name))
+         (name-without-ext (file-name-sans-extension base-name))
+         (safe-name
+          (replace-regexp-in-string
+           "[^[:alnum:]_[:multibyte:]-]"
+           "-"
+           name-without-ext)))
+    (if (string-empty-p safe-name)
+        "untitled.org"
+      (concat safe-name ".org"))))
 
 (defun my/orgfiles--slugify (text)
   (let* ((trimmed (string-trim text))
@@ -329,9 +350,10 @@
 ** Keybinding Model (Evil + Leader)
 
 #+begin_src emacs-lisp
+(setq evil-want-C-u-scroll t)
+
 (when (require 'evil nil t)
-  (evil-mode 1)
-  (setq evil-want-C-u-scroll t))
+  (evil-mode 1))
 
 (when (and (featurep 'evil) (require 'key-chord nil t))
   (key-chord-mode 1)
