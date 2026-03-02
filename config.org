@@ -179,8 +179,8 @@
 (defvar my/orgfiles-idea-file (expand-file-name "ideas.org" my/orgfiles-root)
   "Single file for daily idea capture.")
 
-(defvar my/orgfiles-brainstorm-file (expand-file-name "brainstorm.org" my/orgfiles-root)
-  "Single file for brainstorming drafts.")
+(defvar my/orgfiles-brainstorm-dir (expand-file-name "brainstorm/" my/orgfiles-root)
+  "Directory for brainstorming draft notes.")
 
 (defvar my/orgfiles-journal-dir (expand-file-name "journal/" my/orgfiles-root)
   "Directory for daily journal files.")
@@ -195,6 +195,12 @@
         clean-name
       (concat clean-name ".org"))))
 
+(defun my/orgfiles--slugify (text)
+  (let* ((trimmed (string-trim text))
+         (dashified (replace-regexp-in-string "[[:space:]]+" "-" trimmed))
+         (cleaned (replace-regexp-in-string "[^[:alnum:]-]" "" dashified)))
+    (if (string-empty-p cleaned) "untitled" cleaned)))
+
 (defun my/orgfiles--meeting-template (meeting-name)
   (let ((today (format-time-string "%Y-%m-%d %a"))
         (deadline (format-time-string "%Y-%m-%d %a"
@@ -204,6 +210,30 @@
 
 (defun my/orgfiles--today-journal-file ()
   (expand-file-name (format-time-string "%Y-%m-%d.org") my/orgfiles-journal-dir))
+
+(defun my/orgfiles--new-brainstorm-file (title)
+  (my/orgfiles--ensure-dir my/orgfiles-brainstorm-dir)
+  (let* ((display-title (let ((trimmed (string-trim title)))
+                          (if (string-empty-p trimmed) "Untitled" trimmed)))
+         (timestamp (format-time-string "%Y-%m-%d-%H%M"))
+         (slug (my/orgfiles--slugify title))
+         (counter 0)
+         candidate)
+    (while
+        (progn
+          (setq candidate
+                (expand-file-name
+                 (if (= counter 0)
+                     (format "%s-%s.org" timestamp slug)
+                   (format "%s-%s-%d.org" timestamp slug counter))
+                 my/orgfiles-brainstorm-dir))
+          (setq counter (1+ counter))
+          (file-exists-p candidate)))
+    (with-temp-file candidate
+      (insert (format "#+TITLE: Brainstorm - %s\n#+DATE: <%s>\n\n* Context\n\n* Ideas\n\n* Next Steps\n"
+                      display-title
+                      (format-time-string "%Y-%m-%d %a"))))
+    candidate))
 
 (defun my/orgfiles--ensure-journal-file ()
   (let ((journal-file (my/orgfiles--today-journal-file)))
@@ -226,12 +256,8 @@
 
 (defun my/orgfiles-capture-brainstorm ()
   (interactive)
-  (require 'org-capture)
-  (my/orgfiles--ensure-dir my/orgfiles-root)
-  (unless (file-exists-p my/orgfiles-brainstorm-file)
-    (with-temp-file my/orgfiles-brainstorm-file
-      (insert "#+TITLE: Brainstorm\n\n* Inbox\n")))
-  (org-capture nil "b"))
+  (let ((title (read-string "Brainstorm title: ")))
+    (find-file (my/orgfiles--new-brainstorm-file title))))
 
 (defun my/orgfiles-capture-journal ()
   (interactive)
@@ -266,10 +292,7 @@
   (setq org-directory my/orgfiles-root
         org-default-notes-file my/orgfiles-idea-file
         org-capture-templates
-        '(("b" "Brainstorm" entry
-           (file+headline my/orgfiles-brainstorm-file "Inbox")
-           "* %U %?\n")
-          ("i" "Idea" entry
+        '(("i" "Idea" entry
            (file+headline my/orgfiles-idea-file "Inbox")
            "* %U %?\n")
           ("j" "Journal" entry

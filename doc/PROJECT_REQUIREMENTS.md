@@ -223,9 +223,11 @@ Before declaring done:
   - `SPC a o c -> my/orgfiles-capture-dispatch`
   - `SPC a o l -> org-store-link`
   - `SPC a o t -> org-todo-list`
-- Brainstorm capture workflow:
-  - target file: `~/code/orgfiles/brainstorm.org`
+- Brainstorm draft workflow:
+  - target directory: `~/code/orgfiles/brainstorm/`
   - dispatch option: `brainstorm`
+  - behavior: create a new file each time (no org-capture template entry)
+  - file naming: `YYYY-MM-DD-HHMM-<title>.org`
 - Meeting note capture workflow:
   - root directory: `~/code/orgfiles/`
   - meeting directory: `~/code/orgfiles/meetings/`
