@@ -219,9 +219,13 @@ Before declaring done:
     - `SPC z 0 -> my/font-size-reset`
 - Org application prefix:
   - `SPC a o a -> org-agenda`
+  - `SPC a o b -> my/orgfiles-capture-brainstorm`
   - `SPC a o c -> my/orgfiles-capture-dispatch`
   - `SPC a o l -> org-store-link`
   - `SPC a o t -> org-todo-list`
+- Brainstorm capture workflow:
+  - target file: `~/code/orgfiles/brainstorm.org`
+  - dispatch option: `brainstorm`
 - Meeting note capture workflow:
   - root directory: `~/code/orgfiles/`
   - meeting directory: `~/code/orgfiles/meetings/`

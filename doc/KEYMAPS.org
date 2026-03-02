@@ -6,6 +6,7 @@
 
 - =SPC SPC= -> =execute-extended-command=
 - =SPC a o a= -> =org-agenda=
+- =SPC a o b= -> =my/orgfiles-capture-brainstorm=
 - =SPC a o c= -> =my/orgfiles-capture-dispatch=
 - =SPC a o l= -> =org-store-link=
 - =SPC a o t= -> =org-todo-list=

@@ -179,6 +179,9 @@
 (defvar my/orgfiles-idea-file (expand-file-name "ideas.org" my/orgfiles-root)
   "Single file for daily idea capture.")
 
+(defvar my/orgfiles-brainstorm-file (expand-file-name "brainstorm.org" my/orgfiles-root)
+  "Single file for brainstorming drafts.")
+
 (defvar my/orgfiles-journal-dir (expand-file-name "journal/" my/orgfiles-root)
   "Directory for daily journal files.")
 
@@ -221,6 +224,15 @@
       (insert "#+TITLE: Ideas\n\n* Inbox\n")))
   (org-capture nil "i"))
 
+(defun my/orgfiles-capture-brainstorm ()
+  (interactive)
+  (require 'org-capture)
+  (my/orgfiles--ensure-dir my/orgfiles-root)
+  (unless (file-exists-p my/orgfiles-brainstorm-file)
+    (with-temp-file my/orgfiles-brainstorm-file
+      (insert "#+TITLE: Brainstorm\n\n* Inbox\n")))
+  (org-capture nil "b"))
+
 (defun my/orgfiles-capture-journal ()
   (interactive)
   (require 'org-capture)
@@ -230,9 +242,10 @@
 (defun my/orgfiles-capture-dispatch ()
   (interactive)
   (let ((capture-type (completing-read "Capture type: "
-                                       '("idea" "journal" "meeting")
-                                       nil t nil nil "idea")))
+                                       '("brainstorm" "idea" "journal" "meeting")
+                                       nil t nil nil "brainstorm")))
     (pcase capture-type
+      ("brainstorm" (my/orgfiles-capture-brainstorm))
       ("idea" (my/orgfiles-capture-idea))
       ("journal" (my/orgfiles-capture-journal))
       ("meeting" (my/orgfiles-new-note)))))
@@ -253,7 +266,10 @@
   (setq org-directory my/orgfiles-root
         org-default-notes-file my/orgfiles-idea-file
         org-capture-templates
-        '(("i" "Idea" entry
+        '(("b" "Brainstorm" entry
+           (file+headline my/orgfiles-brainstorm-file "Inbox")
+           "* %U %?\n")
+          ("i" "Idea" entry
            (file+headline my/orgfiles-idea-file "Inbox")
            "* %U %?\n")
           ("j" "Journal" entry
@@ -344,6 +360,7 @@
     "a" '(:ignore t :which-key "actions")
     "a o" '(:ignore t :which-key "org")
     "a o a" #'org-agenda
+    "a o b" #'my/orgfiles-capture-brainstorm
     "a o c" #'my/orgfiles-capture-dispatch
     "a o l" #'org-store-link
     "a o t" #'org-todo-list

@@ -8,7 +8,8 @@
 - 找文件：=SPC f f=
 - 全文检索：=SPC f g=
 - 切项目：=SPC p p=
-- 统一捕获：=SPC a o c=（选择 =idea/journal/meeting=）
+- 统一捕获：=SPC a o c=（选择 =brainstorm/idea/journal/meeting=）
+- 脑暴草稿直达：=SPC a o b=
 - 搜索候选动作：=C-.= 或 =SPC a .=（动作） / =C-c C-o=（导出为可批处理列表）
 - 分屏窗口移动：=SPC w h/j/k/l=
 - 字号调节：=SPC z ==（放大）/=SPC z -=（缩小）/=SPC z 0=（重置）
@@ -16,6 +17,7 @@
 * 笔记工作流
 
 - Idea：捕获到 =~/code/orgfiles/ideas.org=
+- Brainstorm：捕获到 =~/code/orgfiles/brainstorm.org=
 - Journal：捕获到 =~/code/orgfiles/journal/YYYY-MM-DD.org=
 - Meeting：新建到 =~/code/orgfiles/meetings/<会议名>.org=
 
