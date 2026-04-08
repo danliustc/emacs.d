@@ -219,8 +219,12 @@ Before declaring done:
     - `SPC z 0 -> my/font-size-reset`
 - Org application prefix:
   - `SPC a o a -> org-agenda`
-  - `SPC a o b -> my/orgfiles-capture-brainstorm`
-  - `SPC a o c -> my/orgfiles-capture-dispatch`
+  - `SPC a o c -> capture prefix`
+  - `SPC a o c b -> my/orgfiles-capture-brainstorm`
+  - `SPC a o c c -> my/orgfiles-capture-dispatch`
+  - `SPC a o c i -> my/orgfiles-capture-idea`
+  - `SPC a o c j -> my/orgfiles-capture-journal`
+  - `SPC a o c m -> my/orgfiles-capture-meeting`
   - `SPC a o l -> org-store-link`
   - `SPC a o t -> org-todo-list`
 - Brainstorm draft workflow:
@@ -231,5 +235,6 @@ Before declaring done:
 - Meeting note capture workflow:
   - root directory: `~/code/orgfiles/`
   - meeting directory: `~/code/orgfiles/meetings/`
-  - prompt order: capture type -> meeting name
+  - prompt order: capture key -> meeting name -> meeting time (default now)
+  - file naming: `YYYY-MM-DD-HHMM-<meeting-name>.org`
   - first-create behavior: instantiate template sections (背景/结论/待办/风险/下次会议前要准备)

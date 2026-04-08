@@ -199,45 +199,38 @@
 (defvar my/orgfiles-journal-dir (expand-file-name "journal/" my/orgfiles-root)
   "Directory for daily journal files.")
 
+(defvar my/orgfiles-meetings-dir (expand-file-name "meetings/" my/orgfiles-root)
+  "Directory for timestamped meeting notes.")
+
 (defun my/orgfiles--ensure-dir (dir)
   (unless (file-directory-p dir)
     (make-directory dir t)))
 
-(defun my/orgfiles--normalize-name (name)
+(defun my/orgfiles--safe-file-stem (name)
   (let* ((raw-name (string-trim name))
          (base-name (file-name-nondirectory raw-name))
          (name-without-ext (file-name-sans-extension base-name))
+         (space-normalized (replace-regexp-in-string "[[:space:]]+" "-" name-without-ext))
          (safe-name
           (replace-regexp-in-string
            "[^[:alnum:]_[:multibyte:]-]"
            "-"
-           name-without-ext)))
-    (if (string-empty-p safe-name)
-        "untitled.org"
-      (concat safe-name ".org"))))
+           space-normalized))
+         (collapsed (replace-regexp-in-string "-+" "-" safe-name))
+         (trimmed (string-trim collapsed "-+" "-+")))
+    (if (string-empty-p trimmed) "untitled" trimmed)))
+
+(defun my/orgfiles--normalize-name (name)
+  (concat (my/orgfiles--safe-file-stem name) ".org"))
 
 (defun my/orgfiles--slugify (text)
-  (let* ((trimmed (string-trim text))
-         (dashified (replace-regexp-in-string "[[:space:]]+" "-" trimmed))
-         (cleaned (replace-regexp-in-string "[^[:alnum:]-]" "" dashified)))
-    (if (string-empty-p cleaned) "untitled" cleaned)))
+  (my/orgfiles--safe-file-stem text))
 
-(defun my/orgfiles--meeting-template (meeting-name)
-  (let ((today (format-time-string "%Y-%m-%d %a"))
-        (deadline (format-time-string "%Y-%m-%d %a"
-                                      (time-add (current-time) (days-to-time 7)))))
-    (format "#+TITLE: %s\n#+DATE: <%s>\n\n* 背景\n\n* 结论（Decision）\n\n* 待办（Action Items）\n** TODO [#A] xxx\nOWNER: 负责人\nDEADLINE: <%s>\n\n* 风险/阻塞\n\n* 下次会议前要准备\n"
-            meeting-name today deadline)))
-
-(defun my/orgfiles--today-journal-file ()
-  (expand-file-name (format-time-string "%Y-%m-%d.org") my/orgfiles-journal-dir))
-
-(defun my/orgfiles--new-brainstorm-file (title)
-  (my/orgfiles--ensure-dir my/orgfiles-brainstorm-dir)
-  (let* ((display-title (let ((trimmed (string-trim title)))
-                          (if (string-empty-p trimmed) "Untitled" trimmed)))
-         (timestamp (format-time-string "%Y-%m-%d-%H%M"))
-         (slug (my/orgfiles--slugify title))
+(defun my/orgfiles--timestamped-file-path (dir title &optional time)
+  (my/orgfiles--ensure-dir dir)
+  (let* ((captured-at (or time (current-time)))
+         (timestamp (format-time-string "%Y-%m-%d-%H%M" captured-at))
+         (slug (my/orgfiles--safe-file-stem title))
          (counter 0)
          candidate)
     (while
@@ -247,14 +240,42 @@
                  (if (= counter 0)
                      (format "%s-%s.org" timestamp slug)
                    (format "%s-%s-%d.org" timestamp slug counter))
-                 my/orgfiles-brainstorm-dir))
+                 dir))
           (setq counter (1+ counter))
           (file-exists-p candidate)))
+    candidate))
+
+(defun my/orgfiles--meeting-template (meeting-name meeting-time)
+  (let ((captured-at (or meeting-time (current-time)))
+        (deadline (format-time-string "%Y-%m-%d %a"
+                                      (time-add (or meeting-time (current-time))
+                                                (days-to-time 7)))))
+    (format "#+TITLE: %s\n#+DATE: <%s>\n\n* 背景\n\n* 结论（Decision）\n\n* 待办（Action Items）\n** TODO [#A] xxx\nOWNER: 负责人\nDEADLINE: <%s>\n\n* 风险/阻塞\n\n* 下次会议前要准备\n"
+            meeting-name
+            (format-time-string "%Y-%m-%d %a %H:%M" captured-at)
+            deadline)))
+
+(defun my/orgfiles--today-journal-file ()
+  (expand-file-name (format-time-string "%Y-%m-%d.org") my/orgfiles-journal-dir))
+
+(defun my/orgfiles--new-brainstorm-file (title)
+  (let* ((display-title (let ((trimmed (string-trim title)))
+                          (if (string-empty-p trimmed) "Untitled" trimmed)))
+         (candidate (my/orgfiles--timestamped-file-path my/orgfiles-brainstorm-dir title)))
     (with-temp-file candidate
       (insert (format "#+TITLE: Brainstorm - %s\n#+DATE: <%s>\n\n* Context\n\n* Ideas\n\n* Next Steps\n"
                       display-title
                       (format-time-string "%Y-%m-%d %a"))))
     candidate))
+
+(defun my/orgfiles--new-meeting-file (meeting-name &optional meeting-time)
+  (let* ((captured-at (or meeting-time (current-time)))
+         (target-file (my/orgfiles--timestamped-file-path my/orgfiles-meetings-dir
+                                                          meeting-name
+                                                          captured-at)))
+    (with-temp-file target-file
+      (insert (my/orgfiles--meeting-template meeting-name captured-at)))
+    target-file))
 
 (defun my/orgfiles--ensure-journal-file ()
   (let ((journal-file (my/orgfiles--today-journal-file)))
@@ -286,6 +307,13 @@
   (my/orgfiles--ensure-journal-file)
   (org-capture nil "j"))
 
+(defun my/orgfiles-capture-meeting ()
+  (interactive)
+  (require 'org)
+  (let* ((meeting-name (read-string "Meeting name: "))
+         (meeting-time (org-read-date nil t nil "Meeting time: " (current-time))))
+    (find-file (my/orgfiles--new-meeting-file meeting-name meeting-time))))
+
 (defun my/orgfiles-capture-dispatch ()
   (interactive)
   (let ((capture-type (completing-read "Capture type: "
@@ -295,19 +323,9 @@
       ("brainstorm" (my/orgfiles-capture-brainstorm))
       ("idea" (my/orgfiles-capture-idea))
       ("journal" (my/orgfiles-capture-journal))
-      ("meeting" (my/orgfiles-new-note)))))
+      ("meeting" (my/orgfiles-capture-meeting)))))
 
-(defun my/orgfiles-new-note ()
-  (interactive)
-  (let* ((meeting-name (read-string "Meeting name: "))
-         (filename (my/orgfiles--normalize-name meeting-name))
-         (target-dir (expand-file-name "meetings/" my/orgfiles-root))
-         (target-file (expand-file-name filename target-dir)))
-    (my/orgfiles--ensure-dir target-dir)
-    (unless (file-exists-p target-file)
-      (with-temp-file target-file
-        (insert (my/orgfiles--meeting-template meeting-name))))
-    (find-file target-file)))
+(defalias 'my/orgfiles-new-note #'my/orgfiles-capture-meeting)
 
 (with-eval-after-load 'org
   (setq org-directory my/orgfiles-root
@@ -405,8 +423,12 @@
     "a" '(:ignore t :which-key "actions")
     "a o" '(:ignore t :which-key "org")
     "a o a" #'org-agenda
-    "a o b" #'my/orgfiles-capture-brainstorm
-    "a o c" #'my/orgfiles-capture-dispatch
+    "a o c" '(:ignore t :which-key "capture")
+    "a o c b" #'my/orgfiles-capture-brainstorm
+    "a o c c" #'my/orgfiles-capture-dispatch
+    "a o c i" #'my/orgfiles-capture-idea
+    "a o c j" #'my/orgfiles-capture-journal
+    "a o c m" #'my/orgfiles-capture-meeting
     "a o l" #'org-store-link
     "a o t" #'org-todo-list
     "a ." #'embark-act
