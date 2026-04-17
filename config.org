@@ -16,7 +16,7 @@
 (global-visual-line-mode 1)
 (setq-default truncate-lines nil
               word-wrap t)
-(add-hook 'prog-mode-hook #'display-line-numbers-mode)
+(add-hook 'prog-mode-hook (lambda () (display-line-numbers-mode 1)))
 (recentf-mode 1)
 (setq recentf-max-saved-items 200)
 
@@ -32,8 +32,6 @@
   (let ((org-confirm-babel-evaluate nil))
     (org-babel-load-file (expand-file-name "config.org" user-emacs-directory))
     (message "Reloaded config.org")))
-
-(defalias 'load-my-config #'my/reload-config)
 
 (defun my/revert-current-buffer-on-focus ()
   "On focus-in, refresh current local file buffer when stale and safe."
@@ -366,7 +364,6 @@
         org-hide-emphasis-markers t
         org-ellipsis " ▾")
   (define-key org-mode-map (kbd "<tab>") #'org-cycle)
-  (define-key org-mode-map (kbd "TAB") #'org-cycle)
   (define-key org-mode-map (kbd "<backtab>") #'org-shifttab)
   (when (featurep 'evil)
     (evil-define-key '(normal motion) org-mode-map
@@ -511,9 +508,6 @@
 (when (require 'projectile nil t)
   (projectile-mode 1)
   (setq projectile-completion-system 'default))
-
-(define-key global-map (kbd "C-c p p") #'my/project-switch-project)
-(define-key global-map (kbd "C-c p f") #'my/project-find-file)
 #+end_src
 
 ** Status Line
