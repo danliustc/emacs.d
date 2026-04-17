@@ -197,12 +197,11 @@ Before declaring done:
 - Global completion/search bindings:
   - `C-s -> consult-line`
   - `C-x b -> consult-buffer`
-  - `C-. -> embark-act`
-  - `C-, -> embark-dwim`
-  - `SPC a . -> embark-act`
-  - `SPC a , -> embark-dwim`
+  - `C-. -> embark-act` (global; also available in minibuffer)
+  - `C-, -> embark-dwim` (global; also available in minibuffer)
   - `C-c C-o -> embark-export` (inside minibuffer)
   - `C-h B -> embark-bindings`
+  - `SPC a d -> my/orgfiles-capture-dispatch` (shortcut for `SPC a o c c`)
 - File/project bindings:
   - `SPC f f -> find-file`
   - `SPC f g -> consult-ripgrep`
@@ -230,8 +229,10 @@ Before declaring done:
   - `SPC a o c i -> my/orgfiles-capture-idea`
   - `SPC a o c j -> my/orgfiles-capture-journal`
   - `SPC a o c m -> my/orgfiles-capture-meeting`
+  - `SPC a o c t -> my/orgfiles-capture-todo`
   - `SPC a o l -> org-store-link`
   - `SPC a o t -> org-todo-list`
+  - `SPC a d -> my/orgfiles-capture-dispatch` (shortcut; same as `SPC a o c c`)
 - Brainstorm draft workflow: default target `~/Documents/orgfiles/`, file naming `YYYY-MM-DD-HHMM-<title>.org`. Override via `ORGFILES_ROOT` or `~/.emacs.d/local.el`. See Section 3.9 below for details.
 - Todo capture workflow: target file `~/Documents/orgfiles/inbox.org`, headline `Tasks`, direct keybinding `SPC a o c t`. See Section 3.9 below for details.
 - Meeting note capture workflow: default root `~/Documents/orgfiles/`, file naming `YYYY-MM-DD-HHMM-<meeting-name>.org`. See Section 3.9 below for details.

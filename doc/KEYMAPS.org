@@ -15,8 +15,7 @@
 - =SPC a o c t= -> =my/orgfiles-capture-todo=
 - =SPC a o l= -> =org-store-link=
 - =SPC a o t= -> =org-todo-list=
-- =SPC a .= -> =embark-act=
-- =SPC a ,= -> =embark-dwim=
+- =SPC a d= -> =my/orgfiles-capture-dispatch= (shortcut for =SPC a o c c=)
 - =SPC f f= -> =find-file=
 - =SPC f g= -> =consult-ripgrep=
 - =SPC f l= -> =consult-line=
@@ -55,9 +54,7 @@
 
 * Minibuffer Actions (Consult/Embark Flow)
 
-- =C-.= -> =embark-act=
-- =C-,= -> =embark-dwim=
-- =C-c C-o= -> =embark-export=
+- =C-c C-o= -> =embark-export= (exports minibuffer results to a buffer)
 
 * Ergonomics Notes
 
