@@ -16,10 +16,36 @@
 
 * 笔记工作流
 
-- Idea：捕获到 =~/code/orgfiles/ideas.org=
-- Brainstorm：每次新建到 =~/code/orgfiles/brainstorm/YYYY-MM-DD-HHMM-<标题>.org=
-- Journal：捕获到 =~/code/orgfiles/journal/YYYY-MM-DD.org=
-- Meeting：每次新建到 =~/code/orgfiles/meetings/YYYY-MM-DD-HHMM-<会议名>.org=
+- 默认目录：=~/Documents/orgfiles/=
+- 本机覆盖：环境变量 =ORGFILES_ROOT= 或 =~/.emacs.d/local.el=
+- Idea：捕获到 =~/Documents/orgfiles/ideas.org=（可被本机覆盖）
+- Brainstorm：每次新建到 =~/Documents/orgfiles/YYYY-MM-DD-HHMM-<标题>.org=（可被本机覆盖）
+- Journal：捕获到 =~/Documents/orgfiles/YYYY-MM-DD.org=（可被本机覆盖）
+- Meeting：每次新建到 =~/Documents/orgfiles/YYYY-MM-DD-HHMM-<会议名>.org=（可被本机覆盖）
+
+#+begin_src emacs-lisp
+;; ~/.emacs.d/local.el
+(setq my/orgfiles-root "~/Dropbox/orgfiles/")
+#+end_src
+
+* 新机器初始化
+
+1. Clone 这个仓库到 =~/.emacs.d=。
+2. 如果你接受默认目录，直接创建 =~/Documents/orgfiles/=。
+3. 如果你要用自己的同步目录，复制 [[./local.example.el][local.example.el]] 为 =~/.emacs.d/local.el= 并改成你自己的路径。
+4. 或者不用 =local.el=，直接在 shell 里设置环境变量 =ORGFILES_ROOT=。
+
+#+begin_src sh
+# 方案 A：用默认目录
+mkdir -p ~/Documents/orgfiles
+
+# 方案 B：用环境变量覆盖
+export ORGFILES_ROOT="$HOME/Dropbox/orgfiles"
+#+end_src
+
+说明：
+- =local.el= 已在 Git 中忽略，适合放本机私有路径。
+- =ORGFILES_ROOT= 优先级更高，适合不同机器临时切换目录。
 
 * 配置入口
 

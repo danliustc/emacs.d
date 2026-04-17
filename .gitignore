@@ -13,6 +13,7 @@
 /bookmarks
 /network-security.data
 /tutorial
+/local.el
 
 # Tangled/compiled artifacts
 /config.el

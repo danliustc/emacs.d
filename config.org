@@ -187,20 +187,20 @@
 #+begin_src emacs-lisp
 (require 'subr-x)
 
-(defvar my/orgfiles-root (expand-file-name "~/code/orgfiles/")
+(defconst my/orgfiles-default-root
+  (expand-file-name "orgfiles/" "~/Documents/")
+  "Portable fallback directory for personal Org notes.")
+
+(defvar my/orgfiles-root
+  (file-name-as-directory
+   (expand-file-name
+    (or (getenv "ORGFILES_ROOT")
+        (when (boundp 'my/orgfiles-root) my/orgfiles-root)
+        my/orgfiles-default-root)))
   "Root directory for personal Org notes.")
 
 (defvar my/orgfiles-idea-file (expand-file-name "ideas.org" my/orgfiles-root)
   "Single file for daily idea capture.")
-
-(defvar my/orgfiles-brainstorm-dir (expand-file-name "brainstorm/" my/orgfiles-root)
-  "Directory for brainstorming draft notes.")
-
-(defvar my/orgfiles-journal-dir (expand-file-name "journal/" my/orgfiles-root)
-  "Directory for daily journal files.")
-
-(defvar my/orgfiles-meetings-dir (expand-file-name "meetings/" my/orgfiles-root)
-  "Directory for timestamped meeting notes.")
 
 (defun my/orgfiles--ensure-dir (dir)
   (unless (file-directory-p dir)
@@ -256,12 +256,12 @@
             deadline)))
 
 (defun my/orgfiles--today-journal-file ()
-  (expand-file-name (format-time-string "%Y-%m-%d.org") my/orgfiles-journal-dir))
+  (expand-file-name (format-time-string "%Y-%m-%d.org") my/orgfiles-root))
 
 (defun my/orgfiles--new-brainstorm-file (title)
   (let* ((display-title (let ((trimmed (string-trim title)))
                           (if (string-empty-p trimmed) "Untitled" trimmed)))
-         (candidate (my/orgfiles--timestamped-file-path my/orgfiles-brainstorm-dir title)))
+         (candidate (my/orgfiles--timestamped-file-path my/orgfiles-root title)))
     (with-temp-file candidate
       (insert (format "#+TITLE: Brainstorm - %s\n#+DATE: <%s>\n\n* Context\n\n* Ideas\n\n* Next Steps\n"
                       display-title
@@ -270,7 +270,7 @@
 
 (defun my/orgfiles--new-meeting-file (meeting-name &optional meeting-time)
   (let* ((captured-at (or meeting-time (current-time)))
-         (target-file (my/orgfiles--timestamped-file-path my/orgfiles-meetings-dir
+         (target-file (my/orgfiles--timestamped-file-path my/orgfiles-root
                                                           meeting-name
                                                           captured-at)))
     (with-temp-file target-file
@@ -279,7 +279,7 @@
 
 (defun my/orgfiles--ensure-journal-file ()
   (let ((journal-file (my/orgfiles--today-journal-file)))
-    (my/orgfiles--ensure-dir my/orgfiles-journal-dir)
+    (my/orgfiles--ensure-dir my/orgfiles-root)
     (unless (file-exists-p journal-file)
       (with-temp-file journal-file
         (insert (format "#+TITLE: Journal %s\n#+DATE: <%s>\n\n* Journal\n"
@@ -329,6 +329,7 @@
 
 (with-eval-after-load 'org
   (setq org-directory my/orgfiles-root
+        org-agenda-files (directory-files my/orgfiles-root t "\\.org\\'")
         org-default-notes-file my/orgfiles-idea-file
         org-capture-templates
         '(("i" "Idea" entry

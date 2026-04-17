@@ -228,13 +228,14 @@ Before declaring done:
   - `SPC a o l -> org-store-link`
   - `SPC a o t -> org-todo-list`
 - Brainstorm draft workflow:
-  - target directory: `~/code/orgfiles/brainstorm/`
+  - default target directory: `~/Documents/orgfiles/`
+  - local override: `ORGFILES_ROOT` or `~/.emacs.d/local.el`
   - dispatch option: `brainstorm`
   - behavior: create a new file each time (no org-capture template entry)
   - file naming: `YYYY-MM-DD-HHMM-<title>.org`
 - Meeting note capture workflow:
-  - root directory: `~/code/orgfiles/`
-  - meeting directory: `~/code/orgfiles/meetings/`
+  - default root directory: `~/Documents/orgfiles/`
+  - local override: `ORGFILES_ROOT` or `~/.emacs.d/local.el`
   - prompt order: capture key -> meeting name -> meeting time (default now)
   - file naming: `YYYY-MM-DD-HHMM-<meeting-name>.org`
   - first-create behavior: instantiate template sections (背景/结论/待办/风险/下次会议前要准备)
