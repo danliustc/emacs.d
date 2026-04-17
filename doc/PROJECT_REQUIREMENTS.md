@@ -42,9 +42,11 @@ It is organized as:
 ### 1.4 Documentation Governance
 
 - If behavior or collaboration rules change, update docs in the same change set.
-- Keep docs consistent across:
-  - `README.org`
-  - `doc/PROJECT_REQUIREMENTS.md`
+- Keep docs consistent across: `README.org`, `doc/PROJECT_REQUIREMENTS.md`, `doc/KEYMAPS.org`.
+- Avoid duplication: detailed descriptions belong in one place; other docs should reference rather than repeat.
+  - Workflow details → `README.org` (user-facing)
+  - Design rules and baselines → `PROJECT_REQUIREMENTS.md` (collaboration contract)
+  - Full keybindings → `doc/KEYMAPS.org` (source of truth for current bindings)
 
 ## 2. Testing Standards
 
@@ -182,6 +184,9 @@ Before declaring done:
 
 ### 3.8 Current Baseline (2026-02-28)
 
+> ⚠️ This section is a snapshot as of the date above. For the current actual keybindings,
+> see `doc/KEYMAPS.org`. Completion stack and keybindings may have evolved since this was written.
+
 - Completion stack:
   - `vertico`
   - `orderless`
@@ -227,20 +232,20 @@ Before declaring done:
   - `SPC a o c m -> my/orgfiles-capture-meeting`
   - `SPC a o l -> org-store-link`
   - `SPC a o t -> org-todo-list`
-- Brainstorm draft workflow:
-  - default target directory: `~/Documents/orgfiles/`
-  - local override: `ORGFILES_ROOT` or `~/.emacs.d/local.el`
-  - dispatch option: `brainstorm`
-  - behavior: create a new file each time (no org-capture template entry)
-  - file naming: `YYYY-MM-DD-HHMM-<title>.org`
-- Todo capture workflow:
-  - target file: `~/Documents/orgfiles/inbox.org`
-  - target headline: `Tasks`
-  - direct keybinding: `SPC a o c t`
-  - dispatch option: `todo`
-- Meeting note capture workflow:
-  - default root directory: `~/Documents/orgfiles/`
-  - local override: `ORGFILES_ROOT` or `~/.emacs.d/local.el`
-  - prompt order: capture key -> meeting name -> meeting time (default now)
-  - file naming: `YYYY-MM-DD-HHMM-<meeting-name>.org`
-  - first-create behavior: instantiate template sections (背景/结论/待办/风险/下次会议前要准备)
+- Brainstorm draft workflow: default target `~/Documents/orgfiles/`, file naming `YYYY-MM-DD-HHMM-<title>.org`. Override via `ORGFILES_ROOT` or `~/.emacs.d/local.el`. See Section 3.9 below for details.
+- Todo capture workflow: target file `~/Documents/orgfiles/inbox.org`, headline `Tasks`, direct keybinding `SPC a o c t`. See Section 3.9 below for details.
+- Meeting note capture workflow: default root `~/Documents/orgfiles/`, file naming `YYYY-MM-DD-HHMM-<meeting-name>.org`. See Section 3.9 below for details.
+
+### 3.9 Org Capture Workflows
+
+**Brainstorm**: Create a new file each time (no org-capture template entry). File path: `~/Documents/orgfiles/YYYY-MM-DD-HHMM-<title>.org`. Override: `ORGFILES_ROOT` or `~/.emacs.d/local.el`.
+
+**Todo**: Capture to `~/Documents/orgfiles/inbox.org` under the `Tasks` headline. Direct keybinding: `SPC a o c t`. Dispatch option: `todo`.
+
+**Meeting**: Creates new file at `~/Documents/orgfiles/YYYY-MM-DD-HHMM-<meeting-name>.org`. Prompt order: capture key → meeting name → meeting time (defaults to now). First-create instantiates template sections: 背景/结论/待办/风险/下次会议前要准备.
+
+**Journal**: Capture to `~/Documents/orgfiles/YYYY-MM-DD.org`.
+
+**Idea**: Capture to `~/Documents/orgfiles/ideas.org`.
+
+**Dispatch**: Menu-driven entry point for all capture types.

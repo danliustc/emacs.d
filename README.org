@@ -19,16 +19,8 @@
 
 - 默认目录：=~/Documents/orgfiles/=
 - 本机覆盖：环境变量 =ORGFILES_ROOT= 或 =~/.emacs.d/local.el=
-- Todo：捕获到 =~/Documents/orgfiles/inbox.org= 的 =Tasks= 标题下（可被本机覆盖）
-- Idea：捕获到 =~/Documents/orgfiles/ideas.org=（可被本机覆盖）
-- Brainstorm：每次新建到 =~/Documents/orgfiles/YYYY-MM-DD-HHMM-<标题>.org=（可被本机覆盖）
-- Journal：捕获到 =~/Documents/orgfiles/YYYY-MM-DD.org=（可被本机覆盖）
-- Meeting：每次新建到 =~/Documents/orgfiles/YYYY-MM-DD-HHMM-<会议名>.org=（可被本机覆盖）
-
-#+begin_src emacs-lisp
-;; ~/.emacs.d/local.el
-(setq my/orgfiles-root "~/Dropbox/orgfiles/")
-#+end_src
+- Capture 前缀：=SPC a o c=（子键：=t= todo / =b= brainstorm / =i= idea / =j= journal / =m= meeting / =c= dispatch）
+- 详细说明及文件模板：参见 [[./doc/PROJECT_REQUIREMENTS.md][PROJECT_REQUIREMENTS.md]] 第 3.8 节
 
 * 新机器初始化
 
