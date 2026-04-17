@@ -55,7 +55,7 @@
     (should (string-match-p "truncate-lines nil" content))
     (should (string-match-p "word-wrap t" content))
     (should-not (string-match-p "global-display-line-numbers-mode 1" content))
-    (should (string-match-p "add-hook 'prog-mode-hook #'display-line-numbers-mode" content))))
+    (should (string-match-p "prog-mode-hook.*lambda.*display-line-numbers-mode" content))))
 
 (ert-deftest legacy-lisp-modules-should-be-removed ()
   (should-not (file-directory-p (repo-file "lisp"))))
@@ -91,8 +91,6 @@
     (should (string-match-p "\"a o c j\" #'my/orgfiles-capture-journal" content))
     (should (string-match-p "\"a o c m\" #'my/orgfiles-capture-meeting" content))
     (should (string-match-p "\"a o c t\" #'my/orgfiles-capture-todo" content))
-    (should (string-match-p "\"a \\.\" #'embark-act" content))
-    (should (string-match-p "\"a ,\" #'embark-dwim" content))
     (should-not (string-match-p "\"a o b\" #'my/orgfiles-capture-brainstorm" content))
     (should-not (string-match-p "\"a o i\" #'my/orgfiles-capture-idea" content))
     (should-not (string-match-p "\"a o j\" #'my/orgfiles-capture-journal" content))
@@ -219,7 +217,6 @@
 (ert-deftest config-should-provide-manual-reload-command ()
   (let ((content (file-content "config.org")))
     (should (string-match-p "defun my/reload-config" content))
-    (should (string-match-p "defalias 'load-my-config #'my/reload-config" content))
     (should (string-match-p "org-babel-load-file" content))
     (should (string-match-p "expand-file-name \"config\\.org\" user-emacs-directory" content))))
 

@@ -223,12 +223,6 @@
          (trimmed (string-trim collapsed "-+" "-+")))
     (if (string-empty-p trimmed) "untitled" trimmed)))
 
-(defun my/orgfiles--normalize-name (name)
-  (concat (my/orgfiles--safe-file-stem name) ".org"))
-
-(defun my/orgfiles--slugify (text)
-  (my/orgfiles--safe-file-stem text))
-
 (defun my/orgfiles--timestamped-file-path (dir title &optional time)
   (my/orgfiles--ensure-dir dir)
   (let* ((captured-at (or time (current-time)))
