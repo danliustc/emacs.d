@@ -4,12 +4,13 @@
 
 * 我日常怎么用
 
-- 命令入口：=SPC SPC=（输入命令名，例如 =load-my-config=）
+- 命令入口：=SPC SPC=（输入命令名，例如 =my/reload-config=）
 - 找文件：=SPC f f=
 - 全文检索：=SPC f g=
 - 切项目：=SPC p p=
 - Capture 前缀：=SPC a o c=
-- Capture 子键：=b= brainstorm / =i= idea / =j= journal / =m= meeting / =c= dispatch
+- 快速 TODO：=SPC a o c t=
+- Capture 子键：=t= todo / =b= brainstorm / =i= idea / =j= journal / =m= meeting / =c= dispatch
 - 搜索候选动作：=C-.= 或 =SPC a .=（动作） / =C-c C-o=（导出为可批处理列表）
 - 分屏窗口移动：=SPC w h/j/k/l=
 - 字号调节：=SPC z ==（放大）/=SPC z -=（缩小）/=SPC z 0=（重置）
@@ -18,6 +19,7 @@
 
 - 默认目录：=~/Documents/orgfiles/=
 - 本机覆盖：环境变量 =ORGFILES_ROOT= 或 =~/.emacs.d/local.el=
+- Todo：捕获到 =~/Documents/orgfiles/inbox.org= 的 =Tasks= 标题下（可被本机覆盖）
 - Idea：捕获到 =~/Documents/orgfiles/ideas.org=（可被本机覆盖）
 - Brainstorm：每次新建到 =~/Documents/orgfiles/YYYY-MM-DD-HHMM-<标题>.org=（可被本机覆盖）
 - Journal：捕获到 =~/Documents/orgfiles/YYYY-MM-DD.org=（可被本机覆盖）

@@ -233,6 +233,11 @@ Before declaring done:
   - dispatch option: `brainstorm`
   - behavior: create a new file each time (no org-capture template entry)
   - file naming: `YYYY-MM-DD-HHMM-<title>.org`
+- Todo capture workflow:
+  - target file: `~/Documents/orgfiles/inbox.org`
+  - target headline: `Tasks`
+  - direct keybinding: `SPC a o c t`
+  - dispatch option: `todo`
 - Meeting note capture workflow:
   - default root directory: `~/Documents/orgfiles/`
   - local override: `ORGFILES_ROOT` or `~/.emacs.d/local.el`

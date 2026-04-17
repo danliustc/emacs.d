@@ -12,6 +12,7 @@
 - =SPC a o c i= -> =my/orgfiles-capture-idea=
 - =SPC a o c j= -> =my/orgfiles-capture-journal=
 - =SPC a o c m= -> =my/orgfiles-capture-meeting=
+- =SPC a o c t= -> =my/orgfiles-capture-todo=
 - =SPC a o l= -> =org-store-link=
 - =SPC a o t= -> =org-todo-list=
 - =SPC a .= -> =embark-act=

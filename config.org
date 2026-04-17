@@ -27,11 +27,13 @@
 
 (setq confirm-kill-emacs #'my/confirm-kill-emacs)
 
-(defun load-my-config ()
+(defun my/reload-config ()
   (interactive)
   (let ((org-confirm-babel-evaluate nil))
     (org-babel-load-file (expand-file-name "config.org" user-emacs-directory))
     (message "Reloaded config.org")))
+
+(defalias 'load-my-config #'my/reload-config)
 
 (defun my/revert-current-buffer-on-focus ()
   "On focus-in, refresh current local file buffer when stale and safe."
@@ -202,6 +204,9 @@
 (defvar my/orgfiles-idea-file (expand-file-name "ideas.org" my/orgfiles-root)
   "Single file for daily idea capture.")
 
+(defvar my/orgfiles-inbox-file (expand-file-name "inbox.org" my/orgfiles-root)
+  "Single file for quick TODO capture.")
+
 (defun my/orgfiles--ensure-dir (dir)
   (unless (file-directory-p dir)
     (make-directory dir t)))
@@ -296,6 +301,15 @@
       (insert "#+TITLE: Ideas\n\n* Inbox\n")))
   (org-capture nil "i"))
 
+(defun my/orgfiles-capture-todo ()
+  (interactive)
+  (require 'org-capture)
+  (my/orgfiles--ensure-dir my/orgfiles-root)
+  (unless (file-exists-p my/orgfiles-inbox-file)
+    (with-temp-file my/orgfiles-inbox-file
+      (insert "#+TITLE: Inbox\n\n* Tasks\n")))
+  (org-capture nil "t"))
+
 (defun my/orgfiles-capture-brainstorm ()
   (interactive)
   (let ((title (read-string "Brainstorm title: ")))
@@ -317,9 +331,10 @@
 (defun my/orgfiles-capture-dispatch ()
   (interactive)
   (let ((capture-type (completing-read "Capture type: "
-                                       '("brainstorm" "idea" "journal" "meeting")
-                                       nil t nil nil "brainstorm")))
+                                       '("todo" "brainstorm" "idea" "journal" "meeting")
+                                       nil t nil nil "todo")))
     (pcase capture-type
+      ("todo" (my/orgfiles-capture-todo))
       ("brainstorm" (my/orgfiles-capture-brainstorm))
       ("idea" (my/orgfiles-capture-idea))
       ("journal" (my/orgfiles-capture-journal))
@@ -332,7 +347,10 @@
         org-agenda-files (directory-files my/orgfiles-root t "\\.org\\'")
         org-default-notes-file my/orgfiles-idea-file
         org-capture-templates
-        '(("i" "Idea" entry
+        '(("t" "Todo" entry
+           (file+headline my/orgfiles-inbox-file "Tasks")
+           "* TODO %?\n%U\n")
+          ("i" "Idea" entry
            (file+headline my/orgfiles-idea-file "Inbox")
            "* %U %?\n")
           ("j" "Journal" entry
@@ -430,6 +448,7 @@
     "a o c i" #'my/orgfiles-capture-idea
     "a o c j" #'my/orgfiles-capture-journal
     "a o c m" #'my/orgfiles-capture-meeting
+    "a o c t" #'my/orgfiles-capture-todo
     "a o l" #'org-store-link
     "a o t" #'org-todo-list
     "a ." #'embark-act
