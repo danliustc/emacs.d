@@ -11,7 +11,7 @@
 - Capture 前缀：=SPC a o c=
 - 快速 TODO：=SPC a o c t=
 - Capture 子键：=t= todo / =b= brainstorm / =i= idea / =j= journal / =m= meeting / =c= dispatch
-- 搜索候选动作：=C-.= 或 =SPC a .=（动作） / =C-c C-o=（导出为可批处理列表）
+- 搜索候选动作：=C-.=（动作） / =C-c C-o=（导出为可批处理列表）
 - 分屏窗口移动：=SPC w h/j/k/l=
 - 字号调节：=SPC z ==（放大）/=SPC z -=（缩小）/=SPC z 0=（重置）
 
