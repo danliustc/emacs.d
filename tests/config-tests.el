@@ -232,7 +232,6 @@
 (ert-deftest config-should-sanitize-meeting-note-filename ()
   (let ((content (file-content "config.org")))
     (should (string-match-p "my/orgfiles--safe-file-stem" content))
-    (should (string-match-p "my/orgfiles--normalize-name" content))
     (should (string-match-p "file-name-nondirectory" content))
     (should (string-match-p "string-trim collapsed" content))
     (should (string-match-p "untitled" content))

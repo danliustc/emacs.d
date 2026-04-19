@@ -191,13 +191,16 @@
   (expand-file-name "orgfiles/" "~/Documents/")
   "Portable fallback directory for personal Org notes.")
 
-(defvar my/orgfiles-root
-  (file-name-as-directory
-   (expand-file-name
-    (or (getenv "ORGFILES_ROOT")
-        (when (boundp 'my/orgfiles-root) my/orgfiles-root)
-        my/orgfiles-default-root)))
-  "Root directory for personal Org notes.")
+(defvar my/orgfiles-root nil
+  "Root directory for personal Org notes.
+May be pre-set via `local.el' or `ORGFILES_ROOT'; normalized below.")
+
+(setq my/orgfiles-root
+      (file-name-as-directory
+       (expand-file-name
+        (or (getenv "ORGFILES_ROOT")
+            my/orgfiles-root
+            my/orgfiles-default-root))))
 
 (defvar my/orgfiles-idea-file (expand-file-name "ideas.org" my/orgfiles-root)
   "Single file for daily idea capture.")
@@ -336,7 +339,7 @@
 
 (with-eval-after-load 'org
   (setq org-directory my/orgfiles-root
-        org-agenda-files (directory-files my/orgfiles-root t "\\.org\\'")
+        org-agenda-files (list my/orgfiles-root)
         org-default-notes-file my/orgfiles-idea-file
         org-capture-templates
         '(("t" "Todo" entry
