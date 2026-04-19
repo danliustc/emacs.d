@@ -55,7 +55,8 @@
     (should (string-match-p "truncate-lines nil" content))
     (should (string-match-p "word-wrap t" content))
     (should-not (string-match-p "global-display-line-numbers-mode 1" content))
-    (should (string-match-p "prog-mode-hook.*lambda.*display-line-numbers-mode" content))))
+    (should (string-match-p "add-hook 'prog-mode-hook #'display-line-numbers-mode" content))
+    (should-not (string-match-p "prog-mode-hook.*lambda.*display-line-numbers-mode" content))))
 
 (ert-deftest legacy-lisp-modules-should-be-removed ()
   (should-not (file-directory-p (repo-file "lisp"))))
@@ -64,7 +65,7 @@
   (let ((content (file-content "config.org")))
     (should (string-match-p "my/install-missing-packages" content))
     (should (string-match-p "my/auto-install-packages" content))
-    (should (string-match-p "when my/auto-install-packages" content))
+    (should (string-match-p "if my/auto-install-packages" content))
     (should (string-match-p "condition-case" content))
     (should (string-match-p "display-warning" content))
     (should (string-match-p "'my/init" content))))

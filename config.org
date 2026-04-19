@@ -16,7 +16,7 @@
 (global-visual-line-mode 1)
 (setq-default truncate-lines nil
               word-wrap t)
-(add-hook 'prog-mode-hook (lambda () (display-line-numbers-mode 1)))
+(add-hook 'prog-mode-hook #'display-line-numbers-mode)
 (recentf-mode 1)
 (setq recentf-max-saved-items 200)
 
@@ -94,9 +94,8 @@
 (let ((missing
        (seq-filter (lambda (pkg) (not (package-installed-p pkg))) my/packages)))
   (when missing
-    (when my/auto-install-packages
-      (my/install-missing-packages))
-    (unless my/auto-install-packages
+    (if my/auto-install-packages
+        (my/install-missing-packages)
       (message "Missing packages: %s. Run M-x my/install-missing-packages"
                missing))))
 #+end_src
@@ -185,8 +184,6 @@
 ** Capture System
 
 #+begin_src emacs-lisp
-(require 'subr-x)
-
 (defconst my/orgfiles-default-root
   (expand-file-name "orgfiles/" "~/Documents/")
   "Portable fallback directory for personal Org notes.")
@@ -335,8 +332,6 @@ May be pre-set via `local.el' or `ORGFILES_ROOT'; normalized below.")
       ("journal" (my/orgfiles-capture-journal))
       ("meeting" (my/orgfiles-capture-meeting)))))
 
-(defalias 'my/orgfiles-new-note #'my/orgfiles-capture-meeting)
-
 (with-eval-after-load 'org
   (setq org-directory my/orgfiles-root
         org-agenda-files (list my/orgfiles-root)
@@ -376,7 +371,7 @@ May be pre-set via `local.el' or `ORGFILES_ROOT'; normalized below.")
   (add-to-list 'auto-mode-alist '("\\.md\\'" . text-mode)))
 #+end_src
 
-* Scenario: Editing UX
+* Scenario: Keybindings & Project
 
 ** Keybinding Model (Evil + Leader)
 
