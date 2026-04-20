@@ -205,6 +205,12 @@ May be pre-set via `local.el' or `ORGFILES_ROOT'; normalized below.")
 (defvar my/orgfiles-inbox-file (expand-file-name "inbox.org" my/orgfiles-root)
   "Single file for quick TODO capture.")
 
+(defvar my/orgfiles-projects-dir
+  (file-name-as-directory (expand-file-name "projects" my/orgfiles-root))
+  "Directory of active project Org files scanned by the agenda.
+Meeting, brainstorm and journal files in the root are intentionally
+excluded so the agenda stays small; refile important items here.")
+
 (defun my/orgfiles--ensure-dir (dir)
   (unless (file-directory-p dir)
     (make-directory dir t)))
@@ -333,9 +339,16 @@ May be pre-set via `local.el' or `ORGFILES_ROOT'; normalized below.")
       ("meeting" (my/orgfiles-capture-meeting)))))
 
 (with-eval-after-load 'org
+  (my/orgfiles--ensure-dir my/orgfiles-projects-dir)
   (setq org-directory my/orgfiles-root
-        org-agenda-files (list my/orgfiles-root)
+        org-agenda-files (list my/orgfiles-inbox-file
+                               my/orgfiles-idea-file
+                               my/orgfiles-projects-dir)
         org-default-notes-file my/orgfiles-idea-file
+        org-refile-targets '((org-agenda-files :maxlevel . 3))
+        org-refile-use-outline-path 'file
+        org-outline-path-complete-in-steps nil
+        org-refile-allow-creating-parent-nodes 'confirm
         org-capture-templates
         '(("t" "Todo" entry
            (file+headline my/orgfiles-inbox-file "Tasks")
@@ -479,7 +492,8 @@ May be pre-set via `local.el' or `ORGFILES_ROOT'; normalized below.")
       :keymaps 'org-mode-map
       "t" #'org-todo
       "a" #'org-archive-subtree
-      "s" #'org-schedule))
+      "s" #'org-schedule
+      "r" #'org-refile))
 
   (with-eval-after-load 'markdown-mode
     (my/local-leader-def

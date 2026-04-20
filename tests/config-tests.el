@@ -237,3 +237,21 @@
     (should (string-match-p "string-trim collapsed" content))
     (should (string-match-p "untitled" content))
     (should (string-match-p "\\[:multibyte:\\]" content))))
+
+(ert-deftest config-should-narrow-agenda-files-and-enable-refile ()
+  (let ((content (file-content "config.org")))
+    ;; Agenda scope is narrowed: explicit list, not the whole root directory.
+    (should (string-match-p "defvar my/orgfiles-projects-dir" content))
+    (should (string-match-p "\"projects\" my/orgfiles-root" content))
+    (should (string-match-p "my/orgfiles--ensure-dir my/orgfiles-projects-dir" content))
+    (should (string-match-p "org-agenda-files (list my/orgfiles-inbox-file" content))
+    (should (string-match-p "my/orgfiles-idea-file" content))
+    (should (string-match-p "my/orgfiles-projects-dir)" content))
+    (should-not (string-match-p "org-agenda-files (list my/orgfiles-root)" content))
+    ;; Refile configuration is present and points at agenda files.
+    (should (string-match-p "org-refile-targets '((org-agenda-files :maxlevel \\. 3))" content))
+    (should (string-match-p "org-refile-use-outline-path 'file" content))
+    (should (string-match-p "org-outline-path-complete-in-steps nil" content))
+    (should (string-match-p "org-refile-allow-creating-parent-nodes 'confirm" content))
+    ;; Local leader exposes refile alongside todo/archive/schedule.
+    (should (string-match-p "\"r\" #'org-refile" content))))

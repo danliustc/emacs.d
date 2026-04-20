@@ -250,3 +250,11 @@ Before declaring done:
 **Idea**: Capture to `~/Documents/orgfiles/ideas.org`.
 
 **Dispatch**: Menu-driven entry point for all capture types.
+
+### 3.10 Agenda Scope and Refile
+
+- `org-agenda-files` is an explicit list: `inbox.org`, `ideas.org`, and the `projects/` subdirectory under `my/orgfiles-root`. Meeting/brainstorm/journal files in the root are deliberately excluded so the agenda stays small and stable as those files accumulate over time.
+- Flow: capture lands in `inbox.org` (todo) or meeting notes; review and refile actionable items into `projects/<name>.org` via `, r` / `C-c C-w`.
+- Refile completion is flat (`org-outline-path-complete-in-steps nil`) and includes the file prefix (`org-refile-use-outline-path 'file`) so vertico/orderless can fuzzy-match across files.
+- New project files: put a top-level `* Tasks` (or similar) heading in a new `projects/<name>.org`; `org-refile-allow-creating-parent-nodes 'confirm` lets you create missing parents on the fly.
+- Full-text search across every note (including meetings/journals) remains available via `SPC f g` (`consult-ripgrep`).
