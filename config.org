@@ -199,17 +199,14 @@ May be pre-set via `local.el' or `ORGFILES_ROOT'; normalized below.")
             my/orgfiles-root
             my/orgfiles-default-root))))
 
-(defvar my/orgfiles-idea-file (expand-file-name "ideas.org" my/orgfiles-root)
-  "Single file for daily idea capture.")
-
 (defvar my/orgfiles-inbox-file (expand-file-name "inbox.org" my/orgfiles-root)
   "Single file for quick TODO capture.")
 
-(defvar my/orgfiles-projects-dir
-  (file-name-as-directory (expand-file-name "projects" my/orgfiles-root))
-  "Directory of active project Org files scanned by the agenda.
-Meeting, brainstorm and journal files in the root are intentionally
-excluded so the agenda stays small; refile important items here.")
+(defvar my/orgfiles-personal-file (expand-file-name "personal.org" my/orgfiles-root)
+  "Personal tasks and notes.")
+
+(defvar my/orgfiles-work-file (expand-file-name "work.org" my/orgfiles-root)
+  "Work tasks and notes.")
 
 (defun my/orgfiles--ensure-dir (dir)
   (unless (file-directory-p dir)
@@ -294,9 +291,9 @@ excluded so the agenda stays small; refile important items here.")
   (interactive)
   (require 'org-capture)
   (my/orgfiles--ensure-dir my/orgfiles-root)
-  (unless (file-exists-p my/orgfiles-idea-file)
-    (with-temp-file my/orgfiles-idea-file
-      (insert "#+TITLE: Ideas\n\n* Inbox\n")))
+  (unless (file-exists-p my/orgfiles-personal-file)
+    (with-temp-file my/orgfiles-personal-file
+      (insert "#+TITLE: Personal\n\n* Inbox\n")))
   (org-capture nil "i"))
 
 (defun my/orgfiles-capture-todo ()
@@ -339,12 +336,13 @@ excluded so the agenda stays small; refile important items here.")
       ("meeting" (my/orgfiles-capture-meeting)))))
 
 (with-eval-after-load 'org
-  (my/orgfiles--ensure-dir my/orgfiles-projects-dir)
   (setq org-directory my/orgfiles-root
+        org-todo-keywords
+        '((sequence "TODO" "IN-PROGRESS" "WAITING" "|" "DONE" "CANCELLED"))
         org-agenda-files (list my/orgfiles-inbox-file
-                               my/orgfiles-idea-file
-                               my/orgfiles-projects-dir)
-        org-default-notes-file my/orgfiles-idea-file
+                               my/orgfiles-personal-file
+                               my/orgfiles-work-file)
+        org-default-notes-file my/orgfiles-inbox-file
         org-refile-targets '((org-agenda-files :maxlevel . 3))
         org-refile-use-outline-path 'file
         org-outline-path-complete-in-steps nil
@@ -354,7 +352,7 @@ excluded so the agenda stays small; refile important items here.")
            (file+headline my/orgfiles-inbox-file "Tasks")
            "* TODO %?\n%U\n")
           ("i" "Idea" entry
-           (file+headline my/orgfiles-idea-file "Inbox")
+           (file+headline my/orgfiles-personal-file "Inbox")
            "* %U %?\n")
           ("j" "Journal" entry
            (file+headline (lambda () (my/orgfiles--ensure-journal-file)) "Journal")
