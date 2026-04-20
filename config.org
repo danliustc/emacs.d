@@ -208,6 +208,9 @@ May be pre-set via `local.el' or `ORGFILES_ROOT'; normalized below.")
 (defvar my/orgfiles-work-file (expand-file-name "work.org" my/orgfiles-root)
   "Work tasks and notes.")
 
+(defvar my/orgfiles-ideas-file (expand-file-name "ideas.org" my/orgfiles-root)
+  "Captured ideas and brainstorms.")
+
 (defun my/orgfiles--ensure-dir (dir)
   (unless (file-directory-p dir)
     (make-directory dir t)))
@@ -341,7 +344,8 @@ May be pre-set via `local.el' or `ORGFILES_ROOT'; normalized below.")
         '((sequence "TODO" "IN-PROGRESS" "WAITING" "|" "DONE" "CANCELLED"))
         org-agenda-files (list my/orgfiles-inbox-file
                                my/orgfiles-personal-file
-                               my/orgfiles-work-file)
+                               my/orgfiles-work-file
+                               my/orgfiles-ideas-file)
         org-default-notes-file my/orgfiles-inbox-file
         org-refile-targets '((org-agenda-files :maxlevel . 3))
         org-refile-use-outline-path 'file
@@ -352,7 +356,7 @@ May be pre-set via `local.el' or `ORGFILES_ROOT'; normalized below.")
            (file+headline my/orgfiles-inbox-file "Tasks")
            "* TODO %?\n%U\n")
           ("i" "Idea" entry
-           (file+headline my/orgfiles-personal-file "Inbox")
+           (file+headline my/orgfiles-ideas-file "Ideas")
            "* %U %?\n")
           ("j" "Journal" entry
            (file+headline (lambda () (my/orgfiles--ensure-journal-file)) "Journal")
