@@ -42,9 +42,9 @@ It is organized as:
 ### 1.4 Documentation Governance
 
 - If behavior or collaboration rules change, update docs in the same change set.
-- Keep docs consistent across: `README.org`, `doc/PROJECT_REQUIREMENTS.md`, `doc/KEYMAPS.org`.
+- Keep docs consistent across: `README.md`, `doc/PROJECT_REQUIREMENTS.md`, `doc/KEYMAPS.org`.
 - Avoid duplication: detailed descriptions belong in one place; other docs should reference rather than repeat.
-  - Workflow details → `README.org` (user-facing)
+  - Workflow details → `README.md` (user-facing)
   - Design rules and baselines → `PROJECT_REQUIREMENTS.md` (collaboration contract)
   - Full keybindings → `doc/KEYMAPS.org` (source of truth for current bindings)
 
