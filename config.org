@@ -1,531 +1,671 @@
-#+TITLE: Emacs Config
+#+TITLE: Emacs 配置 — 文学编程版
+#+AUTHOR: You
+#+PROPERTY: header-args:emacs-lisp :tangle yes :results silent
+#+STARTUP: overview
 
-* Foundation: Runtime & Safety
+* 说明
+
+这是一份基于 Org-mode 文学编程的 Emacs 配置。
+所有代码都在这个文件里，通过 =org-babel-tangle= 生成 =config.el=。
+
+使用方法：
+1. 把这个文件放到 =~/.emacs.d/config.org=
+2. 在 =~/.emacs.d/init.el= 里写：
+   #+begin_src emacs-lisp :tangle no
+   (org-babel-load-file (expand-file-name "config.org" user-emacs-directory))
+   #+end_src
+3. 先装好依赖工具（Homebrew）：
+   #+begin_src sh :tangle no
+   brew install ripgrep aspell pandoc
+   #+end_src
+4. 重启 Emacs，一切就绪。
+
+如果你想手动 tangle：=M-x org-babel-tangle= 或 =C-c C-v t=
+
+* 用户设置 ← 只需要改 user-settings.el
+
+所有个人偏好放在独立的 =~/.emacs.d/user-settings.el= 文件里。
+配置主体（这个文件）完全不用动。
 
 #+begin_src emacs-lisp
-(setq inhibit-startup-screen t
-      ring-bell-function 'ignore
-      make-backup-files nil
-      auto-save-default nil
-      create-lockfiles nil
-      auto-save-list-file-prefix nil)
+;; 加载用户设置文件，不存在则用默认值
+(let ((settings (expand-file-name "user-settings.el" user-emacs-directory)))
+  (if (file-exists-p settings)
+      (load settings)
+    (message "提示：未找到 user-settings.el，使用默认配置")))
 
+;; 默认值（user-settings.el 里没写的项目都走这里）
+(defvar my/org-dir     (or (bound-and-true-p my/org-dir)     "~/Dropbox/orgfiles"))
+(defvar my/font        (or (bound-and-true-p my/font)        "Iosevka"))
+(defvar my/font-size   (or (bound-and-true-p my/font-size)   150))
+(defvar my/theme       (or (bound-and-true-p my/theme)       'modus-operandi-tinted))
+(defvar my/mac-command-key (or (bound-and-true-p my/mac-command-key) 'meta))
+
+;; GTD 文件路径从 my/org-dir 自动派生
+(defvar my/org-inbox    (concat my/org-dir "/inbox.org"))
+(defvar my/org-personal (concat my/org-dir "/personal.org"))
+(defvar my/org-work     (concat my/org-dir "/work.org"))
+(defvar my/org-journal  (concat my/org-dir "/journal.org"))
+#+end_src
+
+* 早期初始化 — 加速启动
+
+#+begin_src emacs-lisp
+;; 启动时临时关大 GC，启动完再调回来
+(setq gc-cons-threshold most-positive-fixnum)
+(add-hook 'emacs-startup-hook
+          (lambda () (setq gc-cons-threshold (* 16 1024 1024))))
+
+;; 关掉 native-comp 警告
+(setq native-comp-async-report-warnings-errors nil)
+#+end_src
+
+* macOS 专项配置
+
+#+begin_src emacs-lisp
+;; macOS 上 Command 键作为 Meta（更符合 Mac 习惯）
+;; 这样 Cmd+x 就是 M-x，Cmd+space 不冲突
+(setq mac-command-modifier my/mac-command-key
+      mac-option-modifier  'super
+      mac-right-option-modifier nil)
+
+;; 让 Emacs 能找到 Homebrew 安装的工具（ripgrep、aspell、pandoc 等）
+;; macOS GUI 启动时不走 shell，所以 PATH 要手动设置
+(use-package exec-path-from-shell
+  :config
+  (when (memq window-system '(mac ns))
+    (exec-path-from-shell-initialize)))
+
+;; macOS 原生全屏（不是 Emacs 的假全屏）
+(setq ns-use-native-fullscreen t)
+
+;; 标题栏显示文件名
+(setq frame-title-format '("%b — Emacs"))
+
+;; 让删除键行为和 macOS 一致
+(setq delete-by-moving-to-trash t
+      trash-directory "~/.Trash")
+
+;; 在 macOS 上禁用右键菜单弹出（避免和系统冲突）
+(when (display-graphic-p)
+  (context-menu-mode -1))
+#+end_src
+
+** 关于按键说明
+
+在这套配置里：
+- =M-x= 就是 =Cmd+x=（最常用的命令搜索）
+- =C-c= 仍然是 =Ctrl+c=
+- =s-= 前缀是 =Option= 键（留作备用扩展）
+
+* 包管理 — use-package + straight.el
+
+#+begin_src emacs-lisp
+;; 安装 straight.el（如果还没有）
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el"
+                         user-emacs-directory))
+      (bootstrap-version 7))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+
+;; 让 use-package 默认用 straight
+(straight-use-package 'use-package)
+(setq straight-use-package-by-default t)
+(setq use-package-always-ensure t)
+#+end_src
+
+* 基础外观 — 简洁干净
+
+#+begin_src emacs-lisp
+;; 去掉杂项 UI
+(setq inhibit-startup-message t)
 (menu-bar-mode -1)
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
-(global-visual-line-mode 1)
-(setq-default truncate-lines nil
-              word-wrap t)
-(add-hook 'prog-mode-hook #'display-line-numbers-mode)
-(recentf-mode 1)
-(setq recentf-max-saved-items 200)
+(blink-cursor-mode -1)
 
+;; 字体
+(when (and my/font (not (string-empty-p my/font))
+           (find-font (font-spec :name my/font)))
+  (set-face-attribute 'default nil :font my/font :height my/font-size))
+;; 回退顺序：SF Mono → Menlo（macOS 自带）
+(unless (and my/font (not (string-empty-p my/font))
+             (find-font (font-spec :name my/font)))
+  (cond
+   ((find-font (font-spec :name "JetBrains Mono"))
+    (set-face-attribute 'default nil :font "JetBrains Mono" :height my/font-size))
+   ((find-font (font-spec :name "SF Mono"))
+    (set-face-attribute 'default nil :font "SF Mono" :height my/font-size))
+   ((find-font (font-spec :name "Menlo"))
+    (set-face-attribute 'default nil :font "Menlo" :height my/font-size))))
+
+;; 中文字体（macOS 自带，显示 org 里的中文更好看）
+(when (display-graphic-p)
+  (dolist (charset '(han cjk-misc))
+    (set-fontset-font t charset
+                      (font-spec :family "PingFang SC") nil 'prepend)))
+
+;; 行号（只在编程模式显示）
+(add-hook 'prog-mode-hook 'display-line-numbers-mode)
+
+;; 高亮当前行
+(global-hl-line-mode 1)
+
+;; 用 modus-themes，对 org-mode 非常友好
+(use-package modus-themes
+  :config
+  (setq modus-themes-org-blocks 'gray-background
+        modus-themes-headings '((1 . (bold 1.3))
+                                (2 . (bold 1.15))
+                                (3 . (1.05))
+                                (t . (1.0))))
+  (load-theme my/theme :no-confirm))
+#+end_src
+
+* 编辑体验 — 顺手的基础设置
+
+#+begin_src emacs-lisp
+;; 自动配对括号
+(electric-pair-mode 1)
+
+;; 显示配对括号
+(show-paren-mode 1)
+
+;; 用空格代替 tab
+(setq-default indent-tabs-mode nil)
+(setq-default tab-width 4)
+
+;; 自动换行（仅 text/org 模式）
+(add-hook 'text-mode-hook 'visual-line-mode)
+(add-hook 'org-mode-hook  'visual-line-mode)
+
+;; 保存时删除行尾空格
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
+
+;; 文件修改后自动重载
+(global-auto-revert-mode 1)
+
+;; 备份文件统一放到一个地方，不污染工作目录
+(setq backup-directory-alist
+      `(("." . ,(expand-file-name "backups" user-emacs-directory))))
+(setq auto-save-file-name-transforms
+      `((".*" ,(expand-file-name "auto-saves/" user-emacs-directory) t)))
+
+;; 确保目录存在
+(make-directory (expand-file-name "backups" user-emacs-directory) t)
+(make-directory (expand-file-name "auto-saves" user-emacs-directory) t)
+
+;; 确认退出
+(setq confirm-kill-emacs 'y-or-n-p)
 (fset 'yes-or-no-p 'y-or-n-p)
-
-(defun my/confirm-kill-emacs (prompt)
-  (y-or-n-p (or prompt "Really quit Emacs? ")))
-
-(setq confirm-kill-emacs #'my/confirm-kill-emacs)
-
-(defun my/reload-config ()
-  (interactive)
-  (let ((org-confirm-babel-evaluate nil))
-    (org-babel-load-file (expand-file-name "config.org" user-emacs-directory))
-    (message "Reloaded config.org")))
-
-(defun my/revert-current-buffer-on-focus ()
-  "On focus-in, refresh current local file buffer when stale and safe."
-  (when (and (not (minibufferp))
-             buffer-file-name
-             (not (file-remote-p buffer-file-name))
-             (file-exists-p buffer-file-name)
-             (not (buffer-modified-p))
-             (not (verify-visited-file-modtime (current-buffer))))
-    (revert-buffer :ignore-auto :noconfirm :preserve-modes)))
-
-(add-hook 'focus-in-hook #'my/revert-current-buffer-on-focus)
-
-(when (eq system-type 'darwin)
-  (setq mac-command-modifier 'super
-        mac-option-modifier 'meta))
-
-(setq select-enable-clipboard t
-      select-enable-primary t
-      save-interprogram-paste-before-kill t)
-
-(defun my/copy-region-or-line ()
-  "Copy active region, or current line when no region is active."
-  (interactive)
-  (if (use-region-p)
-      (progn
-        (kill-ring-save (region-beginning) (region-end))
-        (message "Copied region"))
-    (kill-ring-save (line-beginning-position) (line-end-position))
-    (message "Copied line")))
-
-(define-key global-map (kbd "C-c w") #'my/copy-region-or-line)
-(define-key global-map (kbd "s-c") #'my/copy-region-or-line)
-(define-key global-map (kbd "s-v") #'yank)
-(define-key global-map (kbd "s-x") #'kill-region)
 #+end_src
 
-* Foundation: Package Bootstrap
+* 命令搜索 — 核心体验（Vertico + Consult + Embark + Marginalia）
+
+这是这套配置的灵魂。你只需要记住一件事：
+
+- =M-x= → 搜索所有命令（模糊匹配，带描述）
+- =M-X= → 只搜索当前 major-mode 的命令
+- =C-h k= → 查某个快捷键绑了什么命令
+- =C-h K= → 查某个命令的快捷键是什么
 
 #+begin_src emacs-lisp
-(require 'package)
-(setq package-archives
-      '(("gnu" . "https://elpa.gnu.org/packages/")
-        ("melpa" . "https://melpa.org/packages/")))
-(package-initialize)
+;; Vertico — 竖向候选列表，替换默认 minibuffer
+(use-package vertico
+  :init
+  (vertico-mode 1)
+  :config
+  (setq vertico-count 15
+        vertico-cycle t))
 
-(defvar my/packages
-  '(which-key projectile markdown-mode ayu-theme
-              vertico orderless consult marginalia embark embark-consult)
-  "Packages for simple Emacs-native editing and project workflow.")
-
-(defvar my/auto-install-packages t
-  "When non-nil, install missing packages automatically at startup.")
-
-(defun my/install-missing-packages ()
-  (interactive)
-  (let ((missing
-         (seq-filter (lambda (pkg) (not (package-installed-p pkg))) my/packages)))
-    (when missing
-      (condition-case err
-          (progn
-            (unless package-archive-contents
-              (package-refresh-contents))
-            (dolist (pkg missing)
-              (condition-case pkg-err
-                  (package-install pkg)
-                (error
-                 (display-warning
-                  'my/init
-                  (format "Failed to install %s: %s"
-                          pkg (error-message-string pkg-err))
-                  :warning)))))
-        (error
-         (display-warning
-          'my/init
-          (format "Package bootstrap failed: %s" (error-message-string err))
-          :warning))))))
-
-(let ((missing
-       (seq-filter (lambda (pkg) (not (package-installed-p pkg))) my/packages)))
-  (when missing
-    (if my/auto-install-packages
-        (my/install-missing-packages)
-      (message "Missing packages: %s. Run M-x my/install-missing-packages"
-               missing))))
-#+end_src
-
-* Scenario: Editing UX
-
-** Visual Baseline
-
-#+begin_src emacs-lisp
-(when (require 'ayu-theme nil t)
-  (load-theme 'ayu-light t))
-
-(defvar my/default-font-height
-  (if (>= (display-pixel-width) 2200) 160 145)
-  "Default font height selected from display width.")
-
-(set-face-attribute 'default nil :height my/default-font-height)
-
-(defun my/font-size-reset ()
-  (interactive)
-  (set-face-attribute 'default nil :height my/default-font-height)
-  (message "Font reset to %d" my/default-font-height))
-
-(defun my/font-size-increase ()
-  (interactive)
-  (let ((new-height (+ (face-attribute 'default :height nil 'default) 5)))
-    (set-face-attribute 'default nil :height new-height)
-    (message "Font size %d" new-height)))
-
-(defun my/font-size-decrease ()
-  (interactive)
-  (let ((new-height (max 100 (- (face-attribute 'default :height nil 'default) 5))))
-    (set-face-attribute 'default nil :height new-height)
-    (message "Font size %d" new-height)))
-#+end_src
-
-** Search & Completion
-
-#+begin_src emacs-lisp
-(when (require 'vertico nil t)
-  (vertico-mode 1))
-
-(when (require 'orderless nil t)
+;; Orderless — 空格分隔的多词模糊匹配，比如 "org cap" 能匹配 "org-capture"
+(use-package orderless
+  :config
   (setq completion-styles '(orderless basic)
-        completion-category-defaults nil
         completion-category-overrides
-        '((file (styles basic partial-completion)))))
+        '((file (styles partial-completion)))))
 
-(when (require 'consult nil t)
-  (setq completion-in-region-function #'consult-completion-in-region
-        register-preview-delay 0.5
-        register-preview-function #'consult-register-format
-        xref-show-xrefs-function #'consult-xref
-        xref-show-definitions-function #'consult-xref)
-  (unless (advice-member-p #'consult-register-window #'register-preview)
-    (advice-add #'register-preview :override #'consult-register-window))
-  (define-key global-map (kbd "C-s") #'consult-line)
-  (define-key global-map (kbd "C-x b") #'consult-buffer))
-
-(when (require 'marginalia nil t)
+;; Marginalia — 在候选项旁边显示文档注释、快捷键等
+(use-package marginalia
+  :init
   (marginalia-mode 1))
 
-(when (require 'embark nil t)
-  (setq prefix-help-command #'embark-prefix-help-command)
-  (define-key global-map (kbd "C-.") #'embark-act)
-  (define-key global-map (kbd "C-,") #'embark-dwim)
-  (define-key global-map (kbd "C-h B") #'embark-bindings))
+;; Consult — 强力搜索命令集合
+(use-package consult
+  :bind
+  (("M-y"   . consult-yank-pop)       ; 剪贴板历史
+   ("C-x b" . consult-buffer)          ; 切换 buffer（含最近文件）
+   ("C-s"   . consult-line)            ; 当前文件内搜索（实时预览）
+   ("C-c s" . consult-ripgrep)         ; 全局文字搜索（需装 ripgrep）
+   ("C-c f" . consult-find)            ; 文件名搜索
+   ("C-c o" . consult-outline)         ; 跳转大纲
+   ("C-c m" . consult-mark)            ; 跳转 mark ring
+   ("C-c e" . consult-flymake)         ; 错误列表
+   :map org-mode-map
+   ("C-c o" . consult-org-heading))    ; Org 标题跳转
+  :config
+  (setq consult-preview-key 'any))
 
-(with-eval-after-load 'minibuffer
-  (dolist (map (list minibuffer-local-map
-                     minibuffer-local-ns-map
-                     minibuffer-local-completion-map
-                     minibuffer-local-must-match-map
-                     minibuffer-local-filename-completion-map))
-    (define-key map (kbd "C-.") #'embark-act)
-    (define-key map (kbd "C-,") #'embark-dwim)
-    (define-key map (kbd "C-c C-o") #'embark-export)))
+;; Embark — 在任意候选项上触发动作（类似右键菜单）
+(use-package embark
+  :bind
+  (("C-." . embark-act)       ; 对当前光标处的东西触发动作
+   ("C-;" . embark-dwim)      ; 智能默认动作
+   ("C-h B" . embark-bindings))  ; 当前所有可用快捷键
+  :config
+  (setq prefix-help-command #'embark-prefix-help-command))
 
-(with-eval-after-load 'embark
-  (when (require 'embark-consult nil t)
-    (add-hook 'embark-collect-mode-hook #'consult-preview-at-point-mode)))
+;; Embark + Consult 集成
+(use-package embark-consult
+  :hook
+  (embark-collect-mode . consult-preview-at-point-mode))
 
-(defun my/consult-line ()
-  (interactive)
-  (if (fboundp 'consult-line)
-      (consult-line)
-    (call-interactively #'isearch-forward)))
-
-(defun my/consult-buffer ()
-  (interactive)
-  (if (fboundp 'consult-buffer)
-      (consult-buffer)
-    (call-interactively #'switch-to-buffer)))
-
-(defun my/consult-recent-file ()
-  (interactive)
-  (if (fboundp 'consult-recent-file)
-      (consult-recent-file)
-    (call-interactively #'recentf-open-files)))
-
-(defun my/consult-ripgrep ()
-  (interactive)
-  (if (fboundp 'consult-ripgrep)
-      (consult-ripgrep)
-    (call-interactively #'rgrep)))
-
-(defun my/consult-imenu ()
-  (interactive)
-  (if (fboundp 'consult-imenu)
-      (consult-imenu)
-    (call-interactively #'imenu)))
-
-(defun my/search-dispatch ()
-  "Search from one predictable entry point."
-  (interactive)
-  (pcase (completing-read "Search: "
-                          '("current buffer"
-                            "project text"
-                            "symbols"
-                            "recent files")
-                          nil t nil nil "current buffer")
-    ("current buffer" (my/consult-line))
-    ("project text" (my/consult-ripgrep))
-    ("symbols" (my/consult-imenu))
-    ("recent files" (my/consult-recent-file))))
+;; Which-key — 输入前缀后弹出所有后续可用键
+(use-package which-key
+  :init
+  (which-key-mode 1)
+  :config
+  (setq which-key-idle-delay 0.5
+        which-key-max-description-length 40))
 #+end_src
 
-* Scenario: Notes Workflow
+** 关于 M-x 的几个技巧
 
-** Capture System
+=M-x= 现在可以这样搜索：
+- 输入 =org cap= → 找到 =org-capture=
+- 输入 =buf sw= → 找到 =switch-to-buffer=
+- 输入 =gtd= → 找到你自定义的 GTD 命令（如果有前缀）
+- 输入命令的任意部分词，以空格分隔，顺序不限
+
+=C-h ?= 之后，which-key 会列出所有可用快捷键。
+
+* GTD — 简单好用的任务管理
+
+** 核心思路
+
+采用最简版 GTD：
+
+#+begin_example
+收集 → Inbox.org (C-c c i)
+整理 → Refile 到 personal.org / work.org
+执行 → Agenda 视图
+回顾 → 每周 Agenda
+#+end_example
+
+** Org-mode 基础配置
 
 #+begin_src emacs-lisp
-(defconst my/orgfiles-default-root
-  (expand-file-name "orgfiles/" "~/Documents/")
-  "Portable fallback directory for personal Org notes.")
+(use-package org
+  :straight nil   ; 用内置版本
+  :config
 
-(defvar my/orgfiles-root nil
-  "Root directory for personal Org notes.
-May be pre-set via `local.el' or `ORGFILES_ROOT'; normalized below.")
+  ;; --- GTD 文件 ---
+  (setq org-directory my/org-dir)
+  (setq org-agenda-files
+        (append (list my/org-inbox my/org-personal my/org-work)
+                (when (bound-and-true-p my/org-extra-agenda-files)
+                  my/org-extra-agenda-files)))
 
-(setq my/orgfiles-root
-      (file-name-as-directory
-       (expand-file-name
-        (or (getenv "ORGFILES_ROOT")
-            my/orgfiles-root
-            my/orgfiles-default-root))))
+  ;; --- TODO 关键词 ---
+  ;; 简单但够用：TODO → NEXT → DONE，WAITING，CANCELLED
+  (setq org-todo-keywords
+        '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
+          (sequence "WAITING(w@/!)" "|" "CANCELLED(c@)")))
 
-(defvar my/orgfiles-inbox-file (expand-file-name "inbox.org" my/orgfiles-root)
-  "Single file for quick TODO capture.")
+  (setq org-todo-keyword-faces
+        '(("TODO"      . (:foreground "#b45309" :weight bold))
+          ("NEXT"      . (:foreground "#1d4ed8" :weight bold))
+          ("WAITING"   . (:foreground "#6d28d9" :weight bold))
+          ("DONE"      . (:foreground "#15803d"))
+          ("CANCELLED" . (:foreground "#6b7280" :strike-through t))))
 
-(defvar my/orgfiles-idea-file (expand-file-name "ideas.org" my/orgfiles-root)
-  "Captured ideas and brainstorms.")
+  ;; --- 标签 ---
+  (setq org-tag-alist
+        '((:startgroup)
+          ("@home"    . ?h)
+          ("@work"    . ?w)
+          ("@errands" . ?e)
+          ("@computer". ?c)
+          (:endgroup)
+          ("energy_high" . ?H)
+          ("energy_low"  . ?L)
+          ("quick"       . ?q)))
 
-(defvar my/orgfiles-projects-dir
-  (file-name-as-directory (expand-file-name "projects" my/orgfiles-root))
-  "Directory for project Org files included in agenda/refile.")
+  ;; --- 完成时自动记录时间 ---
+  (setq org-log-done 'time)
+  (setq org-log-into-drawer t)
 
-(defun my/orgfiles--ensure-dir (dir)
-  (unless (file-directory-p dir)
-    (make-directory dir t)))
+  ;; --- Refile ---
+  ;; 允许 refile 到 agenda 文件的任意标题，最多 3 级
+  (setq org-refile-targets
+        '((org-agenda-files :maxlevel . 3)))
+  (setq org-refile-use-outline-path 'file)
+  (setq org-outline-path-complete-in-steps nil)  ; 一步完成，配合 vertico
+  (setq org-refile-allow-creating-parent-nodes 'confirm)
 
-(defun my/orgfiles-agenda-files ()
-  "Return root Org files except init.org, plus project Org files."
-  (my/orgfiles--ensure-dir my/orgfiles-root)
-  (my/orgfiles--ensure-dir my/orgfiles-projects-dir)
-  (append
-   (seq-remove
-    (lambda (file)
-      (string= (file-name-nondirectory file) "init.org"))
-    (directory-files my/orgfiles-root t "\\.org\\'"))
-   (list my/orgfiles-projects-dir)))
+  ;; --- Capture ---
+  (setq org-capture-templates
+        '(
+          ;; 快速收集任何想法 / 任务
+          ("i" "📥 Inbox" entry
+           (file my/org-inbox)
+           "* TODO %?\n:PROPERTIES:\n:CREATED: %U\n:END:\n%i\n"
+           :empty-lines 1)
 
-(defun my/orgfiles--safe-file-stem (name)
-  (let* ((raw-name (string-trim name))
-         (base-name (file-name-nondirectory raw-name))
-         (name-without-ext (file-name-sans-extension base-name))
-         (space-normalized (replace-regexp-in-string "[[:space:]]+" "-" name-without-ext))
-         (safe-name
-          (replace-regexp-in-string
-           "[^[:alnum:]_[:multibyte:]-]"
-           "-"
-           space-normalized))
-         (collapsed (replace-regexp-in-string "-+" "-" safe-name))
-         (trimmed (string-trim collapsed "-+" "-+")))
-    (if (string-empty-p trimmed) "untitled" trimmed)))
+          ;; 个人任务
+          ("p" "👤 Personal 任务" entry
+           (file+headline my/org-personal "Tasks")
+           "* TODO %?\n:PROPERTIES:\n:CREATED: %U\n:END:\n"
+           :empty-lines 1)
 
-(defun my/orgfiles--timestamped-file-path (dir title &optional time)
-  (my/orgfiles--ensure-dir dir)
-  (let* ((captured-at (or time (current-time)))
-         (timestamp (format-time-string "%Y-%m-%d-%H%M" captured-at))
-         (slug (my/orgfiles--safe-file-stem title))
-         (counter 0)
-         candidate)
-    (while
-        (progn
-          (setq candidate
-                (expand-file-name
-                 (if (= counter 0)
-                     (format "%s-%s.org" timestamp slug)
-                   (format "%s-%s-%d.org" timestamp slug counter))
-                 dir))
-          (setq counter (1+ counter))
-          (file-exists-p candidate)))
-    candidate))
+          ;; 工作任务
+          ("w" "💼 Work 任务" entry
+           (file+headline my/org-work "Tasks")
+           "* TODO %?\n:PROPERTIES:\n:CREATED: %U\n:END:\n"
+           :empty-lines 1)
 
-(defun my/orgfiles--meeting-template (meeting-name meeting-time)
-  (let ((captured-at (or meeting-time (current-time)))
-        (deadline (format-time-string "%Y-%m-%d %a"
-                                      (time-add (or meeting-time (current-time))
-                                                (days-to-time 7)))))
-    (format "#+TITLE: %s\n#+DATE: <%s>\n\n* 背景\n\n* 结论（Decision）\n\n* 待办（Action Items）\n** TODO [#A] xxx\nOWNER: 负责人\nDEADLINE: <%s>\n\n* 风险/阻塞\n\n* 下次会议前要准备\n"
-            meeting-name
-            (format-time-string "%Y-%m-%d %a %H:%M" captured-at)
-            deadline)))
+          ;; 快速笔记（不是任务）
+          ("n" "📝 笔记" entry
+           (file+headline my/org-inbox "Notes")
+           "* %? :note:\n%U\n%i\n"
+           :empty-lines 1)
 
-(defun my/orgfiles--today-journal-file ()
-  (expand-file-name (format-time-string "%Y-%m-%d.org") my/orgfiles-root))
+          ;; 日记 / 日志
+          ("j" "📓 日记" entry
+           (file+datetree my/org-journal)
+           "* %U\n%?\n"
+           :empty-lines 1)
 
-(defun my/orgfiles--new-brainstorm-file (title)
-  (let* ((display-title (let ((trimmed (string-trim title)))
-                          (if (string-empty-p trimmed) "Untitled" trimmed)))
-         (candidate (my/orgfiles--timestamped-file-path my/orgfiles-root title)))
-    (with-temp-file candidate
-      (insert (format "#+TITLE: Brainstorm - %s\n#+DATE: <%s>\n\n* Context\n\n* Ideas\n\n* Next Steps\n"
-                      display-title
-                      (format-time-string "%Y-%m-%d %a"))))
-    candidate))
+          ;; 读书 / 阅读笔记
+          ("r" "📚 阅读笔记" entry
+           (file+headline my/org-personal "Reading")
+           "* %^{书名 / 文章}\n:PROPERTIES:\n:CREATED: %U\n:SOURCE: %^{来源}\n:END:\n%?\n"
+           :empty-lines 1)))
 
-(defun my/orgfiles--new-meeting-file (meeting-name &optional meeting-time)
-  (let* ((captured-at (or meeting-time (current-time)))
-         (target-file (my/orgfiles--timestamped-file-path my/orgfiles-root
-                                                          meeting-name
-                                                          captured-at)))
-    (with-temp-file target-file
-      (insert (my/orgfiles--meeting-template meeting-name captured-at)))
-    target-file))
+  ;; --- 外观 ---
+  (setq org-hide-emphasis-markers t    ; 隐藏 *bold* 的星号
+        org-pretty-entities t          ; 显示 LaTeX 符号
+        org-ellipsis " ▾"
+        org-startup-indented t         ; 缩进对齐
+        org-src-fontify-natively t     ; 代码块语法高亮
+        org-src-tab-acts-natively t
+        org-confirm-babel-evaluate nil)
 
-(defun my/orgfiles--ensure-journal-file ()
-  (let ((journal-file (my/orgfiles--today-journal-file)))
-    (my/orgfiles--ensure-dir my/orgfiles-root)
-    (unless (file-exists-p journal-file)
-      (with-temp-file journal-file
-        (insert (format "#+TITLE: Journal %s\n#+DATE: <%s>\n\n* Journal\n"
-                        (format-time-string "%Y-%m-%d")
-                        (format-time-string "%Y-%m-%d %a")))))
-    journal-file))
-
-(defun my/orgfiles-capture-idea ()
-  (interactive)
-  (require 'org-capture)
-  (my/orgfiles--ensure-dir my/orgfiles-root)
-  (unless (file-exists-p my/orgfiles-idea-file)
-    (with-temp-file my/orgfiles-idea-file
-      (insert "#+TITLE: Ideas\n\n* Ideas\n")))
-  (org-capture nil "i"))
-
-(defun my/orgfiles-capture-todo ()
-  (interactive)
-  (require 'org-capture)
-  (my/orgfiles--ensure-dir my/orgfiles-root)
-  (unless (file-exists-p my/orgfiles-inbox-file)
-    (with-temp-file my/orgfiles-inbox-file
-      (insert "#+TITLE: Inbox\n\n* Tasks\n")))
-  (org-capture nil "t"))
-
-(defun my/orgfiles-capture-brainstorm ()
-  (interactive)
-  (let ((title (read-string "Brainstorm title: ")))
-    (find-file (my/orgfiles--new-brainstorm-file title))))
-
-(defun my/orgfiles-capture-journal ()
-  (interactive)
-  (require 'org-capture)
-  (my/orgfiles--ensure-journal-file)
-  (org-capture nil "j"))
-
-(defun my/orgfiles-capture-meeting ()
-  (interactive)
-  (require 'org)
-  (let* ((meeting-name (read-string "Meeting name: "))
-         (meeting-time (org-read-date nil t nil "Meeting time: " (current-time))))
-    (find-file (my/orgfiles--new-meeting-file meeting-name meeting-time))))
-
-(defun my/orgfiles-capture-dispatch ()
-  (interactive)
-  (let ((capture-type (completing-read "Capture type: "
-                                       '("todo" "brainstorm" "idea" "journal" "meeting")
-                                       nil t nil nil "todo")))
-    (pcase capture-type
-      ("todo" (my/orgfiles-capture-todo))
-      ("brainstorm" (my/orgfiles-capture-brainstorm))
-      ("idea" (my/orgfiles-capture-idea))
-      ("journal" (my/orgfiles-capture-journal))
-      ("meeting" (my/orgfiles-capture-meeting)))))
-
-(with-eval-after-load 'org
-  (my/orgfiles--ensure-dir my/orgfiles-projects-dir)
-  (setq org-directory my/orgfiles-root
-        org-todo-keywords
-        '((sequence "TODO" "IN-PROGRESS" "WAITING" "|" "DONE" "CANCELLED"))
-        org-agenda-files (my/orgfiles-agenda-files)
-        org-default-notes-file my/orgfiles-inbox-file
-        org-refile-targets '((org-agenda-files :maxlevel . 3))
-        org-refile-use-outline-path 'file
-        org-outline-path-complete-in-steps nil
-        org-refile-allow-creating-parent-nodes 'confirm
-        org-capture-templates
-        '(("t" "Todo" entry
-           (file+headline my/orgfiles-inbox-file "Tasks")
-           "* TODO %?\n%U\n")
-          ("i" "Idea" entry
-           (file+headline my/orgfiles-idea-file "Ideas")
-           "* %U %?\n")
-          ("j" "Journal" entry
-           (file+headline (lambda () (my/orgfiles--ensure-journal-file)) "Journal")
-           "* %U %?\n"))))
+  ;; --- 全局快捷键 ---
+  :bind
+  (("C-c c" . org-capture)
+   ("C-c a" . org-agenda)
+   ("C-c l" . org-store-link)))
 #+end_src
 
-** Writing Modes (Org/Markdown)
+** Agenda 视图 — 你的每日仪表盘
 
 #+begin_src emacs-lisp
-(with-eval-after-load 'org
-  (setq org-startup-indented nil
-        org-hide-emphasis-markers t
-        org-ellipsis " ▾")
-  (define-key org-mode-map (kbd "<tab>") #'org-cycle)
-  (define-key org-mode-map (kbd "<backtab>") #'org-shifttab))
-
-(add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
-
-(if (require 'markdown-mode nil t)
-    (progn
-      (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
-      (add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode)))
-  (add-to-list 'auto-mode-alist '("\\.md\\'" . text-mode)))
-#+end_src
-
-* Scenario: Keybindings & Project
-
-** Keybinding Model (Emacs Native)
-
-#+begin_src emacs-lisp
-(when (require 'which-key nil t)
-  (which-key-mode 1))
-
-(defun my/project-switch-project ()
-  (interactive)
-  (if (fboundp 'projectile-switch-project)
-      (projectile-switch-project)
-    (project-switch-project)))
-
-(defun my/project-find-file ()
-  (interactive)
-  (if (fboundp 'projectile-find-file)
-      (projectile-find-file)
-    (project-find-file)))
-
-(defun my/project-recent-file ()
-  (interactive)
-  (if (fboundp 'projectile-recentf)
-      (projectile-recentf)
-    (my/consult-recent-file)))
-
-(defun my/project-dired ()
-  (interactive)
-  (cond
-   ((fboundp 'projectile-dired) (projectile-dired))
-   ((fboundp 'project-dired) (project-dired))
-   (t (dired default-directory))))
-
-(define-key global-map (kbd "C-c a") #'org-agenda)
-(define-key global-map (kbd "C-c c") #'my/orgfiles-capture-dispatch)
-(define-key global-map (kbd "C-c t") #'my/orgfiles-capture-todo)
-(define-key global-map (kbd "C-c T") #'org-todo-list)
-(define-key global-map (kbd "C-c s") #'my/search-dispatch)
-(define-key global-map (kbd "C-c g") #'my/consult-ripgrep)
-(define-key global-map (kbd "C-c l") #'my/consult-line)
-(define-key global-map (kbd "C-c r") #'my/consult-recent-file)
-(define-key global-map (kbd "C-c p") #'my/project-switch-project)
-(define-key global-map (kbd "C-c f") #'my/project-find-file)
-(define-key global-map (kbd "C-c d") #'my/project-dired)
-(define-key global-map (kbd "C-c +") #'my/font-size-increase)
-(define-key global-map (kbd "C-c -") #'my/font-size-decrease)
-(define-key global-map (kbd "C-c 0") #'my/font-size-reset)
-(define-key global-map (kbd "C-c q") #'quit-window)
-
 (with-eval-after-load 'org-agenda
-  (define-key org-agenda-mode-map (kbd "C-c q") #'org-agenda-quit))
+  (setq org-agenda-custom-commands
+        '(
+          ;; "d" → 今日仪表盘（最常用）
+          ("d" "📅 今日仪表盘"
+           ((agenda ""
+                    ((org-agenda-span 1)
+                     (org-agenda-show-all-dates nil)
+                     (org-agenda-start-on-weekday nil)))
+            (todo "NEXT"
+                  ((org-agenda-overriding-header "⚡ 下一步行动")
+                   (org-agenda-skip-function
+                    '(org-agenda-skip-entry-if 'scheduled 'deadline))))
+            (todo "WAITING"
+                  ((org-agenda-overriding-header "⏳ 等待中")))
+            (tags "inbox"
+                  ((org-agenda-overriding-header "📥 待处理 Inbox")
+                   (org-tags-match-list-sublevels nil)))))
 
-(with-eval-after-load 'markdown-mode
-  (define-key markdown-mode-map (kbd "C-c C-p") #'markdown-preview)
-  (define-key markdown-mode-map (kbd "C-c C-h") #'markdown-insert-header-dwim))
+          ;; "w" → 本周视图
+          ("W" "📆 本周概览"
+           ((agenda ""
+                    ((org-agenda-span 7)
+                     (org-agenda-start-on-weekday 1)))))
 
-(with-eval-after-load 'prog-mode
-  (define-key prog-mode-map (kbd "C-c C-g") #'xref-find-definitions)
-  (define-key prog-mode-map (kbd "C-c C-r") #'xref-find-references))
+          ;; "p" → 个人项目
+          ("p" "👤 个人任务"
+           ((tags-todo "@home|@errands|@computer"
+                       ((org-agenda-overriding-header "个人待办")))))
+
+          ;; "k" → 工作
+          ("k" "💼 工作任务"
+           ((tags-todo "@work"
+                       ((org-agenda-overriding-header "工作待办"))))))))
+
+  ;; Agenda 显示设置
+  (setq org-agenda-window-setup 'current-window
+        org-agenda-block-separator ?─
+        org-agenda-time-grid '((daily today require-timed)
+                               (800 1000 1200 1400 1600 1800 2000)
+                               " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
+        org-agenda-current-time-string "◀── 现在"
+        org-agenda-prefix-format
+        '((agenda . " %i %-12:c%?-12t% s")
+          (todo   . " %i %-12:c")
+          (tags   . " %i %-12:c")
+          (search . " %i %-12:c"))))
 #+end_src
 
-** Project Navigation
+** org-superstar — 让标题更好看
 
 #+begin_src emacs-lisp
-(when (require 'projectile nil t)
-  (projectile-mode 1)
-  (setq projectile-completion-system 'default))
+(use-package org-superstar
+  :hook (org-mode . org-superstar-mode)
+  :config
+  (setq org-superstar-headline-bullets-list '("◉" "○" "◈" "◇" "▷")
+        org-superstar-item-bullet-alist '((?- . ?•) (?* . ?◦) (?+ . ?▸))))
 #+end_src
 
-** Status Line
+** 初始化 org 文件目录
 
 #+begin_src emacs-lisp
-(setq-default mode-line-format
-              '((:eval (format " %s " (buffer-name)))
-                "  " mode-line-position
-                "  " mode-line-modes))
+(defun my/gtd-initialize ()
+  "创建 GTD 所需的 org 文件（如果不存在）。"
+  (interactive)
+  (make-directory my/org-dir t)
+  (dolist (path (list my/org-inbox my/org-personal my/org-work my/org-journal))
+    (unless (file-exists-p path)
+      (with-temp-file path
+        (insert (format "#+TITLE: %s\n#+STARTUP: overview\n\n"
+                        (file-name-sans-extension (file-name-nondirectory path))))))
+    (message "GTD 文件已就绪: %s" path)))
+
+;; 启动时自动初始化
+(add-hook 'emacs-startup-hook #'my/gtd-initialize)
+#+end_src
+
+* 写作体验增强
+
+#+begin_src emacs-lisp
+;; Olivetti — 居中写作模式，减少干扰
+(use-package olivetti
+  :hook
+  ((org-mode . olivetti-mode)
+   (markdown-mode . olivetti-mode))
+  :config
+  (setq olivetti-body-width 88))
+
+;; Markdown 支持（写文章时用得到）
+(use-package markdown-mode
+  :mode ("\\.md\\'" . markdown-mode)
+  :config
+  (setq markdown-command "pandoc"))
+
+;; 拼写检查
+;; macOS 推荐先装：brew install aspell
+(use-package flyspell
+  :straight nil
+  :hook
+  ((text-mode . flyspell-mode)
+   (org-mode  . flyspell-mode))
+  :config
+  (cond
+   ((executable-find "aspell")
+    (setq ispell-program-name "aspell"
+          ispell-extra-args '("--sug-mode=ultra" "--lang=en_US")))
+   ;; macOS 内置 ispell 作为兜底
+   ((executable-find "ispell")
+    (setq ispell-program-name "ispell"))))
+#+end_src
+
+* 文件管理 — Dired 增强
+
+#+begin_src emacs-lisp
+(use-package dired
+  :straight nil
+  :config
+  (setq dired-dwim-target t          ; 双窗口时自动以另一个为目标
+        dired-recursive-copies 'always
+        dired-recursive-deletes 'always
+        delete-by-moving-to-trash t))
+
+;; dired-sidebar — 侧边栏文件树
+(use-package dired-sidebar
+  :bind ("C-c t" . dired-sidebar-toggle-sidebar)
+  :config
+  (setq dired-sidebar-should-follow-file t))
+#+end_src
+
+* 快捷键总览
+
+#+begin_src emacs-lisp
+;; 定义一组好记的快捷键前缀
+;; 全部用 C-c 前缀，简单清晰
+
+(global-set-key (kbd "C-c c") 'org-capture)        ; Capture 捕获
+(global-set-key (kbd "C-c a") 'org-agenda)          ; Agenda 日程
+(global-set-key (kbd "C-c l") 'org-store-link)      ; 存链接
+(global-set-key (kbd "C-c s") 'consult-ripgrep)     ; 全局搜索
+(global-set-key (kbd "C-c f") 'consult-find)        ; 文件搜索
+(global-set-key (kbd "C-c o") 'consult-outline)     ; 大纲跳转
+(global-set-key (kbd "C-c t") 'dired-sidebar-toggle-sidebar) ; 文件树
+(global-set-key (kbd "C-c b") 'consult-buffer)      ; Buffer 切换
+
+;; 快速打开常用 org 文件
+(defun my/open-inbox   () (interactive) (find-file my/org-inbox))
+(defun my/open-personal() (interactive) (find-file my/org-personal))
+(defun my/open-work    () (interactive) (find-file my/org-work))
+(defun my/open-config  () (interactive) (find-file "~/.emacs.d/config.org"))
+
+(global-set-key (kbd "C-c g i") 'my/open-inbox)
+(global-set-key (kbd "C-c g p") 'my/open-personal)
+(global-set-key (kbd "C-c g w") 'my/open-work)
+(global-set-key (kbd "C-c g c") 'my/open-config)
+#+end_src
+
+** 快速参考表
+
+| 快捷键        | 功能                        |
+|---------------+-----------------------------|
+| =M-x=         | 搜索所有命令（模糊匹配）      |
+| =C-c c=       | 捕获任务 / 笔记              |
+| =C-c a=       | 打开 Agenda（按 =d= 看今日） |
+| =C-c s=       | 全局内容搜索（ripgrep）       |
+| =C-s=         | 当前文件搜索                 |
+| =C-c o=       | 跳转到大纲标题               |
+| =C-c b=       | 切换 Buffer                 |
+| =C-c g i=     | 打开 inbox.org              |
+| =C-c g p=     | 打开 personal.org           |
+| =C-c g w=     | 打开 work.org               |
+| =C-c g c=     | 打开这个配置文件             |
+| =C-.=         | Embark 动作菜单             |
+| =C-c t=       | 侧边栏文件树                |
+| =C-c C-r=     | Refile 到其他文件 / 标题     |
+| =C-c C-t=     | 切换 TODO 状态              |
+| =C-c C-s=     | 设置 Scheduled 时间          |
+| =C-c C-d=     | 设置 Deadline                |
+| =C-c C-c=     | 打 tag / 确认               |
+
+* GTD 日常工作流
+
+#+begin_src emacs-lisp
+;; 每日回顾辅助函数：列出所有 NEXT 任务
+(defun my/gtd-daily-review ()
+  "打开今日 Agenda 仪表盘。"
+  (interactive)
+  (org-agenda nil "d"))
+
+;; 快速处理 inbox：打开 inbox 并准备 refile
+(defun my/gtd-process-inbox ()
+  "打开 inbox.org，准备逐条处理。"
+  (interactive)
+  (find-file my/org-inbox)
+  (message "提示：选中标题后 C-c C-r 可以 Refile 到其他文件"))
+
+(global-set-key (kbd "C-c g d") 'my/gtd-daily-review)
+(global-set-key (kbd "C-c g n") 'my/gtd-process-inbox)
+#+end_src
+
+* 剪贴板 — 与 macOS 系统互通
+
+macOS GUI 版 Emacs 通常能自动同步剪贴板，但终端版（=emacs -nw=）或某些情况下会断开。这节把两种情况都覆盖好。
+
+#+begin_src emacs-lisp
+;; GUI 版：直接用系统剪贴板（通常默认已开，显式写出更保险）
+(setq select-enable-clipboard t
+      select-enable-primary   nil)   ; macOS 没有 X11 primary selection，关掉
+
+;; 终端版（emacs -nw）：用 pbcopy / pbpaste 桥接系统剪贴板
+(unless (display-graphic-p)
+  (defun my/pbcopy ()
+    "把 Emacs kill-ring 最新内容复制到 macOS 系统剪贴板。"
+    (interactive)
+    (let ((text (current-kill 0 t)))
+      (with-temp-buffer
+        (insert text)
+        (call-process-region (point-min) (point-max) "pbcopy"))))
+
+  (defun my/pbpaste ()
+    "把 macOS 系统剪贴板内容粘贴到 Emacs，并推入 kill-ring。"
+    (interactive)
+    (let ((text (shell-command-to-string "pbpaste")))
+      (kill-new text)
+      (insert text)))
+
+  ;; 覆盖终端模式下的复制/粘贴行为
+  (global-set-key (kbd "M-w") (lambda ()
+                                (interactive)
+                                (call-interactively 'kill-ring-save)
+                                (my/pbcopy)))
+  (global-set-key (kbd "C-w") (lambda ()
+                                (interactive)
+                                (call-interactively 'kill-region)
+                                (my/pbcopy)))
+  (global-set-key (kbd "C-y") 'my/pbpaste))
+
+;; consult-yank-pop：Cmd+Y 弹出剪贴板历史，可以粘贴任意一条历史记录
+;; （已在命令搜索一节绑定到 M-y，这里作为提示保留）
+#+end_src
+
+** 日常操作说明
+
+| 操作 | GUI Emacs | 终端 Emacs |
+|------|-----------|------------|
+| 复制到系统剪贴板 | =Cmd+C= 或 =M-w= | =M-w=（自动调 pbcopy）|
+| 从系统剪贴板粘贴 | =Cmd+V= 或 =C-y= | =C-y=（自动调 pbpaste）|
+| 粘贴历史记录 | =M-y= 弹出列表 | =M-y= 弹出列表 |
+
+=M-y=（即 =Cmd+Y=）弹出的是 =consult-yank-pop=，可以看到你最近复制过的所有内容，用方向键选择后回车粘贴，非常好用。
+
+* 收尾
+
+#+begin_src emacs-lisp
+;; 自定义变量写到单独的文件，不污染 init.el
+(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+(when (file-exists-p custom-file)
+  (load custom-file))
+
+(message "✅ Emacs 配置加载完成！")
 #+end_src

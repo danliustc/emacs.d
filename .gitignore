@@ -1,28 +1,29 @@
-# Emacs package/cache directories
-/elpa/
-/auto-save-list/
-/eln-cache/
-/tramp/
-/url/
-/var/
-/transient/
-
-# Emacs generated local data
-/recentf
-/projectile-bookmarks.eld
-/bookmarks
-/network-security.data
-/tutorial
-/local.el
-
-# Tangled/compiled artifacts
-/config.el
+# Emacs 自动生成
+config.el
+custom.el
 *.elc
 
-# Backup/lock/autosave files
+# 包目录（体积大，不需要纳入版本控制）
+straight/
+elpa/
+
+# 备份与自动保存
+backups/
+auto-saves/
 *~
-\#*#
+\#*\#
 .\#*
 
-# macOS Finder metadata
+# org-mode 导出产物
+*.pdf
+*.html
+*.tex
+*.odt
+
+# Emacs 运行时状态（自动生成，机器各自维护）
+bookmarks
+recentf
+projectile-bookmarks.eld
+
+# macOS
 .DS_Store
