@@ -1,67 +1,62 @@
-# Emacs 配置（个人速查）
+# Emacs 配置
 
-个人 Emacs 配置：轻量、稳定、Emacs 原生按键优先，重点服务写作与轻量代码阅读。
+Emacs 原生按键，轻量，偏写作和轻量代码阅读。
 
-## 我日常怎么用
+## 常用按键
 
-- 命令入口：`M-x`（输入命令名，例如 `my/reload-config`）
-- 找文件：`C-x C-f`
-- 复制：选中文字后 `Cmd-C`；没选区时 `Cmd-C` 复制当前行。终端里用 `C-c w`
-- 粘贴/剪切：`Cmd-V` / `Cmd-X`
-- 搜索总入口：`C-c s`（当前文件 / 全文 / 符号 / 最近文件）
-- 全文检索：`C-c g`
-- 切项目：`C-c p`
-- 打开 agenda：`C-c a`，在 agenda 里按 `q` 退出
-- Capture 菜单：`C-c c`
-- 快速 TODO：`C-c t`
-- 查看所有 TODO：`C-c T`（也可以 `C-c a` 后按 `t`）
-- Capture 子键：`t` todo / `b` brainstorm / `i` idea / `j` journal / `m` meeting / `c` dispatch
-- 搜索候选动作：`C-.`（动作） / `C-c C-o`（导出为可批处理列表）
-- 字号调节：`C-c +`（放大）/`C-c -`（缩小）/`C-c 0`（重置）
-
-## 笔记工作流
-
-- 默认目录：`~/Documents/orgfiles/`
-- 本机覆盖：环境变量 `ORGFILES_ROOT` 或 `~/.emacs.d/local.el`
-- Capture 菜单：`C-c c`（子键：`t` todo / `b` brainstorm / `i` idea / `j` journal / `m` meeting / `c` dispatch）
-- Agenda 扫描范围：根目录下除 `init.org` 以外的 `.org` 文件，以及 `projects/` 子目录。
-- 把重要 TODO 从 inbox 或会议笔记 refile 到 `projects/<name>.org`：在 org buffer 里按 Org 默认的 `C-c C-w`。
-- 详细说明及文件模板：参见 [PROJECT_REQUIREMENTS.md](./doc/PROJECT_REQUIREMENTS.md) 第 3.8 节
-
-## 新机器初始化
-
-1. Clone 这个仓库到 `~/.emacs.d`。
-2. 如果你接受默认目录，直接创建 `~/Documents/orgfiles/`。
-3. 如果你要用自己的同步目录，复制 [local.example.el](./local.example.el) 为 `~/.emacs.d/local.el` 并改成你自己的路径。
-4. 或者不用 `local.el`，直接在 shell 里设置环境变量 `ORGFILES_ROOT`。
-
-```sh
-# 方案 A：用默认目录
-mkdir -p ~/Documents/orgfiles
-
-# 方案 B：用环境变量覆盖
-export ORGFILES_ROOT="$HOME/Dropbox/orgfiles"
+```
+C-x C-f    打开文件
+C-x b      切换 buffer
+C-s        当前文件搜索
+M-x        执行命令（如 my/reload-config）
 ```
 
-说明：
+`C-c` 前缀下：
 
-- `local.el` 已在 Git 中忽略，适合放本机私有路径。
-- `ORGFILES_ROOT` 优先级更高，适合不同机器临时切换目录。
+```
+C-c s      搜索入口（文件内 / 项目全文 / 符号 / 最近文件）
+C-c g      项目全文搜索（consult-ripgrep）
+C-c p      切换项目
+C-c f      项目内找文件
+C-c d      项目根目录 dired
+C-c a      agenda
+C-c c      capture 菜单（todo / idea / journal / brainstorm / meeting）
+C-c t      快速 TODO
+C-c T      TODO 列表
+C-c +-0    字号 + / - / 重置
+C-c q      关窗
+```
 
-## 配置入口
+终端下 `C-c w` 复制（有选区复制内容，否则复制整行）。GUI 下 `Cmd-c/v/x` 走系统剪贴板。
 
-- 主配置：[config.org](./config.org)
-- 启动入口：[init.el](./init.el)
-- 回归测试：[tests/config-tests.el](./tests/config-tests.el)
-- 设计规范：[doc/PROJECT_REQUIREMENTS.md](./doc/PROJECT_REQUIREMENTS.md)
-- 完整快捷键：[doc/KEYMAPS.org](./doc/KEYMAPS.org)
+搜索/补全时 `C-.` 对候选项执行动作，`C-c C-o` 导出到可编辑列表。
 
-## 常用命令
+## 笔记
+
+根目录 `~/Documents/orgfiles/`，可通过 `ORGFILES_ROOT` 环境变量或 `~/.emacs.d/local.el` 覆盖。
+
+- inbox.org — 快速捕获的 TODO
+- ideas.org — 想法
+- YYYY-MM-DD.org — 日记
+- YYYY-MM-DD-HHMM-<title>.org — 头脑风暴 / 会议记录
+- projects/<name>.org — 需要长期跟的项目
+
+Capture 五种类型统一从 `C-c c` 进入。refile 用 Org 默认的 `C-c C-w`。
+
+## 新机器
 
 ```sh
-# 跑回归测试
-emacs --batch -l tests/config-tests.el -f ert-run-tests-batch-and-exit
+git clone <repo-url> ~/.emacs.d
+mkdir -p ~/Documents/orgfiles
+# 或 export ORGFILES_ROOT="$HOME/Dropbox/orgfiles"
+```
 
-# 验证配置可加载
-emacs --batch -l init.el
+启动时自动安装缺失的包。
+
+## 参考
+
+[config.org](config.org) · [doc/KEYMAPS.org](doc/KEYMAPS.org) · [doc/PROJECT_REQUIREMENTS.md](doc/PROJECT_REQUIREMENTS.md)
+
+```sh
+emacs --batch -l tests/config-tests.el -f ert-run-tests-batch-and-exit
 ```
