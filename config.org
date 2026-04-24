@@ -146,6 +146,7 @@
 #+begin_src emacs-lisp
 ;; 去掉杂项 UI
 (setq inhibit-startup-message t)
+(setq initial-scratch-message "stay hungry , stay foolish 🍎\n\n")
 (menu-bar-mode -1)
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
