@@ -3,6 +3,9 @@ config.el
 custom.el
 *.elc
 
+# 本机个人设置
+user-settings.el
+
 # 包目录（体积大，不需要纳入版本控制）
 straight/
 elpa/

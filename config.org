@@ -60,6 +60,26 @@
 (setq native-comp-async-report-warnings-errors nil)
 #+end_src
 
+* 包管理 — package.el + use-package
+
+#+begin_src emacs-lisp
+;; 用 Emacs 内置 package.el 管理第三方包，use-package 负责声明配置。
+(require 'package)
+(setq package-archives
+      '(("gnu"    . "https://elpa.gnu.org/packages/")
+        ("nongnu" . "https://elpa.nongnu.org/nongnu/")
+        ("melpa"  . "https://melpa.org/packages/")))
+(package-initialize)
+
+;; Emacs 29+ 内置 use-package；保留兜底安装逻辑，兼容旧版本。
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+
+(require 'use-package)
+(setq use-package-always-ensure t)
+#+end_src
+
 * macOS 专项配置
 
 #+begin_src emacs-lisp
@@ -97,30 +117,6 @@
 - =M-x= 就是 =Cmd+x=（最常用的命令搜索）
 - =C-c= 仍然是 =Ctrl+c=
 - =s-= 前缀是 =Option= 键（留作备用扩展）
-
-* 包管理 — use-package + straight.el
-
-#+begin_src emacs-lisp
-;; 安装 straight.el（如果还没有）
-(defvar bootstrap-version)
-(let ((bootstrap-file
-       (expand-file-name "straight/repos/straight.el/bootstrap.el"
-                         user-emacs-directory))
-      (bootstrap-version 7))
-  (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage))
-
-;; 让 use-package 默认用 straight
-(straight-use-package 'use-package)
-(setq straight-use-package-by-default t)
-(setq use-package-always-ensure t)
-#+end_src
 
 * 基础外观 — 简洁干净
 
@@ -304,7 +300,7 @@
 
 #+begin_src emacs-lisp
 (use-package org
-  :straight nil   ; 用内置版本
+  :ensure nil
   :config
 
   ;; --- GTD 文件 ---
@@ -353,40 +349,40 @@
 
   ;; --- Capture ---
   (setq org-capture-templates
-        '(
+        `(
           ;; 快速收集任何想法 / 任务
           ("i" "📥 Inbox" entry
-           (file my/org-inbox)
+           (file ,my/org-inbox)
            "* TODO %?\n:PROPERTIES:\n:CREATED: %U\n:END:\n%i\n"
            :empty-lines 1)
 
           ;; 个人任务
           ("p" "👤 Personal 任务" entry
-           (file+headline my/org-personal "Tasks")
+           (file+headline ,my/org-personal "Tasks")
            "* TODO %?\n:PROPERTIES:\n:CREATED: %U\n:END:\n"
            :empty-lines 1)
 
           ;; 工作任务
           ("w" "💼 Work 任务" entry
-           (file+headline my/org-work "Tasks")
+           (file+headline ,my/org-work "Tasks")
            "* TODO %?\n:PROPERTIES:\n:CREATED: %U\n:END:\n"
            :empty-lines 1)
 
           ;; 快速笔记（不是任务）
           ("n" "📝 笔记" entry
-           (file+headline my/org-inbox "Notes")
+           (file+headline ,my/org-inbox "Notes")
            "* %? :note:\n%U\n%i\n"
            :empty-lines 1)
 
           ;; 日记 / 日志
           ("j" "📓 日记" entry
-           (file+datetree my/org-journal)
+           (file+datetree ,my/org-journal)
            "* %U\n%?\n"
            :empty-lines 1)
 
           ;; 读书 / 阅读笔记
           ("r" "📚 阅读笔记" entry
-           (file+headline my/org-personal "Reading")
+           (file+headline ,my/org-personal "Reading")
            "* %^{书名 / 文章}\n:PROPERTIES:\n:CREATED: %U\n:SOURCE: %^{来源}\n:END:\n%?\n"
            :empty-lines 1)))
 
@@ -442,7 +438,7 @@
           ;; "k" → 工作
           ("k" "💼 工作任务"
            ((tags-todo "@work"
-                       ((org-agenda-overriding-header "工作待办"))))))))
+                       ((org-agenda-overriding-header "工作待办")))))))
 
   ;; Agenda 显示设置
   (setq org-agenda-window-setup 'current-window
@@ -506,7 +502,7 @@
 ;; 拼写检查
 ;; macOS 推荐先装：brew install aspell
 (use-package flyspell
-  :straight nil
+  :ensure nil
   :hook
   ((text-mode . flyspell-mode)
    (org-mode  . flyspell-mode))
@@ -524,7 +520,7 @@
 
 #+begin_src emacs-lisp
 (use-package dired
-  :straight nil
+  :ensure nil
   :config
   (setq dired-dwim-target t          ; 双窗口时自动以另一个为目标
         dired-recursive-copies 'always
