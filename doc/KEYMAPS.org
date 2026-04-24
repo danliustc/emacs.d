@@ -1,77 +1,77 @@
 #+TITLE: Keymaps Reference
 
-完整快捷键参考。README 只保留了高频入口，这里放全量映射。
+完整快捷键参考。README 只保留高频入口，这里放全量映射。
 
-* Global Leader (=SPC=)
+* Global Keys
 
-- =SPC SPC= -> =execute-extended-command=
-- =SPC a o a= -> =org-agenda=
-- =SPC a o c= -> capture prefix (sub-keys: =t= todo / =b= brainstorm / =i= idea / =j= journal / =m= meeting / =c= dispatch)
-- =SPC a o c b= -> =my/orgfiles-capture-brainstorm=
-- =SPC a o c c= -> =my/orgfiles-capture-dispatch=
-- =SPC a o c i= -> =my/orgfiles-capture-idea=
-- =SPC a o c j= -> =my/orgfiles-capture-journal=
-- =SPC a o c m= -> =my/orgfiles-capture-meeting=
-- =SPC a o c t= -> =my/orgfiles-capture-todo=
-- =SPC a o l= -> =org-store-link=
-- =SPC a o t= -> =org-todo-list=
-- =SPC a d= -> =my/orgfiles-capture-dispatch= (shortcut for =SPC a o c c=)
-- =SPC f f= -> =find-file=
-- =SPC f g= -> =my/consult-ripgrep= (=consult-ripgrep=, fallback to =rgrep=)
-- =SPC f l= -> =my/consult-line= (=consult-line=, fallback to =isearch-forward=)
-- =SPC f r= -> =my/consult-recent-file= (=consult-recent-file=, fallback to =recentf-open-files=)
-- =SPC f s= -> =save-buffer=
-- =SPC b b= -> =my/consult-buffer= (=consult-buffer=, fallback to =switch-to-buffer=)
-- =SPC b d= -> =kill-current-buffer=
-- =SPC p p= -> =projectile-switch-project=
-- =SPC p f= -> =projectile-find-file=
-- =SPC p r= -> =projectile-recentf=
-- =SPC p d= -> =projectile-dired=
-- =SPC w h= -> =windmove-left=
-- =SPC w j= -> =windmove-down=
-- =SPC w k= -> =windmove-up=
-- =SPC w l= -> =windmove-right=
-- =SPC w /= -> =split-window-right=
-- =SPC w -= -> =split-window-below=
-- =SPC w d= -> =delete-window=
-- =SPC q q= -> =save-buffers-kill-terminal=
-- =SPC z -= -> =my/font-size-decrease=
-- =SPC z == -> =my/font-size-increase=
-- =SPC z 0= -> =my/font-size-reset=
-- =SPC h f= -> =describe-function=
-- =SPC h v= -> =describe-variable=
-- =SPC h k= -> =describe-key=
-
-* Global Non-Leader Keys
-
-- =C-s= -> =consult-line=
+- =M-x= -> =execute-extended-command=
+- =C-x C-f= -> =find-file=
+- =C-x C-s= -> =save-buffer=
 - =C-x b= -> =consult-buffer=
+- =C-s= -> =consult-line=
 - =C-.= -> =embark-act=
 - =C-,= -> =embark-dwim=
 - =C-h B= -> =embark-bindings=
+- =M-w= -> =kill-ring-save= (copy active region)
+- =C-y= -> =yank= (paste)
+
+* Clipboard
+
+- =s-c= / =Command-c= -> =my/copy-region-or-line=
+- =s-v= / =Command-v= -> =yank=
+- =s-x= / =Command-x= -> =kill-region=
+- =C-c w= -> =my/copy-region-or-line= (terminal-friendly copy)
+
+* Personal =C-c= Keys
+
+- =C-c a= -> =org-agenda=
+- =C-c c= -> =my/orgfiles-capture-dispatch=
+- =C-c t= -> =my/orgfiles-capture-todo=
+- =C-c g= -> =my/consult-ripgrep= (=consult-ripgrep=, fallback to =rgrep=)
+- =C-c l= -> =my/consult-line= (=consult-line=, fallback to =isearch-forward=)
+- =C-c r= -> =my/consult-recent-file= (=consult-recent-file=, fallback to =recentf-open-files=)
+- =C-c p= -> =my/project-switch-project=
+- =C-c f= -> =my/project-find-file=
+- =C-c d= -> =my/project-dired=
+- =C-c w= -> =my/copy-region-or-line=
+- =C-c += -> =my/font-size-increase=
+- =C-c -= -> =my/font-size-decrease=
+- =C-c 0= -> =my/font-size-reset=
+- =C-c q= -> =quit-window=
 
 * Minibuffer Actions (Consult/Embark Flow)
 
+- =C-.= -> =embark-act=
+- =C-,= -> =embark-dwim=
 - =C-c C-o= -> =embark-export= (exports minibuffer results to a buffer)
+
+* Org Mode
+
+- =TAB= -> =org-cycle=
+- =<backtab>= -> =org-shifttab=
+- =C-c C-w= -> =org-refile= (Org default)
+- =C-c C-t= -> =org-todo= (Org default)
+- =C-c C-s= -> =org-schedule= (Org default)
+- =C-c C-x C-a= -> =org-archive-subtree= (Org default)
+
+* Org Agenda
+
+- =q= -> =org-agenda-quit=
+- =C-c q= -> =org-agenda-quit=
+
+* Markdown Mode
+
+- =C-c C-p= -> =markdown-preview=
+- =C-c C-h= -> =markdown-insert-header-dwim=
+
+* Prog Mode
+
+- =C-c C-g= -> =xref-find-definitions=
+- =C-c C-r= -> =xref-find-references=
 
 * Ergonomics Notes
 
+- Evil/Vim modal editing is disabled.
+- There is no =fd= escape chord.
 - Line numbers are enabled in =prog-mode= only.
 - Writing modes keep visual wrapping enabled and avoid global line-number noise.
-- Insert-state escape chord is =fd= with =0.2s= timeout.
-
-* Local Leader (=,=)
-
-** Org Mode
-- =, t= -> =org-todo=
-- =, a= -> =org-archive-subtree=
-- =, s= -> =org-schedule=
-- =, r= -> =org-refile=
-
-** Markdown Mode
-- =, p= -> =markdown-preview=
-- =, h= -> =markdown-insert-header-dwim=
-
-** Prog Mode
-- =, g= -> =xref-find-definitions=
-- =, r= -> =xref-find-references=

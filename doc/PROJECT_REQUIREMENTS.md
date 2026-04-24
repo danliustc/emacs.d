@@ -16,8 +16,8 @@ It is organized as:
   - `markdown-mode` writing
   - occasional Python/C++ reading
 - Editing paradigm:
-  - Vim-first (`evil`)
-  - Space-style key system (`SPC` + `,`)
+  - Emacs-native keybindings first
+  - Personal workflow shortcuts under `C-c`
 - Explicit non-goal:
   - Do not turn this repo into a heavy full-IDE distribution unless explicitly requested.
 
@@ -79,9 +79,9 @@ Before declaring done:
 - regression tests pass:
   - `emacs --batch -l tests/config-tests.el -f ert-run-tests-batch-and-exit`
 - key workflow sanity:
-  - `SPC` leader works
-  - `,` local leader works
+  - `C-c` workflow keys work
   - Org `TAB` fold works
+  - Org agenda exits with `q`
 
 ### 2.3 Test Design Rules
 
@@ -119,7 +119,7 @@ Before declaring done:
   - Theme/Font
   - Completion
   - Notes
-  - Evil/Keybindings
+  - Keybindings
   - Project Workflow
   - Org/Markdown
 - Put related settings close together.
@@ -128,20 +128,11 @@ Before declaring done:
 ### 3.4 Keybinding Standards
 
 - Global interaction model:
-  - `SPC` for global workflows
-  - `,` for mode-local workflows
-- Group naming should stay consistent:
-  - `a` actions
-  - `f` files
-  - `b` buffers
-  - `p` projects
-  - `w` windows
-  - `z` zoom
-  - `h` help
-  - `q` quit
-- Org global workflows should be grouped under `SPC a o`.
+  - built-in Emacs keys remain available (`M-x`, `C-x C-f`, `C-x C-s`, `C-x b`)
+  - personal workflow shortcuts use `C-c` mnemonic keys
+  - Org mode keeps standard `C-c C-*` bindings where practical
 - New keybindings must:
-  - match existing group semantics
+  - stay mnemonic and easy to inspect with `C-h k`
   - avoid conflicts with Org critical keys (`TAB`, `<backtab>`)
   - remain discoverable through `which-key`
 
@@ -168,7 +159,7 @@ Before declaring done:
 - Org fold keys must remain functional:
   - `TAB -> org-cycle`
   - `<backtab> -> org-shifttab`
-- Keep local-leader commands for Org/Markdown.
+- Keep mode-local commands available through Emacs-native `C-c C-*` keys.
 - Project navigation should prioritize:
   - switch project
   - find file
@@ -201,47 +192,36 @@ Before declaring done:
   - `C-, -> embark-dwim` (global; also available in minibuffer)
   - `C-c C-o -> embark-export` (inside minibuffer)
   - `C-h B -> embark-bindings`
-  - `SPC a d -> my/orgfiles-capture-dispatch` (shortcut for `SPC a o c c`)
 - File/project bindings:
-  - `SPC f f -> find-file`
-  - `SPC f g -> my/consult-ripgrep` (`consult-ripgrep`, fallback `rgrep`)
-  - `SPC f l -> my/consult-line` (`consult-line`, fallback `isearch-forward`)
-  - `SPC f r -> my/consult-recent-file` (`consult-recent-file`, fallback `recentf-open-files`)
-  - `SPC p p -> projectile-switch-project`
-  - `SPC p f -> projectile-find-file`
-  - `SPC p d -> projectile-dired`
-  - `SPC w h/j/k/l -> windmove-left/down/up/right`
-  - `SPC w / -> split-window-right`
-  - `SPC w - -> split-window-below`
-  - `SPC w d -> delete-window`
+  - `C-x C-f -> find-file`
+  - `C-c g -> my/consult-ripgrep` (`consult-ripgrep`, fallback `rgrep`)
+  - `C-c l -> my/consult-line` (`consult-line`, fallback `isearch-forward`)
+  - `C-c r -> my/consult-recent-file` (`consult-recent-file`, fallback `recentf-open-files`)
+  - `C-c p -> projectile-switch-project`
+  - `C-c f -> projectile-find-file`
+  - `C-c d -> projectile-dired`
 - Ergonomics baseline:
   - line numbers are enabled via `prog-mode-hook`, not globally
-  - insert-state escape chord is `fd` with `key-chord-two-keys-delay 0.2`
+  - Evil/Vim modal editing is disabled
+  - there is no insert-state escape chord
   - font size is adaptive by display width and adjustable with:
-    - `SPC z = -> my/font-size-increase`
-    - `SPC z - -> my/font-size-decrease`
-    - `SPC z 0 -> my/font-size-reset`
+    - `C-c + -> my/font-size-increase`
+    - `C-c - -> my/font-size-decrease`
+    - `C-c 0 -> my/font-size-reset`
 - Org application prefix:
-  - `SPC a o a -> org-agenda`
-  - `SPC a o c -> capture prefix`
-  - `SPC a o c b -> my/orgfiles-capture-brainstorm`
-  - `SPC a o c c -> my/orgfiles-capture-dispatch`
-  - `SPC a o c i -> my/orgfiles-capture-idea`
-  - `SPC a o c j -> my/orgfiles-capture-journal`
-  - `SPC a o c m -> my/orgfiles-capture-meeting`
-  - `SPC a o c t -> my/orgfiles-capture-todo`
-  - `SPC a o l -> org-store-link`
-  - `SPC a o t -> org-todo-list`
-  - `SPC a d -> my/orgfiles-capture-dispatch` (shortcut; same as `SPC a o c c`)
+  - `C-c a -> org-agenda`
+  - `C-c c -> my/orgfiles-capture-dispatch`
+  - `C-c t -> my/orgfiles-capture-todo`
+  - `C-c q -> quit-window`; in agenda buffers this runs `org-agenda-quit`
 - Brainstorm draft workflow: default target `~/Documents/orgfiles/`, file naming `YYYY-MM-DD-HHMM-<title>.org`. Override via `ORGFILES_ROOT` or `~/.emacs.d/local.el`. See Section 3.9 below for details.
-- Todo capture workflow: target file `~/Documents/orgfiles/inbox.org`, headline `Tasks`, direct keybinding `SPC a o c t`. See Section 3.9 below for details.
+- Todo capture workflow: target file `~/Documents/orgfiles/inbox.org`, headline `Tasks`, direct keybinding `C-c t`. See Section 3.9 below for details.
 - Meeting note capture workflow: default root `~/Documents/orgfiles/`, file naming `YYYY-MM-DD-HHMM-<meeting-name>.org`. See Section 3.9 below for details.
 
 ### 3.9 Org Capture Workflows
 
 **Brainstorm**: Create a new file each time (no org-capture template entry). File path: `~/Documents/orgfiles/YYYY-MM-DD-HHMM-<title>.org`. Override: `ORGFILES_ROOT` or `~/.emacs.d/local.el`.
 
-**Todo**: Capture to `~/Documents/orgfiles/inbox.org` under the `Tasks` headline. Direct keybinding: `SPC a o c t`. Dispatch option: `todo`.
+**Todo**: Capture to `~/Documents/orgfiles/inbox.org` under the `Tasks` headline. Direct keybinding: `C-c t`. Dispatch option: `todo`.
 
 **Meeting**: Creates new file at `~/Documents/orgfiles/YYYY-MM-DD-HHMM-<meeting-name>.org`. Prompt order: capture key → meeting name → meeting time (defaults to now). First-create instantiates template sections: 背景/结论/待办/风险/下次会议前要准备.
 
@@ -254,8 +234,8 @@ Before declaring done:
 ### 3.10 Agenda Scope and Refile
 
 - `org-agenda-files` is an explicit list: `inbox.org`, `ideas.org`, and the `projects/` subdirectory under `my/orgfiles-root`. Meeting/brainstorm/journal files in the root are deliberately excluded so the agenda stays small and stable as those files accumulate over time.
-- Flow: capture lands in `inbox.org` (todo) or meeting notes; review and refile actionable items into `projects/<name>.org` via `, r` / `C-c C-w`.
+- Flow: capture lands in `inbox.org` (todo) or meeting notes; review and refile actionable items into `projects/<name>.org` via Org default `C-c C-w`.
 - Refile completion is flat (`org-outline-path-complete-in-steps nil`) and includes the file prefix (`org-refile-use-outline-path 'file`) so vertico/orderless can fuzzy-match across files.
 - New project files: put a top-level `* Tasks` (or similar) heading in a new `projects/<name>.org`; `org-refile-allow-creating-parent-nodes 'confirm` lets you create missing parents on the fly.
-- Full-text search across every note (including meetings/journals) remains available via `SPC f g` (`consult-ripgrep`).
-- Consult-backed leader commands must use local wrapper commands with built-in fallbacks, so startup remains usable if package bootstrap cannot install `consult`.
+- Full-text search across every note (including meetings/journals) remains available via `C-c g` (`consult-ripgrep`).
+- Consult-backed commands must use local wrapper commands with built-in fallbacks, so startup remains usable if package bootstrap cannot install `consult`.

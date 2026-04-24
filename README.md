@@ -1,27 +1,29 @@
 # Emacs 配置（个人速查）
 
-个人 Emacs 配置：轻量、稳定、Vim-like，重点服务写作与轻量代码阅读。
+个人 Emacs 配置：轻量、稳定、Emacs 原生按键优先，重点服务写作与轻量代码阅读。
 
 ## 我日常怎么用
 
-- 命令入口：`SPC SPC`（输入命令名，例如 `my/reload-config`）
-- 找文件：`SPC f f`
-- 全文检索：`SPC f g`
-- 切项目：`SPC p p`
-- Capture 前缀：`SPC a o c`
-- 快速 TODO：`SPC a o c t`
+- 命令入口：`M-x`（输入命令名，例如 `my/reload-config`）
+- 找文件：`C-x C-f`
+- 复制：选中文字后 `Cmd-C`；没选区时 `Cmd-C` 复制当前行。终端里用 `C-c w`
+- 粘贴/剪切：`Cmd-V` / `Cmd-X`
+- 全文检索：`C-c g`
+- 切项目：`C-c p`
+- 打开 agenda：`C-c a`，在 agenda 里按 `q` 退出
+- Capture 菜单：`C-c c`
+- 快速 TODO：`C-c t`
 - Capture 子键：`t` todo / `b` brainstorm / `i` idea / `j` journal / `m` meeting / `c` dispatch
 - 搜索候选动作：`C-.`（动作） / `C-c C-o`（导出为可批处理列表）
-- 分屏窗口移动：`SPC w h/j/k/l`
-- 字号调节：`SPC z =`（放大）/`SPC z -`（缩小）/`SPC z 0`（重置）
+- 字号调节：`C-c +`（放大）/`C-c -`（缩小）/`C-c 0`（重置）
 
 ## 笔记工作流
 
 - 默认目录：`~/Documents/orgfiles/`
 - 本机覆盖：环境变量 `ORGFILES_ROOT` 或 `~/.emacs.d/local.el`
-- Capture 前缀：`SPC a o c`（子键：`t` todo / `b` brainstorm / `i` idea / `j` journal / `m` meeting / `c` dispatch）
+- Capture 菜单：`C-c c`（子键：`t` todo / `b` brainstorm / `i` idea / `j` journal / `m` meeting / `c` dispatch）
 - Agenda 扫描范围：`inbox.org`、`ideas.org` 和 `projects/` 子目录。会议/头脑风暴/日志文件不进 agenda，保持候选小且稳定。
-- 把重要 TODO 从 inbox 或会议笔记 refile 到 `projects/<name>.org`：在 org buffer 里按 `, r`（或 `C-c C-w`）。
+- 把重要 TODO 从 inbox 或会议笔记 refile 到 `projects/<name>.org`：在 org buffer 里按 Org 默认的 `C-c C-w`。
 - 详细说明及文件模板：参见 [PROJECT_REQUIREMENTS.md](./doc/PROJECT_REQUIREMENTS.md) 第 3.8 节
 
 ## 新机器初始化
