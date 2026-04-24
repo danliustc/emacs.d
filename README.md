@@ -9,6 +9,7 @@
 ```
 ~/.emacs.d/
 ├── init.el              # 一行引导，不用动
+├── early-init.el        # 启动早期设置
 ├── config.org           # 配置主体，不用动
 ├── user-settings.example.el # 个人设置模板
 └── user-settings.el     # 本机个人设置，Git 不跟踪
@@ -31,6 +32,7 @@ brew install ripgrep aspell pandoc
 
 # 2. 放置配置文件
 cp init.el ~/.emacs.d/init.el
+cp early-init.el ~/.emacs.d/early-init.el
 cp config.org ~/.emacs.d/config.org
 cp user-settings.example.el ~/.emacs.d/user-settings.el
 
