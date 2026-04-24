@@ -10,7 +10,8 @@
 ~/.emacs.d/
 ├── init.el              # 一行引导，不用动
 ├── config.org           # 配置主体，不用动
-└── user-settings.el     # 个人设置，只改这里
+├── user-settings.example.el # 个人设置模板
+└── user-settings.el     # 本机个人设置，Git 不跟踪
 
 ~/Dropbox/orgfiles/
 ├── inbox.org            # 收集箱
@@ -31,9 +32,10 @@ brew install ripgrep aspell pandoc
 # 2. 放置配置文件
 cp init.el ~/.emacs.d/init.el
 cp config.org ~/.emacs.d/config.org
-cp user-settings.el ~/.emacs.d/user-settings.el
+cp user-settings.example.el ~/.emacs.d/user-settings.el
 
-# 3. 启动 Emacs，等待包自动安装（首次约 3–5 分钟）
+# 3. 首次安装第三方包
+# 启动 Emacs 后运行：M-x my/install-missing-packages
 ```
 
 ------
@@ -111,7 +113,7 @@ C-c C-c      打标签（@home @work @errands 等）
 
 | 按键                | 功能                                   |
 | ------------------- | -------------------------------------- |
-| `Cmd+x`（即 `M-x`） | 搜索所有命令，模糊匹配，输入任意关键词 |
+| `Option+x`（即 `M-x`） | 搜索所有命令，模糊匹配，输入任意关键词 |
 | `C-h B`             | 列出当前所有可用快捷键                 |
 | `C-h k`             | 查某个快捷键是什么命令                 |
 

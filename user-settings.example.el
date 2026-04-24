@@ -18,9 +18,6 @@
 ;; Dark:  modus-vivendi, modus-vivendi-tinted
 (setq my/theme 'modus-operandi-tinted)
 
-;; Command key mapping on macOS: meta or super.
-(setq my/mac-command-key 'meta)
-
 ;; Additional agenda files for larger projects.
 ;; (setq my/org-extra-agenda-files
 ;;       '("~/org/renovation.org"
