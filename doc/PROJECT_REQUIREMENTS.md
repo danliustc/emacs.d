@@ -212,6 +212,7 @@ Before declaring done:
   - `C-c a -> org-agenda`
   - `C-c c -> my/orgfiles-capture-dispatch`
   - `C-c t -> my/orgfiles-capture-todo`
+  - `C-c T -> org-todo-list`
   - `C-c q -> quit-window`; in agenda buffers this runs `org-agenda-quit`
 - Brainstorm draft workflow: default target `~/Documents/orgfiles/`, file naming `YYYY-MM-DD-HHMM-<title>.org`. Override via `ORGFILES_ROOT` or `~/.emacs.d/local.el`. See Section 3.9 below for details.
 - Todo capture workflow: target file `~/Documents/orgfiles/inbox.org`, headline `Tasks`, direct keybinding `C-c t`. See Section 3.9 below for details.
@@ -233,7 +234,7 @@ Before declaring done:
 
 ### 3.10 Agenda Scope and Refile
 
-- `org-agenda-files` is an explicit list: `inbox.org`, `ideas.org`, and the `projects/` subdirectory under `my/orgfiles-root`. Meeting/brainstorm/journal files in the root are deliberately excluded so the agenda stays small and stable as those files accumulate over time.
+- `org-agenda-files` includes every `.org` file directly under `my/orgfiles-root` except `init.org`, plus the `projects/` subdirectory. This keeps regular root files such as `personal.org` and `work.org` visible while excluding setup notes.
 - Flow: capture lands in `inbox.org` (todo) or meeting notes; review and refile actionable items into `projects/<name>.org` via Org default `C-c C-w`.
 - Refile completion is flat (`org-outline-path-complete-in-steps nil`) and includes the file prefix (`org-refile-use-outline-path 'file`) so vertico/orderless can fuzzy-match across files.
 - New project files: put a top-level `* Tasks` (or similar) heading in a new `projects/<name>.org`; `org-refile-allow-creating-parent-nodes 'confirm` lets you create missing parents on the fly.

@@ -256,6 +256,17 @@ May be pre-set via `local.el' or `ORGFILES_ROOT'; normalized below.")
   (unless (file-directory-p dir)
     (make-directory dir t)))
 
+(defun my/orgfiles-agenda-files ()
+  "Return root Org files except init.org, plus project Org files."
+  (my/orgfiles--ensure-dir my/orgfiles-root)
+  (my/orgfiles--ensure-dir my/orgfiles-projects-dir)
+  (append
+   (seq-remove
+    (lambda (file)
+      (string= (file-name-nondirectory file) "init.org"))
+    (directory-files my/orgfiles-root t "\\.org\\'"))
+   (list my/orgfiles-projects-dir)))
+
 (defun my/orgfiles--safe-file-stem (name)
   (let* ((raw-name (string-trim name))
          (base-name (file-name-nondirectory raw-name))
@@ -384,9 +395,7 @@ May be pre-set via `local.el' or `ORGFILES_ROOT'; normalized below.")
   (setq org-directory my/orgfiles-root
         org-todo-keywords
         '((sequence "TODO" "IN-PROGRESS" "WAITING" "|" "DONE" "CANCELLED"))
-        org-agenda-files (list my/orgfiles-inbox-file
-                               my/orgfiles-idea-file
-                               my/orgfiles-projects-dir)
+        org-agenda-files (my/orgfiles-agenda-files)
         org-default-notes-file my/orgfiles-inbox-file
         org-refile-targets '((org-agenda-files :maxlevel . 3))
         org-refile-use-outline-path 'file
@@ -459,6 +468,7 @@ May be pre-set via `local.el' or `ORGFILES_ROOT'; normalized below.")
 (define-key global-map (kbd "C-c a") #'org-agenda)
 (define-key global-map (kbd "C-c c") #'my/orgfiles-capture-dispatch)
 (define-key global-map (kbd "C-c t") #'my/orgfiles-capture-todo)
+(define-key global-map (kbd "C-c T") #'org-todo-list)
 (define-key global-map (kbd "C-c g") #'my/consult-ripgrep)
 (define-key global-map (kbd "C-c l") #'my/consult-line)
 (define-key global-map (kbd "C-c r") #'my/consult-recent-file)

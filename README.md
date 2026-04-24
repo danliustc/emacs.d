@@ -13,6 +13,7 @@
 - 打开 agenda：`C-c a`，在 agenda 里按 `q` 退出
 - Capture 菜单：`C-c c`
 - 快速 TODO：`C-c t`
+- 查看所有 TODO：`C-c T`（也可以 `C-c a` 后按 `t`）
 - Capture 子键：`t` todo / `b` brainstorm / `i` idea / `j` journal / `m` meeting / `c` dispatch
 - 搜索候选动作：`C-.`（动作） / `C-c C-o`（导出为可批处理列表）
 - 字号调节：`C-c +`（放大）/`C-c -`（缩小）/`C-c 0`（重置）
@@ -22,7 +23,7 @@
 - 默认目录：`~/Documents/orgfiles/`
 - 本机覆盖：环境变量 `ORGFILES_ROOT` 或 `~/.emacs.d/local.el`
 - Capture 菜单：`C-c c`（子键：`t` todo / `b` brainstorm / `i` idea / `j` journal / `m` meeting / `c` dispatch）
-- Agenda 扫描范围：`inbox.org`、`ideas.org` 和 `projects/` 子目录。会议/头脑风暴/日志文件不进 agenda，保持候选小且稳定。
+- Agenda 扫描范围：根目录下除 `init.org` 以外的 `.org` 文件，以及 `projects/` 子目录。
 - 把重要 TODO 从 inbox 或会议笔记 refile 到 `projects/<name>.org`：在 org buffer 里按 Org 默认的 `C-c C-w`。
 - 详细说明及文件模板：参见 [PROJECT_REQUIREMENTS.md](./doc/PROJECT_REQUIREMENTS.md) 第 3.8 节
 
