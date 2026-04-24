@@ -503,8 +503,7 @@
     (unless (file-exists-p path)
       (with-temp-file path
         (insert (format "#+TITLE: %s\n#+STARTUP: overview\n\n"
-                        (file-name-sans-extension (file-name-nondirectory path))))))
-    (message "GTD 文件已就绪: %s" path)))
+                        (file-name-sans-extension (file-name-nondirectory path))))))))
 
 ;; 启动时自动初始化
 (add-hook 'emacs-startup-hook #'my/gtd-initialize)
