@@ -235,7 +235,7 @@ Before declaring done:
 
 ### 3.10 Agenda Scope and Refile
 
-- `org-agenda-files` includes every `.org` file directly under `my/orgfiles-root` except `init.org`, plus the `projects/` subdirectory. This keeps regular root files such as `personal.org` and `work.org` visible while excluding setup notes.
+- At startup, `org-agenda-files` is initialized from every `.org` file directly under `my/orgfiles-root` except `init.org`, plus the `projects/` subdirectory. Files created later in the session are intentionally not auto-added; temporary notes should be reviewed/refiled or the config reloaded when they should enter agenda.
 - Flow: capture lands in `inbox.org` (todo) or meeting notes; review and refile actionable items into `projects/<name>.org` via Org default `C-c C-w`.
 - Refile completion is flat (`org-outline-path-complete-in-steps nil`) and includes the file prefix (`org-refile-use-outline-path 'file`) so vertico/orderless can fuzzy-match across files.
 - New project files: put a top-level `* Tasks` (or similar) heading in a new `projects/<name>.org`; `org-refile-allow-creating-parent-nodes 'confirm` lets you create missing parents on the fly.

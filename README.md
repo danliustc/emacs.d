@@ -41,6 +41,8 @@ C-c q      关窗
 - YYYY-MM-DD-HHMM-<title>.org — 头脑风暴 / 会议记录
 - projects/<name>.org — 需要长期跟的项目
 
+Agenda 启动时从根目录下除 `init.org` 以外的 `.org` 文件和 `projects/` 初始化。会话中新建的日记、会议或头脑风暴文件不会自动进入 agenda；需要长期跟踪时 refile 到项目文件，或重载配置。
+
 Capture 五种类型统一从 `C-c c` 进入。refile 用 Org 默认的 `C-c C-w`。
 
 ## 新机器

@@ -250,9 +250,9 @@
     (should (string-match-p "untitled" content))
     (should (string-match-p "\\[:multibyte:\\]" content))))
 
-(ert-deftest config-should-include-root-org-agenda-files-and-enable-refile ()
+(ert-deftest config-should-initialize-root-org-agenda-files-and-enable-refile ()
   (let ((content (file-content "config.org")))
-    ;; Agenda includes root org files dynamically, excluding init.org setup notes.
+    ;; Agenda is initialized from root org files at startup, excluding init.org setup notes.
     (should (string-match-p "defvar my/orgfiles-projects-dir" content))
     (should (string-match-p "\"projects\" my/orgfiles-root" content))
     (should (string-match-p "defun my/orgfiles-agenda-files" content))
