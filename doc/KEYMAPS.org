@@ -17,11 +17,11 @@
 - =SPC a o t= -> =org-todo-list=
 - =SPC a d= -> =my/orgfiles-capture-dispatch= (shortcut for =SPC a o c c=)
 - =SPC f f= -> =find-file=
-- =SPC f g= -> =consult-ripgrep=
-- =SPC f l= -> =consult-line=
-- =SPC f r= -> =consult-recent-file=
+- =SPC f g= -> =my/consult-ripgrep= (=consult-ripgrep=, fallback to =rgrep=)
+- =SPC f l= -> =my/consult-line= (=consult-line=, fallback to =isearch-forward=)
+- =SPC f r= -> =my/consult-recent-file= (=consult-recent-file=, fallback to =recentf-open-files=)
 - =SPC f s= -> =save-buffer=
-- =SPC b b= -> =consult-buffer=
+- =SPC b b= -> =my/consult-buffer= (=consult-buffer=, fallback to =switch-to-buffer=)
 - =SPC b d= -> =kill-current-buffer=
 - =SPC p p= -> =projectile-switch-project=
 - =SPC p f= -> =projectile-find-file=

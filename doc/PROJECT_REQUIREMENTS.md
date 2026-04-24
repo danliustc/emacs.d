@@ -204,9 +204,9 @@ Before declaring done:
   - `SPC a d -> my/orgfiles-capture-dispatch` (shortcut for `SPC a o c c`)
 - File/project bindings:
   - `SPC f f -> find-file`
-  - `SPC f g -> consult-ripgrep`
-  - `SPC f l -> consult-line`
-  - `SPC f r -> consult-recent-file`
+  - `SPC f g -> my/consult-ripgrep` (`consult-ripgrep`, fallback `rgrep`)
+  - `SPC f l -> my/consult-line` (`consult-line`, fallback `isearch-forward`)
+  - `SPC f r -> my/consult-recent-file` (`consult-recent-file`, fallback `recentf-open-files`)
   - `SPC p p -> projectile-switch-project`
   - `SPC p f -> projectile-find-file`
   - `SPC p d -> projectile-dired`
@@ -258,3 +258,4 @@ Before declaring done:
 - Refile completion is flat (`org-outline-path-complete-in-steps nil`) and includes the file prefix (`org-refile-use-outline-path 'file`) so vertico/orderless can fuzzy-match across files.
 - New project files: put a top-level `* Tasks` (or similar) heading in a new `projects/<name>.org`; `org-refile-allow-creating-parent-nodes 'confirm` lets you create missing parents on the fly.
 - Full-text search across every note (including meetings/journals) remains available via `SPC f g` (`consult-ripgrep`).
+- Consult-backed leader commands must use local wrapper commands with built-in fallbacks, so startup remains usable if package bootstrap cannot install `consult`.
