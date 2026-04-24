@@ -28,6 +28,7 @@
 - =C-c c= -> =my/orgfiles-capture-dispatch=
 - =C-c t= -> =my/orgfiles-capture-todo=
 - =C-c T= -> =org-todo-list=
+- =C-c s= -> =my/search-dispatch=
 - =C-c g= -> =my/consult-ripgrep= (=consult-ripgrep=, fallback to =rgrep=)
 - =C-c l= -> =my/consult-line= (=consult-line=, fallback to =isearch-forward=)
 - =C-c r= -> =my/consult-recent-file= (=consult-recent-file=, fallback to =recentf-open-files=)

@@ -194,6 +194,7 @@ Before declaring done:
   - `C-h B -> embark-bindings`
 - File/project bindings:
   - `C-x C-f -> find-file`
+  - `C-c s -> my/search-dispatch`
   - `C-c g -> my/consult-ripgrep` (`consult-ripgrep`, fallback `rgrep`)
   - `C-c l -> my/consult-line` (`consult-line`, fallback `isearch-forward`)
   - `C-c r -> my/consult-recent-file` (`consult-recent-file`, fallback `recentf-open-files`)

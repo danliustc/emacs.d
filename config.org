@@ -220,6 +220,26 @@
   (if (fboundp 'consult-ripgrep)
       (consult-ripgrep)
     (call-interactively #'rgrep)))
+
+(defun my/consult-imenu ()
+  (interactive)
+  (if (fboundp 'consult-imenu)
+      (consult-imenu)
+    (call-interactively #'imenu)))
+
+(defun my/search-dispatch ()
+  "Search from one predictable entry point."
+  (interactive)
+  (pcase (completing-read "Search: "
+                          '("current buffer"
+                            "project text"
+                            "symbols"
+                            "recent files")
+                          nil t nil nil "current buffer")
+    ("current buffer" (my/consult-line))
+    ("project text" (my/consult-ripgrep))
+    ("symbols" (my/consult-imenu))
+    ("recent files" (my/consult-recent-file))))
 #+end_src
 
 * Scenario: Notes Workflow
@@ -469,6 +489,7 @@ May be pre-set via `local.el' or `ORGFILES_ROOT'; normalized below.")
 (define-key global-map (kbd "C-c c") #'my/orgfiles-capture-dispatch)
 (define-key global-map (kbd "C-c t") #'my/orgfiles-capture-todo)
 (define-key global-map (kbd "C-c T") #'org-todo-list)
+(define-key global-map (kbd "C-c s") #'my/search-dispatch)
 (define-key global-map (kbd "C-c g") #'my/consult-ripgrep)
 (define-key global-map (kbd "C-c l") #'my/consult-line)
 (define-key global-map (kbd "C-c r") #'my/consult-recent-file)
