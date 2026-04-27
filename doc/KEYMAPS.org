@@ -30,13 +30,13 @@
 - =C-c a= -> =org-agenda=
 - =C-c c= -> =org-capture=
 - =C-c l= -> =org-store-link=
-- =C-c s= -> =consult-ripgrep=
-- =C-c f= -> =consult-find=
-- =C-c o= -> =consult-outline= globally, =consult-org-heading= in =org-mode=
+- =C-c s= -> =my/search-ripgrep= (=consult-ripgrep=, fallback to =rgrep=)
+- =C-c f= -> =my/find-file-by-name= (=consult-find=, fallback to =find-file=)
+- =C-c o= -> =my/jump-outline= globally (=consult-outline=, fallback to =imenu=); =consult-org-heading= in =org-mode= when =consult= is installed
 - =C-c m= -> =consult-mark=
 - =C-c e= -> =consult-flymake=
-- =C-c t= -> =dired-sidebar-toggle-sidebar=
-- =C-c b= -> =consult-buffer=
+- =C-c t= -> =my/toggle-file-sidebar= (=dired-sidebar-toggle-sidebar=, fallback to =dired=)
+- =C-c b= -> =my/switch-buffer= (=consult-buffer=, fallback to =switch-to-buffer=)
 
 * GTD Navigation Keys
 

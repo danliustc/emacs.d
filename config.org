@@ -97,6 +97,10 @@
   (dolist (pkg my/packages)
     (unless (package-installed-p pkg)
       (package-install pkg))))
+
+(defun my/package-installed-p (pkg)
+  "Return non-nil when third-party package PKG is installed."
+  (package-installed-p pkg))
 #+end_src
 
 * macOS 专项配置
@@ -115,6 +119,7 @@
 ;; macOS GUI 启动时不走 shell，所以 PATH 要手动设置
 (use-package exec-path-from-shell
   :ensure nil
+  :if (my/package-installed-p 'exec-path-from-shell)
   :config
   (when (memq window-system '(mac ns))
     (exec-path-from-shell-initialize)))
@@ -182,6 +187,7 @@
 ;; 用 modus-themes，对 org-mode 非常友好
 (use-package modus-themes
   :ensure nil
+  :if (my/package-installed-p 'modus-themes)
   :config
   (setq modus-themes-org-blocks 'gray-background
         modus-themes-headings '((1 . (bold 1.3))
@@ -208,8 +214,12 @@
 (add-hook 'text-mode-hook 'visual-line-mode)
 (add-hook 'org-mode-hook  'visual-line-mode)
 
-;; 保存时删除行尾空格
-(add-hook 'before-save-hook 'delete-trailing-whitespace)
+;; 保存代码/配置文件时删除行尾空格；写作类文本保留原样。
+(defun my/enable-delete-trailing-whitespace ()
+  "Delete trailing whitespace before saving the current buffer."
+  (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
+(add-hook 'prog-mode-hook #'my/enable-delete-trailing-whitespace)
+(add-hook 'conf-mode-hook #'my/enable-delete-trailing-whitespace)
 
 ;; 文件修改后自动重载
 (global-auto-revert-mode 1)
@@ -242,6 +252,7 @@
 ;; Vertico — 竖向候选列表，替换默认 minibuffer
 (use-package vertico
   :ensure nil
+  :if (my/package-installed-p 'vertico)
   :init
   (vertico-mode 1)
   :config
@@ -251,6 +262,7 @@
 ;; Orderless — 空格分隔的多词模糊匹配，比如 "org cap" 能匹配 "org-capture"
 (use-package orderless
   :ensure nil
+  :if (my/package-installed-p 'orderless)
   :config
   (setq completion-styles '(orderless basic)
         completion-category-overrides
@@ -259,12 +271,14 @@
 ;; Marginalia — 在候选项旁边显示文档注释、快捷键等
 (use-package marginalia
   :ensure nil
+  :if (my/package-installed-p 'marginalia)
   :init
   (marginalia-mode 1))
 
 ;; Consult — 强力搜索命令集合
 (use-package consult
   :ensure nil
+  :if (my/package-installed-p 'consult)
   :bind
   (("M-y"   . consult-yank-pop)       ; 剪贴板历史
    ("C-x b" . consult-buffer)          ; 切换 buffer（含最近文件）
@@ -282,6 +296,7 @@
 ;; Embark — 在任意候选项上触发动作（类似右键菜单）
 (use-package embark
   :ensure nil
+  :if (my/package-installed-p 'embark)
   :bind
   (("C-." . embark-act)       ; 对当前光标处的东西触发动作
    ("C-;" . embark-dwim)      ; 智能默认动作
@@ -292,12 +307,16 @@
 ;; Embark + Consult 集成
 (use-package embark-consult
   :ensure nil
+  :if (and (my/package-installed-p 'embark)
+           (my/package-installed-p 'embark-consult)
+           (my/package-installed-p 'consult))
   :hook
   (embark-collect-mode . consult-preview-at-point-mode))
 
 ;; Which-key — 输入前缀后弹出所有后续可用键
 (use-package which-key
   :ensure nil
+  :if (my/package-installed-p 'which-key)
   :init
   (which-key-mode 1)
   :config
@@ -425,7 +444,7 @@
         org-startup-indented t         ; 缩进对齐
         org-src-fontify-natively t     ; 代码块语法高亮
         org-src-tab-acts-natively t
-        org-confirm-babel-evaluate nil)
+        org-confirm-babel-evaluate t)
 
   )
 #+end_src
@@ -448,9 +467,9 @@
                     '(org-agenda-skip-entry-if 'scheduled 'deadline))))
             (todo "WAITING"
                   ((org-agenda-overriding-header "⏳ 等待中")))
-            (tags "inbox"
+            (todo "TODO"
                   ((org-agenda-overriding-header "📥 待处理 Inbox")
-                   (org-tags-match-list-sublevels nil)))))
+                   (org-agenda-files (list my/org-inbox))))))
 
           ;; "w" → 本周视图
           ("W" "📆 本周概览"
@@ -487,6 +506,7 @@
 #+begin_src emacs-lisp
 (use-package org-superstar
   :ensure nil
+  :if (my/package-installed-p 'org-superstar)
   :hook (org-mode . org-superstar-mode)
   :config
   (setq org-superstar-headline-bullets-list '("◉" "○" "◈" "◇" "▷")
@@ -516,6 +536,7 @@
 ;; Olivetti — 居中写作模式，减少干扰
 (use-package olivetti
   :ensure nil
+  :if (my/package-installed-p 'olivetti)
   :hook
   ((org-mode . olivetti-mode)
    (markdown-mode . olivetti-mode))
@@ -525,6 +546,7 @@
 ;; Markdown 支持（写文章时用得到）
 (use-package markdown-mode
   :ensure nil
+  :if (my/package-installed-p 'markdown-mode)
   :mode ("\\.md\\'" . markdown-mode)
   :config
   (setq markdown-command "pandoc"))
@@ -558,6 +580,7 @@
 ;; dired-sidebar — 侧边栏文件树
 (use-package dired-sidebar
   :ensure nil
+  :if (my/package-installed-p 'dired-sidebar)
   :bind ("C-c t" . dired-sidebar-toggle-sidebar)
   :config
   (setq dired-sidebar-should-follow-file t))
@@ -569,14 +592,49 @@
 ;; 定义一组好记的快捷键前缀
 ;; 全部用 C-c 前缀，简单清晰
 
-(global-set-key (kbd "C-c c") 'org-capture)        ; Capture 捕获
-(global-set-key (kbd "C-c a") 'org-agenda)          ; Agenda 日程
-(global-set-key (kbd "C-c l") 'org-store-link)      ; 存链接
-(global-set-key (kbd "C-c s") 'consult-ripgrep)     ; 全局搜索
-(global-set-key (kbd "C-c f") 'consult-find)        ; 文件搜索
-(global-set-key (kbd "C-c o") 'consult-outline)     ; 大纲跳转
-(global-set-key (kbd "C-c t") 'dired-sidebar-toggle-sidebar) ; 文件树
-(global-set-key (kbd "C-c b") 'consult-buffer)      ; Buffer 切换
+(defun my/search-ripgrep ()
+  "Search files with consult-ripgrep, falling back to rgrep."
+  (interactive)
+  (if (fboundp 'consult-ripgrep)
+      (call-interactively #'consult-ripgrep)
+    (call-interactively #'rgrep)))
+
+(defun my/find-file-by-name ()
+  "Find files with consult-find, falling back to find-file."
+  (interactive)
+  (if (fboundp 'consult-find)
+      (call-interactively #'consult-find)
+    (call-interactively #'find-file)))
+
+(defun my/jump-outline ()
+  "Jump to a heading with consult-outline, falling back to imenu."
+  (interactive)
+  (if (fboundp 'consult-outline)
+      (call-interactively #'consult-outline)
+    (call-interactively #'imenu)))
+
+(defun my/switch-buffer ()
+  "Switch buffers with consult-buffer, falling back to switch-to-buffer."
+  (interactive)
+  (if (fboundp 'consult-buffer)
+      (call-interactively #'consult-buffer)
+    (call-interactively #'switch-to-buffer)))
+
+(defun my/toggle-file-sidebar ()
+  "Toggle dired-sidebar when available, otherwise open dired."
+  (interactive)
+  (if (fboundp 'dired-sidebar-toggle-sidebar)
+      (call-interactively #'dired-sidebar-toggle-sidebar)
+    (call-interactively #'dired)))
+
+(global-set-key (kbd "C-c c") 'org-capture)          ; Capture 捕获
+(global-set-key (kbd "C-c a") 'org-agenda)           ; Agenda 日程
+(global-set-key (kbd "C-c l") 'org-store-link)       ; 存链接
+(global-set-key (kbd "C-c s") 'my/search-ripgrep)    ; 全局搜索
+(global-set-key (kbd "C-c f") 'my/find-file-by-name) ; 文件搜索
+(global-set-key (kbd "C-c o") 'my/jump-outline)      ; 大纲跳转
+(global-set-key (kbd "C-c t") 'my/toggle-file-sidebar) ; 文件树
+(global-set-key (kbd "C-c b") 'my/switch-buffer)     ; Buffer 切换
 
 ;; 快速打开常用 org 文件和 GTD 视图
 (defun my/open-inbox   () (interactive) (find-file my/org-inbox))

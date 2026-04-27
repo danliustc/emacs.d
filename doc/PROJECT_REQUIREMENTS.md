@@ -195,11 +195,11 @@ Before declaring done:
   - `C-h B -> embark-bindings`
 - Search/file/buffer bindings:
   - `C-x C-f -> find-file`
-  - `C-c s -> consult-ripgrep`
-  - `C-c f -> consult-find`
-  - `C-c o -> consult-outline`; in `org-mode`, `consult-org-heading`
-  - `C-c b -> consult-buffer`
-  - `C-c t -> dired-sidebar-toggle-sidebar`
+  - `C-c s -> my/search-ripgrep` (`consult-ripgrep`, fallback `rgrep`)
+  - `C-c f -> my/find-file-by-name` (`consult-find`, fallback `find-file`)
+  - `C-c o -> my/jump-outline` globally (`consult-outline`, fallback `imenu`); in `org-mode`, `consult-org-heading` when `consult` is installed
+  - `C-c b -> my/switch-buffer` (`consult-buffer`, fallback `switch-to-buffer`)
+  - `C-c t -> my/toggle-file-sidebar` (`dired-sidebar-toggle-sidebar`, fallback `dired`)
 - Ergonomics baseline:
   - line numbers are enabled via `prog-mode-hook`, not globally
   - Evil/Vim modal editing is disabled
@@ -234,4 +234,4 @@ Capture uses the built-in `org-capture` dispatcher on `C-c c`.
 - Flow: capture lands in `inbox.org`, `personal.org`, `work.org`, or `journal.org`; review and refile actionable items via Org default `C-c C-w`.
 - Refile completion is flat (`org-outline-path-complete-in-steps nil`) and includes the file prefix (`org-refile-use-outline-path 'file`) so vertico/orderless can fuzzy-match across files.
 - Larger projects can be kept in separate org files and added through `my/org-extra-agenda-files`.
-- Full-text search across notes remains available via `C-c s` (`consult-ripgrep`).
+- Full-text search across notes remains available via `C-c s` (`consult-ripgrep`, fallback `rgrep`).
