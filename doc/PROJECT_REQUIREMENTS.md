@@ -50,9 +50,10 @@ It is organized as:
 
 ## 2. Testing Standards
 
-### 2.1 Mandatory Delivery Workflow (TDD)
+### 2.1 Delivery Workflow
 
-All behavior changes follow Red/Green/Refactor:
+Behavior changes should follow Red/Green/Refactor when there is an existing
+test harness or when the behavior is non-trivial enough to justify adding one:
 
 1. Red
    - add/update tests first
@@ -63,10 +64,10 @@ All behavior changes follow Red/Green/Refactor:
    - cleanup without changing behavior
    - keep all tests green
 
-Every change summary must include:
+Every behavior-change summary should include:
 
 - tests added/changed
-- red failure point
+- red failure point, when applicable
 - green implementation summary
 - final test result
 
@@ -76,7 +77,7 @@ Before declaring done:
 
 - config loads:
   - `emacs --batch -l init.el`
-- regression tests pass:
+- regression tests pass, if `tests/config-tests.el` exists:
   - `emacs --batch -l tests/config-tests.el -f ert-run-tests-batch-and-exit`
 - key workflow sanity:
   - `C-c` workflow keys work
@@ -85,8 +86,8 @@ Before declaring done:
 
 ### 2.3 Test Design Rules
 
-- Tests live in `tests/config-tests.el`.
-- Behavioral changes require test updates.
+- Tests should live in `tests/config-tests.el` once the repository has a test suite.
+- Behavioral changes should add or update tests when the behavior can be validated in batch mode without brittle UI assumptions.
 - Keep tests focused and avoid overfitting to unrelated formatting.
 - Prefer assertions on meaningful behavior contracts and stable symbols.
 
@@ -101,7 +102,7 @@ Before declaring done:
   - single source of behavior
   - tangled output is `config.el`
 - `tests/config-tests.el`
-  - repository-level regression checks
+  - optional repository-level regression checks; create this file before making the test command mandatory
 
 ### 3.2 Platform Policy
 
@@ -173,7 +174,7 @@ Before declaring done:
   - package missing -> skip feature with default behavior
 - Startup must remain robust in fresh environments.
 
-### 3.8 Current Baseline (2026-02-28)
+### 3.8 Current Baseline (2026-04-27)
 
 > ⚠️ This section is a snapshot as of the date above. For the current actual keybindings,
 > see `doc/KEYMAPS.org`. Completion stack and keybindings may have evolved since this was written.
@@ -189,55 +190,48 @@ Before declaring done:
   - `C-s -> consult-line`
   - `C-x b -> consult-buffer`
   - `C-. -> embark-act` (global; also available in minibuffer)
-  - `C-, -> embark-dwim` (global; also available in minibuffer)
-  - `C-c C-o -> embark-export` (inside minibuffer)
+  - `C-; -> embark-dwim`
+  - `M-y -> consult-yank-pop`
   - `C-h B -> embark-bindings`
-- File/project bindings:
+- Search/file/buffer bindings:
   - `C-x C-f -> find-file`
-  - `C-c s -> my/search-dispatch`
-  - `C-c g -> my/consult-ripgrep` (`consult-ripgrep`, fallback `rgrep`)
-  - `C-c l -> my/consult-line` (`consult-line`, fallback `isearch-forward`)
-  - `C-c r -> my/consult-recent-file` (`consult-recent-file`, fallback `recentf-open-files`)
-  - `C-c p -> projectile-switch-project`
-  - `C-c f -> projectile-find-file`
-  - `C-c d -> projectile-dired`
+  - `C-c s -> consult-ripgrep`
+  - `C-c f -> consult-find`
+  - `C-c o -> consult-outline`; in `org-mode`, `consult-org-heading`
+  - `C-c b -> consult-buffer`
+  - `C-c t -> dired-sidebar-toggle-sidebar`
 - Ergonomics baseline:
   - line numbers are enabled via `prog-mode-hook`, not globally
   - Evil/Vim modal editing is disabled
   - there is no insert-state escape chord
-  - font size is adaptive by display width and adjustable with:
-    - `C-c + -> my/font-size-increase`
-    - `C-c - -> my/font-size-decrease`
-    - `C-c 0 -> my/font-size-reset`
 - Org application prefix:
   - `C-c a -> org-agenda`
-  - `C-c c -> my/orgfiles-capture-dispatch`
-  - `C-c t -> my/orgfiles-capture-todo`
-  - `C-c T -> org-todo-list`
-  - `C-c q -> quit-window`; in agenda buffers this runs `org-agenda-quit`
-- Brainstorm draft workflow: default target `~/Documents/orgfiles/`, file naming `YYYY-MM-DD-HHMM-<title>.org`. Override via `ORGFILES_ROOT` or `~/.emacs.d/local.el`. See Section 3.9 below for details.
-- Todo capture workflow: target file `~/Documents/orgfiles/inbox.org`, headline `Tasks`, direct keybinding `C-c t`. See Section 3.9 below for details.
-- Meeting note capture workflow: default root `~/Documents/orgfiles/`, file naming `YYYY-MM-DD-HHMM-<meeting-name>.org`. See Section 3.9 below for details.
+  - `C-c c -> org-capture`
+  - `C-c l -> org-store-link`
+  - `C-c g i/p/w/c/d/n -> open inbox, personal, work, config, daily review, process inbox`
+- Org files are derived from `my/org-dir`: `inbox.org`, `personal.org`, `work.org`, and `journal.org`.
 
 ### 3.9 Org Capture Workflows
 
-**Brainstorm**: Create a new file each time (no org-capture template entry). File path: `~/Documents/orgfiles/YYYY-MM-DD-HHMM-<title>.org`. Override: `ORGFILES_ROOT` or `~/.emacs.d/local.el`.
+Capture uses the built-in `org-capture` dispatcher on `C-c c`.
 
-**Todo**: Capture to `~/Documents/orgfiles/inbox.org` under the `Tasks` headline. Direct keybinding: `C-c t`. Dispatch option: `todo`.
+**Inbox**: key `i`, captures a `TODO` entry directly into `my/org-inbox`.
 
-**Meeting**: Creates new file at `~/Documents/orgfiles/YYYY-MM-DD-HHMM-<meeting-name>.org`. Prompt order: capture key → meeting name → meeting time (defaults to now). First-create instantiates template sections: 背景/结论/待办/风险/下次会议前要准备.
+**Personal Task**: key `p`, captures a `TODO` entry under the `Tasks` headline in `my/org-personal`.
 
-**Journal**: Capture to `~/Documents/orgfiles/YYYY-MM-DD.org`.
+**Work Task**: key `w`, captures a `TODO` entry under the `Tasks` headline in `my/org-work`.
 
-**Idea**: Capture to `~/Documents/orgfiles/ideas.org`.
+**Note**: key `n`, captures a non-task note under the `Notes` headline in `my/org-inbox`.
 
-**Dispatch**: Menu-driven entry point for all capture types.
+**Journal**: key `j`, captures into the datetree in `my/org-journal`.
+
+**Reading Note**: key `r`, captures under the `Reading` headline in `my/org-personal`.
 
 ### 3.10 Agenda Scope and Refile
 
-- At startup, `org-agenda-files` is initialized from every `.org` file directly under `my/orgfiles-root` except `init.org`, plus the `projects/` subdirectory. Files created later in the session are intentionally not auto-added; temporary notes should be reviewed/refiled or the config reloaded when they should enter agenda.
-- Flow: capture lands in `inbox.org` (todo) or meeting notes; review and refile actionable items into `projects/<name>.org` via Org default `C-c C-w`.
+- At startup, `org-agenda-files` is initialized from `my/org-inbox`, `my/org-personal`, `my/org-work`, plus optional `my/org-extra-agenda-files`.
+- `my/gtd-initialize` creates the core org files if they do not exist.
+- Flow: capture lands in `inbox.org`, `personal.org`, `work.org`, or `journal.org`; review and refile actionable items via Org default `C-c C-w`.
 - Refile completion is flat (`org-outline-path-complete-in-steps nil`) and includes the file prefix (`org-refile-use-outline-path 'file`) so vertico/orderless can fuzzy-match across files.
-- New project files: put a top-level `* Tasks` (or similar) heading in a new `projects/<name>.org`; `org-refile-allow-creating-parent-nodes 'confirm` lets you create missing parents on the fly.
-- Full-text search across every note (including meetings/journals) remains available via `C-c g` (`consult-ripgrep`).
-- Consult-backed commands must use local wrapper commands with built-in fallbacks, so startup remains usable if package bootstrap cannot install `consult`.
+- Larger projects can be kept in separate org files and added through `my/org-extra-agenda-files`.
+- Full-text search across notes remains available via `C-c s` (`consult-ripgrep`).

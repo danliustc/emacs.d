@@ -591,7 +591,7 @@
   "打开 inbox.org，准备逐条处理。"
   (interactive)
   (find-file my/org-inbox)
-  (message "提示：选中标题后 C-c C-r 可以 Refile 到其他文件"))
+  (message "提示：选中标题后 C-c C-w 可以 Refile 到其他文件"))
 
 (global-set-key (kbd "C-c g i") 'my/open-inbox)
 (global-set-key (kbd "C-c g p") 'my/open-personal)
@@ -618,7 +618,7 @@
 | =C-c g c=     | 打开这个配置文件             |
 | =C-.=         | Embark 动作菜单             |
 | =C-c t=       | 侧边栏文件树                |
-| =C-c C-r=     | Refile 到其他文件 / 标题     |
+| =C-c C-w=     | Refile 到其他文件 / 标题     |
 | =C-c C-t=     | 切换 TODO 状态              |
 | =C-c C-s=     | 设置 Scheduled 时间          |
 | =C-c C-d=     | 设置 Deadline                |

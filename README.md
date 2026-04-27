@@ -88,7 +88,7 @@ C-c a k      工作任务列表
 ```
 C-c g n      打开 inbox.org
 C-c C-t      切换 TODO 状态（TODO → NEXT → DONE）
-C-c C-r      Refile 到 personal.org 或 work.org
+C-c C-w      Refile 到 personal.org 或 work.org
 C-c C-s      设置 Scheduled 时间
 C-c C-d      设置 Deadline
 C-c C-c      打标签（@home @work @errands 等）
@@ -139,7 +139,7 @@ C-c C-c      打标签（@home @work @errands 等）
 | 按键        | 功能                     |
 | ----------- | ------------------------ |
 | `C-c C-t`   | 切换 TODO 状态           |
-| `C-c C-r`   | Refile 到其他文件 / 标题 |
+| `C-c C-w`   | Refile 到其他文件 / 标题 |
 | `C-c C-s`   | 设置 Scheduled 时间      |
 | `C-c C-d`   | 设置 Deadline            |
 | `C-c C-c`   | 打标签 / 确认            |

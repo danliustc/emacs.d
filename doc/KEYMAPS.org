@@ -10,42 +10,47 @@
 - =C-x b= -> =consult-buffer=
 - =C-s= -> =consult-line=
 - =C-.= -> =embark-act=
-- =C-,= -> =embark-dwim=
+- =C-;= -> =embark-dwim=
 - =C-h B= -> =embark-bindings=
+- =M-y= -> =consult-yank-pop=
 - =M-w= -> =kill-ring-save= (copy active region)
 - =C-y= -> =yank= (paste)
 
 * Clipboard
 
-- =s-c= / =Command-c= -> =my/copy-region-or-line=
-- =s-v= / =Command-v= -> =yank=
-- =s-x= / =Command-x= -> =kill-region=
-- =C-c w= -> =my/copy-region-or-line= (terminal-friendly copy)
+- GUI Emacs uses the system clipboard through =select-enable-clipboard=.
+- Terminal Emacs remaps:
+  - =M-w= -> =kill-ring-save=, then =pbcopy=
+  - =C-w= -> =kill-region=, then =pbcopy=
+  - =C-y= -> =my/pbpaste=
+- =M-y= -> =consult-yank-pop=
 
 * Personal =C-c= Keys
 
 - =C-c a= -> =org-agenda=
-- =C-c c= -> =my/orgfiles-capture-dispatch=
-- =C-c t= -> =my/orgfiles-capture-todo=
-- =C-c T= -> =org-todo-list=
-- =C-c s= -> =my/search-dispatch=
-- =C-c g= -> =my/consult-ripgrep= (=consult-ripgrep=, fallback to =rgrep=)
-- =C-c l= -> =my/consult-line= (=consult-line=, fallback to =isearch-forward=)
-- =C-c r= -> =my/consult-recent-file= (=consult-recent-file=, fallback to =recentf-open-files=)
-- =C-c p= -> =my/project-switch-project=
-- =C-c f= -> =my/project-find-file=
-- =C-c d= -> =my/project-dired=
-- =C-c w= -> =my/copy-region-or-line=
-- =C-c += -> =my/font-size-increase=
-- =C-c -= -> =my/font-size-decrease=
-- =C-c 0= -> =my/font-size-reset=
-- =C-c q= -> =quit-window=
+- =C-c c= -> =org-capture=
+- =C-c l= -> =org-store-link=
+- =C-c s= -> =consult-ripgrep=
+- =C-c f= -> =consult-find=
+- =C-c o= -> =consult-outline= globally, =consult-org-heading= in =org-mode=
+- =C-c m= -> =consult-mark=
+- =C-c e= -> =consult-flymake=
+- =C-c t= -> =dired-sidebar-toggle-sidebar=
+- =C-c b= -> =consult-buffer=
+
+* GTD Navigation Keys
+
+- =C-c g i= -> =my/open-inbox=
+- =C-c g p= -> =my/open-personal=
+- =C-c g w= -> =my/open-work=
+- =C-c g c= -> =my/open-config=
+- =C-c g d= -> =my/gtd-daily-review=
+- =C-c g n= -> =my/gtd-process-inbox=
 
 * Minibuffer Actions (Consult/Embark Flow)
 
 - =C-.= -> =embark-act=
-- =C-,= -> =embark-dwim=
-- =C-c C-o= -> =embark-export= (exports minibuffer results to a buffer)
+- =C-;= -> =embark-dwim=
 
 * Org Mode
 
@@ -59,7 +64,10 @@
 * Org Agenda
 
 - =q= -> =org-agenda-quit=
-- =C-c q= -> =org-agenda-quit=
+- =C-c a d= -> daily dashboard custom command
+- =C-c a W= -> weekly overview custom command
+- =C-c a p= -> personal tasks custom command
+- =C-c a k= -> work tasks custom command
 
 * Markdown Mode
 
@@ -68,8 +76,7 @@
 
 * Prog Mode
 
-- =C-c C-g= -> =xref-find-definitions=
-- =C-c C-r= -> =xref-find-references=
+- Line numbers are enabled in =prog-mode= via =display-line-numbers-mode=.
 
 * Ergonomics Notes
 
