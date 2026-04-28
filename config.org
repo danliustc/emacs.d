@@ -1,4 +1,4 @@
-#+TITLE: Emacs 配置 — 文学编程版
+#+TITLE: 简单配置
 #+AUTHOR: AI
 #+PROPERTY: header-args:emacs-lisp :tangle yes :results silent
 #+STARTUP: overview
@@ -42,9 +42,8 @@
 
 ;; GTD 文件路径从 my/org-dir 自动派生
 (defvar my/org-inbox    (concat my/org-dir "/inbox.org"))
-(defvar my/org-personal (concat my/org-dir "/personal.org"))
-(defvar my/org-work     (concat my/org-dir "/work.org"))
-(defvar my/org-journal  (concat my/org-dir "/journal.org"))
+(defvar my/org-tasks    (concat my/org-dir "/tasks.org"))
+(defvar my/org-ideas    (concat my/org-dir "/ideas.org"))
 #+end_src
 
 * 早期初始化 — 加速启动
@@ -341,7 +340,7 @@
 
 #+begin_example
 收集 → Inbox.org (C-c c i)
-整理 → Refile 到 personal.org / work.org
+整理 → Refile 到 tasks.org
 执行 → Agenda 视图
 回顾 → 每周 Agenda
 #+end_example
@@ -356,31 +355,34 @@
   ;; --- GTD 文件 ---
   (setq org-directory my/org-dir)
   (setq org-agenda-files
-        (append (list my/org-inbox my/org-personal my/org-work)
+        (append (list my/org-inbox my/org-tasks)
                 (when (bound-and-true-p my/org-extra-agenda-files)
                   my/org-extra-agenda-files)))
 
   ;; --- TODO 关键词 ---
-  ;; 简单但够用：TODO → NEXT → DONE，WAITING，CANCELLED
+  ;; Things/GTD 风格：Inbox 收集 TODO，整理后进入 NEXT/WAITING/SOMEDAY。
   (setq org-todo-keywords
         '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
-          (sequence "WAITING(w@/!)" "|" "CANCELLED(c@)")))
+          (sequence "WAITING(w@/!)" "SOMEDAY(s)" "|" "CANCELLED(c@)")))
 
   (setq org-todo-keyword-faces
         '(("TODO"      . (:foreground "#b45309" :weight bold))
           ("NEXT"      . (:foreground "#1d4ed8" :weight bold))
           ("WAITING"   . (:foreground "#6d28d9" :weight bold))
+          ("SOMEDAY"   . (:foreground "#64748b" :weight bold))
           ("DONE"      . (:foreground "#15803d"))
           ("CANCELLED" . (:foreground "#6b7280" :strike-through t))))
 
   ;; --- 标签 ---
   (setq org-tag-alist
-        '((:startgroup)
-          ("@home"    . ?h)
-          ("@work"    . ?w)
-          ("@errands" . ?e)
-          ("@computer". ?c)
-          (:endgroup)
+        '(("personal" . ?p)
+          ("work"     . ?w)
+          ("home"     . ?h)
+          ("errands"  . ?e)
+          ("computer" . ?c)
+          ("health"   . ?m)
+          ("learning" . ?l)
+          ("travel"   . ?v)
           ("energy_high" . ?H)
           ("energy_low"  . ?L)
           ("quick"       . ?q)))
@@ -408,31 +410,31 @@
 
           ;; 个人任务
           ("p" "👤 Personal 任务" entry
-           (file+headline ,my/org-personal "Tasks")
-           "* TODO %?\n:PROPERTIES:\n:CREATED: %U\n:END:\n"
+           (file+headline ,my/org-tasks "Tasks")
+           "* TODO %? :personal:\n:PROPERTIES:\n:CREATED: %U\n:END:\n"
            :empty-lines 1)
 
           ;; 工作任务
           ("w" "💼 Work 任务" entry
-           (file+headline ,my/org-work "Tasks")
-           "* TODO %?\n:PROPERTIES:\n:CREATED: %U\n:END:\n"
+           (file+headline ,my/org-tasks "Tasks")
+           "* TODO %? :work:\n:PROPERTIES:\n:CREATED: %U\n:END:\n"
            :empty-lines 1)
 
-          ;; 快速笔记（不是任务）
-          ("n" "📝 笔记" entry
-           (file+headline ,my/org-inbox "Notes")
-           "* %? :note:\n%U\n%i\n"
+          ;; Someday / Maybe
+          ("s" "🕰 Someday" entry
+           (file+headline ,my/org-tasks "Tasks")
+           "* SOMEDAY %?\n:PROPERTIES:\n:CREATED: %U\n:END:\n"
            :empty-lines 1)
 
-          ;; 日记 / 日志
-          ("j" "📓 日记" entry
-           (file+datetree ,my/org-journal)
-           "* %U\n%?\n"
+          ;; 碎碎念 / 想法（不是任务）
+          ("n" "💭 Ideas / 碎碎念" entry
+           (file+headline ,my/org-ideas "Ideas")
+           "* %?\n:PROPERTIES:\n:CREATED: %U\n:END:\n%i\n"
            :empty-lines 1)
 
           ;; 读书 / 阅读笔记
           ("r" "📚 阅读笔记" entry
-           (file+headline ,my/org-personal "Reading")
+           (file+headline ,my/org-ideas "Reading")
            "* %^{书名 / 文章}\n:PROPERTIES:\n:CREATED: %U\n:SOURCE: %^{来源}\n:END:\n%?\n"
            :empty-lines 1)))
 
@@ -470,6 +472,30 @@
                   ((org-agenda-overriding-header "📥 待处理 Inbox")
                    (org-agenda-files (list my/org-inbox))))))
 
+          ;; "n" → Anytime / Next Actions
+          ("n" "⚡ 下一步行动"
+           ((todo "NEXT"
+                  ((org-agenda-overriding-header "⚡ Anytime / 下一步行动")
+                   (org-agenda-skip-function
+                    '(org-agenda-skip-entry-if 'scheduled 'deadline))))))
+
+          ;; "i" → Inbox
+          ("i" "📥 Inbox"
+           ((todo "TODO"
+                  ((org-agenda-overriding-header "📥 待整理 Inbox")
+                   (org-agenda-files (list my/org-inbox))))))
+
+          ;; "s" → Someday / Maybe
+          ("s" "🕰 Someday"
+           ((todo "SOMEDAY"
+                  ((org-agenda-overriding-header "🕰 Someday / Maybe")))))
+
+          ;; "u" → Upcoming
+          ("u" "📆 Upcoming"
+           ((agenda ""
+                    ((org-agenda-span 14)
+                     (org-agenda-start-on-weekday nil)))))
+
           ;; "w" → 本周视图
           ("W" "📆 本周概览"
            ((agenda ""
@@ -478,13 +504,17 @@
 
           ;; "p" → 个人项目
           ("p" "👤 个人任务"
-           ((tags-todo "@home|@errands|@computer"
-                       ((org-agenda-overriding-header "个人待办")))))
+           ((tags-todo "personal|home|errands|computer"
+                       ((org-agenda-overriding-header "个人待办")
+                        (org-agenda-skip-function
+                         '(org-agenda-skip-entry-if 'todo '("SOMEDAY")))))))
 
           ;; "k" → 工作
           ("k" "💼 工作任务"
-           ((tags-todo "@work"
-                       ((org-agenda-overriding-header "工作待办")))))))
+           ((tags-todo "work"
+                       ((org-agenda-overriding-header "工作待办")
+                        (org-agenda-skip-function
+                         '(org-agenda-skip-entry-if 'todo '("SOMEDAY")))))))))
 
   ;; Agenda 显示设置
   (setq org-agenda-window-setup 'current-window
@@ -515,15 +545,43 @@
 ** 初始化 org 文件目录
 
 #+begin_src emacs-lisp
+(defun my/gtd-file-title (path)
+  "Return a readable Org title for PATH."
+  (file-name-sans-extension (file-name-nondirectory path)))
+
+(defun my/gtd-create-file (path &optional body)
+  "Create PATH with a standard Org header and optional BODY."
+  (unless (file-exists-p path)
+    (with-temp-file path
+      (insert (format "#+TITLE: %s\n#+STARTUP: overview\n\n%s"
+                      (my/gtd-file-title path)
+                      (or body ""))))))
+
+(defun my/gtd-ensure-top-level-headings (path headings)
+  "Append missing top-level HEADINGS to PATH."
+  (with-current-buffer (find-file-noselect path)
+    (save-excursion
+      (dolist (heading headings)
+        (unless (save-excursion
+                  (goto-char (point-min))
+                  (re-search-forward
+                   (format "^\\* %s\\(?:[ \t\n]\\|$\\)" (regexp-quote heading))
+                   nil t))
+          (goto-char (point-max))
+          (unless (bolp) (insert "\n"))
+          (insert (format "\n* %s\n" heading)))))
+    (when (buffer-modified-p)
+      (save-buffer))))
+
 (defun my/gtd-initialize ()
   "创建 GTD 所需的 org 文件（如果不存在）。"
   (interactive)
   (make-directory my/org-dir t)
-  (dolist (path (list my/org-inbox my/org-personal my/org-work my/org-journal))
-    (unless (file-exists-p path)
-      (with-temp-file path
-        (insert (format "#+TITLE: %s\n#+STARTUP: overview\n\n"
-                        (file-name-sans-extension (file-name-nondirectory path))))))))
+  (dolist (path (list my/org-inbox my/org-ideas))
+    (my/gtd-create-file path))
+  (my/gtd-ensure-top-level-headings my/org-ideas '("Ideas"))
+  (my/gtd-create-file my/org-tasks "* Tasks\n")
+  (my/gtd-ensure-top-level-headings my/org-tasks '("Tasks")))
 
 ;; 启动时自动初始化
 (add-hook 'emacs-startup-hook #'my/gtd-initialize)
@@ -627,8 +685,8 @@
 
 ;; 快速打开常用 org 文件和 GTD 视图
 (defun my/open-inbox   () (interactive) (find-file my/org-inbox))
-(defun my/open-personal() (interactive) (find-file my/org-personal))
-(defun my/open-work    () (interactive) (find-file my/org-work))
+(defun my/open-tasks   () (interactive) (find-file my/org-tasks))
+(defun my/open-ideas   () (interactive) (find-file my/org-ideas))
 (defun my/open-config  () (interactive) (find-file "~/.emacs.d/config.org"))
 (defun my/gtd-daily-review ()
   "打开今日 Agenda 仪表盘。"
@@ -641,8 +699,8 @@
   (message "提示：选中标题后 C-c C-w 可以 Refile 到其他文件"))
 
 (global-set-key (kbd "C-c g i") 'my/open-inbox)
-(global-set-key (kbd "C-c g p") 'my/open-personal)
-(global-set-key (kbd "C-c g w") 'my/open-work)
+(global-set-key (kbd "C-c g t") 'my/open-tasks)
+(global-set-key (kbd "C-c g e") 'my/open-ideas)
 (global-set-key (kbd "C-c g c") 'my/open-config)
 (global-set-key (kbd "C-c g d") 'my/gtd-daily-review)
 (global-set-key (kbd "C-c g n") 'my/gtd-process-inbox)
@@ -655,13 +713,17 @@
 | =M-x=         | 搜索所有命令（模糊匹配）      |
 | =C-c c=       | 捕获任务 / 笔记              |
 | =C-c a=       | 打开 Agenda（按 =d= 看今日） |
+| =C-c a n=     | Anytime / 下一步行动         |
+| =C-c a i=     | Inbox 待整理                 |
+| =C-c a s=     | Someday / Maybe             |
+| =C-c a u=     | Upcoming 未来 14 天          |
 | =C-c s=       | 全局内容搜索（ripgrep）       |
 | =C-s=         | 当前文件搜索                 |
 | =C-c o=       | 跳转到大纲标题               |
 | =C-c b=       | 切换 Buffer                 |
 | =C-c g i=     | 打开 inbox.org              |
-| =C-c g p=     | 打开 personal.org           |
-| =C-c g w=     | 打开 work.org               |
+| =C-c g t=     | 打开 tasks.org              |
+| =C-c g e=     | 打开 ideas.org              |
 | =C-c g c=     | 打开这个配置文件             |
 | =C-.=         | Embark 动作菜单             |
 | =C-c t=       | 侧边栏文件树                |

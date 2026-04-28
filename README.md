@@ -16,9 +16,8 @@
 
 ~/Dropbox/orgfiles/
 ├── inbox.org            # 收集箱
-├── personal.org         # 个人任务
-├── work.org             # 工作任务
-├── journal.org          # 日记
+├── tasks.org            # 所有已明确的行动任务
+├── ideas.org            # 碎碎念 / 想法
 └── init.org             # beorg（手机）配置
 ```
 
@@ -68,16 +67,20 @@ cp user-settings.example.el ~/.emacs.d/user-settings.el
 | 按键             | 动作                 |
 | ---------------- | -------------------- |
 | `C-c c` 然后 `i` | 扔进 Inbox（最常用） |
-| `C-c c` 然后 `p` | 直接存为个人任务     |
-| `C-c c` 然后 `w` | 直接存为工作任务     |
-| `C-c c` 然后 `n` | 记一条笔记           |
-| `C-c c` 然后 `j` | 写日记               |
+| `C-c c` 然后 `p` | 个人任务，写入 tasks.org 并加 `:personal:` |
+| `C-c c` 然后 `w` | 工作任务，写入 tasks.org 并加 `:work:`     |
+| `C-c c` 然后 `s` | 放入 Someday / Maybe |
+| `C-c c` 然后 `n` | 记一条碎碎念 / 想法  |
 
 ### 每日回顾
 
 ```
 C-c a d      打开今日仪表盘
   → 显示今天的日程、NEXT 任务、等待中的事、待处理 Inbox
+C-c a n      Anytime / 下一步行动
+C-c a i      Inbox
+C-c a s      Someday / Maybe
+C-c a u      Upcoming（未来 14 天）
 C-c a W      本周概览
 C-c a p      个人任务列表
 C-c a k      工作任务列表
@@ -87,25 +90,30 @@ C-c a k      工作任务列表
 
 ```
 C-c g n      打开 inbox.org
-C-c C-t      切换 TODO 状态（TODO → NEXT → DONE）
-C-c C-w      Refile 到 personal.org 或 work.org
+C-c C-t      切换 TODO 状态（TODO → NEXT → DONE；WAITING/SOMEDAY 可用快捷键直接选）
+C-c C-w      Refile 到 tasks.org
 C-c C-s      设置 Scheduled 时间
 C-c C-d      设置 Deadline
-C-c C-c      打标签（@home @work @errands 等）
+C-c C-c      打标签（personal work health computer 等）
 ```
 
-### 复杂项目
+### 任务与搜索
 
-在 `personal.org` 或 `work.org` 里直接建层级：
+所有已明确要做的任务统一放在 `tasks.org`。个人、工作、健康、学习等维度用标签表达，不再按文件硬分类。
 
 ```org
-* 项目名称          ← 不加 TODO
-** TODO 子任务一
-** NEXT 子任务二    ← 当前要做的
-** WAITING 等某人回复
+* Tasks
+** NEXT 预约体检 :personal:health:
+SCHEDULED: <2026-04-29 Wed>
+
+** NEXT 写项目周报 :work:
+
+** WAITING 等朋友确认旅行日期 :personal:travel:
+
+** SOMEDAY 学摄影 :personal:learning:
 ```
 
-项目很大时，单独建文件（如 `project-x.org`），加到 `user-settings.el` 的 `my/org-extra-agenda-files` 里。
+项目很大时，可以在 `tasks.org` 里建一个普通标题组织子任务；真的需要单独文件时，再加到 `user-settings.el` 的 `my/org-extra-agenda-files` 里。
 
 ------
 
@@ -127,10 +135,14 @@ C-c C-c      打标签（@home @work @errands 等）
 | --------- | ----------------------------- |
 | `C-c c`   | 捕获任务 / 笔记               |
 | `C-c a d` | 今日仪表盘                    |
+| `C-c a n` | 下一步行动 / Anytime          |
+| `C-c a i` | Inbox                         |
+| `C-c a s` | Someday / Maybe               |
+| `C-c a u` | Upcoming                      |
 | `C-c a`   | Agenda 菜单（再按字母选视图） |
 | `C-c g i` | 打开 inbox.org                |
-| `C-c g p` | 打开 personal.org             |
-| `C-c g w` | 打开 work.org                 |
+| `C-c g t` | 打开 tasks.org                |
+| `C-c g e` | 打开 ideas.org                |
 | `C-c g d` | 今日 Agenda（同 `C-c a d`）   |
 | `C-c g n` | 处理 Inbox                    |
 
@@ -191,6 +203,6 @@ C-c C-c      打标签（@home @work @errands 等）
 
 ## 手机端（beorg）
 
-将 `init.org` 放入 `~/Dropbox/orgfiles/`，beorg 启动时自动读取。 配置了和 Emacs 一致的 TODO 关键词（`TODO → NEXT → WAITING → DONE`）、捕获模板、以及排除 `init.org` 本身不出现在任务列表里。
+将 `init.org` 放入 `~/Dropbox/orgfiles/`，beorg 启动时自动读取。 配置了和 Emacs 一致的 TODO 关键词（`TODO → NEXT → WAITING → SOMEDAY → DONE`）、捕获模板、以及排除 `init.org` 本身不出现在任务列表里。
 
 修改后在 beorg 的 REPL 里输入 `(load 'init)` 立即生效，无需重启。
