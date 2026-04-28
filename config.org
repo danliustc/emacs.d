@@ -1,5 +1,5 @@
 #+TITLE: Emacs 配置 — 文学编程版
-#+AUTHOR: You
+#+AUTHOR: AI
 #+PROPERTY: header-args:emacs-lisp :tangle yes :results silent
 #+STARTUP: overview
 
@@ -85,7 +85,6 @@
     embark-consult
     which-key
     org-superstar
-    olivetti
     markdown-mode
     dired-sidebar)
   "Third-party packages used by this configuration.")
@@ -533,16 +532,6 @@
 * 写作体验增强
 
 #+begin_src emacs-lisp
-;; Olivetti — 居中写作模式，减少干扰
-(use-package olivetti
-  :ensure nil
-  :if (my/package-installed-p 'olivetti)
-  :hook
-  ((org-mode . olivetti-mode)
-   (markdown-mode . olivetti-mode))
-  :config
-  (setq olivetti-body-width 88))
-
 ;; Markdown 支持（写文章时用得到）
 (use-package markdown-mode
   :ensure nil
