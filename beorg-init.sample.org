@@ -1,0 +1,143 @@
+#+TITLE: beorg init.org sample
+#+AUTHOR: liwei
+#+STARTUP: overview
+
+* 使用方式
+
+这是给 beorg 手机端使用的 =init.org= 示例文件。
+
+你的桌面 Emacs 配置里，Org 根目录目前是：
+
+#+begin_example
+/Users/liwei/Library/CloudStorage/Dropbox/orgfiles
+#+end_example
+
+如果 beorg 也同步这个目录，把本文件内容复制到该目录下的 =init.org=：
+
+#+begin_example
+/Users/liwei/Library/CloudStorage/Dropbox/orgfiles/init.org
+#+end_example
+
+beorg 只会执行下面的 =#+begin_src scheme= 代码块；普通 Org 标题和说明会被忽略。
+
+* GTD 状态
+
+和桌面 Emacs 的 =org-todo-keywords= 保持一致：
+
+- 未完成：TODO, NEXT, WAITING
+- 已完成：DONE, CANCELLED
+
+#+begin_src scheme
+(set! org-todo-action-keywords '("TODO" "NEXT" "WAITING"))
+(set! org-todo-done-keywords '("DONE" "CANCELLED"))
+#+end_src
+
+* 完成日志
+
+桌面 Emacs 里设置了 =org-log-done= 和 =org-log-into-drawer=。
+这里让 beorg 完成任务时也写入 CLOSED，并把状态变化/计时日志放进 LOGBOOK。
+
+#+begin_src scheme
+(set! org-log-done 'time)
+(set! org-log-repeat 'time)
+(set! org-log-into-drawer "LOGBOOK")
+(set! org-todo-repeat-to-state "TODO")
+#+end_src
+
+* Agenda 与 Tasks
+
+你的桌面工作流是：
+
+- =inbox.org=：快速收集
+- =personal.org=：个人任务
+- =work.org=：工作任务
+- =journal.org=：日记
+
+beorg 的文件范围主要在 App 的同步设置里控制；这里配置 Tasks 页的默认过滤和角标。
+
+#+begin_src scheme
+;; Tasks 页默认显示未完成任务，按状态分组，并把高优先级排前面。
+(set! todo-default-filter "/(state:TODO OR state:NEXT OR state:WAITING) group:state order:>priority")
+
+;; App 图标角标只统计逾期且未完成的任务。
+(set! badge-filter "o k")
+#+end_src
+
+* 日期与时间
+
+使用和 Org 文件兼容、也更接近你桌面 Agenda 阅读习惯的日期格式。
+
+#+begin_src scheme
+(set! org-date-format "yyyy-MM-dd")
+(set! org-date-time-format "yyyy-MM-dd HH:mm")
+(set! org-time-format "HH:mm")
+
+;; 在 beorg 里给任务加时间时，常用时间快捷项。
+(set! date-preset-times '("09:00" "13:00" "17:00" "21:00"))
+#+end_src
+
+* 优先级
+
+桌面 Emacs 支持默认的 A/B/C 优先级；这里保留 A 到 C，避免手机端选择列表过长。
+
+#+begin_src scheme
+(set! org-priorities '("A" "B" "C"))
+(set! org-priority-default "B")
+#+end_src
+
+* 文件与同步
+
+如果你以后把项目文件放进子目录，可以打开 =sync-subfolders=。当前 GTD 主文件都在根目录，所以默认关闭。
+
+#+begin_src scheme
+(set! sync-subfolders #f)
+(set! show-notes-tab #f)
+
+;; 避免误删文件；需要在 beorg 删除文件时临时改成 #f。
+(set! file-disable-delete #t)
+
+;; init.org 是配置文件，不作为任务文件编辑。
+(set! file-read-only-list '("init.org"))
+#+end_src
+
+* 打开体验
+
+beorg 启动后默认进入 Agenda；打开大纲时显示一到二级标题，适合手机屏幕。
+
+#+begin_src scheme
+(set! ui-start-tab "agenda")
+(set! org-startup-folded "show2levels")
+#+end_src
+
+* 文本编辑器
+
+手机端编辑 Org 文件时使用等宽字体，减少 Scheme、属性抽屉和列表错位。
+
+#+begin_src scheme
+(set! editor-font "Menlo 15")
+(set! repl-font "Menlo 15")
+(set! editor-toolbar-show-in-mini #t)
+#+end_src
+
+* 可选：标签约定
+
+beorg 没有直接等价于 Emacs =org-tag-alist= 的固定标签列表。
+建议在手机端沿用桌面的这些标签：
+
+#+begin_example
+@home  @work  @errands  @computer
+energy_high  energy_low  quick
+#+end_example
+
+* 可选：手机端快速收集约定
+
+beorg 的 Quick Capture 目标文件建议在 App 设置里设为 =inbox.org=。
+如果你购买或启用了 Templates 扩展，可以手动建这些模板来对应桌面 capture：
+
+| 模板 | 文件 | 状态 | 标题/用途 |
+|------+------|------+-----------|
+| Inbox | inbox.org | TODO | 快速收集任何想法或任务 |
+| Personal | personal.org | TODO | 个人任务 |
+| Work | work.org | TODO | 工作任务 |
+| Note | inbox.org | 空 | 快速笔记，可加 note 标签 |
+| Journal | journal.org | 空 | 日记或日志 |
