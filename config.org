@@ -49,11 +49,6 @@
 * 早期初始化 — 加速启动
 
 #+begin_src emacs-lisp
-;; 启动时临时关大 GC，启动完再调回来
-(setq gc-cons-threshold most-positive-fixnum)
-(add-hook 'emacs-startup-hook
-          (lambda () (setq gc-cons-threshold (* 16 1024 1024))))
-
 ;; 关掉 native-comp 警告
 (setq native-comp-async-report-warnings-errors nil)
 #+end_src
@@ -234,7 +229,7 @@
 
 ;; 确认退出
 (setq confirm-kill-emacs 'y-or-n-p)
-(fset 'yes-or-no-p 'y-or-n-p)
+(setq use-short-answers t)
 #+end_src
 
 * 命令搜索 — 核心体验（Vertico + Consult + Embark + Marginalia）
@@ -281,9 +276,6 @@
   (("M-y"   . consult-yank-pop)       ; 剪贴板历史
    ("C-x b" . consult-buffer)          ; 切换 buffer（含最近文件）
    ("C-s"   . consult-line)            ; 当前文件内搜索（实时预览）
-   ("C-c s" . consult-ripgrep)         ; 全局文字搜索（需装 ripgrep）
-   ("C-c f" . consult-find)            ; 文件名搜索
-   ("C-c o" . consult-outline)         ; 跳转大纲
    ("C-c m" . consult-mark)            ; 跳转 mark ring
    ("C-c e" . consult-flymake)         ; 错误列表
    :map org-mode-map
@@ -559,19 +551,21 @@
 
 (defun my/gtd-ensure-top-level-headings (path headings)
   "Append missing top-level HEADINGS to PATH."
-  (with-current-buffer (find-file-noselect path)
-    (save-excursion
-      (dolist (heading headings)
-        (unless (save-excursion
-                  (goto-char (point-min))
-                  (re-search-forward
-                   (format "^\\* %s\\(?:[ \t\n]\\|$\\)" (regexp-quote heading))
-                   nil t))
-          (goto-char (point-max))
-          (unless (bolp) (insert "\n"))
-          (insert (format "\n* %s\n" heading)))))
-    (when (buffer-modified-p)
-      (save-buffer))))
+  (let ((buf (find-file-noselect path)))
+    (with-current-buffer buf
+      (save-excursion
+        (dolist (heading headings)
+          (unless (save-excursion
+                    (goto-char (point-min))
+                    (re-search-forward
+                     (format "^\\* %s\\(?:[ \t\n]\\|$\\)" (regexp-quote heading))
+                     nil t))
+            (goto-char (point-max))
+            (unless (bolp) (insert "\n"))
+            (insert (format "\n* %s\n" heading)))))
+      (when (buffer-modified-p)
+        (save-buffer)))
+    (kill-buffer buf)))
 
 (defun my/gtd-initialize ()
   "创建 GTD 所需的 org 文件（如果不存在）。"
