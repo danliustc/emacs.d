@@ -222,6 +222,8 @@
       `(("." . ,(expand-file-name "backups" user-emacs-directory))))
 (setq auto-save-file-name-transforms
       `((".*" ,(expand-file-name "auto-saves/" user-emacs-directory) t)))
+;; 不生成锁文件，避免网盘同步冲突；Emacs 仍会在保存时检测磁盘变更
+(setq create-lockfiles nil)
 
 ;; 确保目录存在
 (make-directory (expand-file-name "backups" user-emacs-directory) t)
