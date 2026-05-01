@@ -22,3 +22,7 @@
 ;; (setq my/org-extra-agenda-files
 ;;       '("~/org/renovation.org"
 ;;         "~/org/book-draft.org"))
+
+;; capture-llm: DeepSeek API key for natural language capture.
+;; Get your key at https://platform.deepseek.com/api_keys
+(setq my/deepseek-api-key "YOUR_DEEPSEEK_API_KEY")
