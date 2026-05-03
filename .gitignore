@@ -9,6 +9,7 @@ user-settings.el
 # 包目录（体积大，不需要纳入版本控制）
 straight/
 elpa/
+quelpa/
 
 # 备份与自动保存
 backups/
