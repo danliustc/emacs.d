@@ -387,6 +387,9 @@
   (setq org-log-done 'time)
   (setq org-log-into-drawer t)
 
+  ;; --- Archive ---
+  (setq org-archive-location (concat my/org-dir "/archive.org::* Archived"))
+
   ;; --- Refile ---
   ;; 只允许 refile 到各文件的一级容器标题（Inbox / Tasks / Ideas / Reading）。
   ;; 任务本身从二级开始，避免误把一个任务 refile 到另一个任务下面。
