@@ -44,6 +44,7 @@
 (defvar my/org-inbox    (concat my/org-dir "/inbox.org"))
 (defvar my/org-tasks    (concat my/org-dir "/tasks.org"))
 (defvar my/org-ideas    (concat my/org-dir "/ideas.org"))
+(defvar my/org-archive  (concat my/org-dir "/archive.org"))
 #+end_src
 
 * 早期初始化 — 加速启动
@@ -388,13 +389,14 @@
   (setq org-log-into-drawer t)
 
   ;; --- Archive ---
-  (setq org-archive-location (concat my/org-dir "/archive.org::* Archived"))
+  (setq org-archive-location (concat my/org-archive "::* Archived"))
 
   ;; --- Refile ---
-  ;; 只允许 refile 到各文件的一级容器标题（Inbox / Tasks / Ideas / Reading）。
+  ;; 只允许 refile 到各文件的一级容器标题（Inbox / Tasks / Ideas / Reading / Archived）。
   ;; 任务本身从二级开始，避免误把一个任务 refile 到另一个任务下面。
   (setq org-refile-targets
-        '((org-agenda-files :level . 1)))
+        `((org-agenda-files :level . 1)
+          (,my/org-archive :level . 1)))
   (setq org-refile-use-outline-path t)
   (setq org-outline-path-complete-in-steps nil)  ; 一步完成，配合 vertico
   (setq org-refile-allow-creating-parent-nodes 'confirm)
@@ -579,10 +581,11 @@
   "创建 GTD 所需的 org 文件（如果不存在）。"
   (interactive)
   (make-directory my/org-dir t)
-  (dolist (path (list my/org-inbox my/org-ideas))
+  (dolist (path (list my/org-inbox my/org-ideas my/org-archive))
     (my/gtd-create-file path))
   (my/gtd-ensure-top-level-headings my/org-inbox '("Inbox"))
   (my/gtd-ensure-top-level-headings my/org-ideas '("Ideas"))
+  (my/gtd-ensure-top-level-headings my/org-archive '("Archived"))
   (my/gtd-create-file my/org-tasks "* Tasks\n")
   (my/gtd-ensure-top-level-headings my/org-tasks '("Tasks")))
 
