@@ -38,7 +38,7 @@
 (defvar my/org-dir     (or (bound-and-true-p my/org-dir)     "~/Dropbox/orgfiles"))
 (defvar my/font        (or (bound-and-true-p my/font)        "Iosevka"))
 (defvar my/font-size   (or (bound-and-true-p my/font-size)   150))
-(defvar my/theme       (or (bound-and-true-p my/theme)       'modus-operandi-tinted))
+(defvar my/theme       (or (bound-and-true-p my/theme)       'solarized-light))
 
 ;; GTD 文件路径从 my/org-dir 自动派生
 (defvar my/org-inbox    (concat my/org-dir "/inbox.org"))
@@ -63,6 +63,15 @@
       '(("gnu"    . "https://elpa.gnu.org/packages/")
         ("nongnu" . "https://elpa.nongnu.org/nongnu/")
         ("melpa"  . "https://melpa.org/packages/")))
+
+;; 稳定优先。MELPA 是滚动快照，版本号形如 20260502.950，永远大于 GNU ELPA 的
+;; 语义版本号 1.9；不设优先级的话每个包都会装成当天快照。设好之后，只有 MELPA
+;; 独有的包（org-superstar、dired-sidebar）才走 MELPA。
+(setq package-archive-priorities
+      '(("gnu"    . 3)
+        ("nongnu" . 2)
+        ("melpa"  . 1)))
+
 (package-initialize)
 
 (unless (require 'use-package nil t)
@@ -71,32 +80,55 @@
 
 (defvar my/packages
   '(exec-path-from-shell
-    modus-themes
+    solarized-theme
     vertico
     orderless
     marginalia
     consult
     embark
     embark-consult
-    which-key
     org-superstar
     markdown-mode
     dired-sidebar
-    llm                                ; capture-llm 的 LLM 抽象层
-    quelpa)                            ; 从 GitHub 安装非 MELPA 包
-  "Third-party packages used by this configuration.")
+    llm)                               ; capture-llm 的 LLM 抽象层
+  "Third-party packages installed from the archives in `package-archives'.
+which-key、use-package 是 Emacs 30 内置的，不需要列在这里。")
+
+(defvar my/vc-packages
+  '((capture-llm . "https://github.com/danliustc/capture-llm"))
+  "Packages installed directly from a Git repository.
+用内置的 `package-vc-install'，不需要 quelpa（quelpa 会为此克隆一份
+40MB 以上的 MELPA 仓库）。")
+
+;; 让 package.el 知道哪些包是「要的」：package-autoremove 靠它识别孤儿包，
+;; package-upgrade-all 靠它决定升级范围。这个值必须和上面两张表一致，
+;; 否则 autoremove 会误判（见「收尾」一节的重新赋值）。
+(defvar my/selected-packages
+  (append my/packages (mapcar #'car my/vc-packages))
+  "All packages this configuration wants installed.")
+
+(setq package-selected-packages my/selected-packages)
 
 (defun my/install-missing-packages ()
-  "Install third-party packages required by this configuration."
+  "Install every package this configuration needs.
+装完需要重启 Emacs：各个 use-package 块的 :if 在配置加载时就已经求值了。"
   (interactive)
   (package-refresh-contents)
-  (dolist (pkg my/packages)
+  (package-install-selected-packages t)
+  (pcase-dolist (`(,pkg . ,url) my/vc-packages)
     (unless (package-installed-p pkg)
-      (package-install pkg))))
+      (package-vc-install (cons pkg (list :url url)))))
+  (message "包安装完成，重启 Emacs 后生效。"))
 
-(defun my/package-installed-p (pkg)
-  "Return non-nil when third-party package PKG is installed."
-  (package-installed-p pkg))
+(defun my/upgrade-packages ()
+  "Upgrade all installed packages, including the Git-installed ones."
+  (interactive)
+  (package-refresh-contents)
+  (package-upgrade-all)
+  (pcase-dolist (`(,pkg . ,_url) my/vc-packages)
+    (when (package-installed-p pkg)
+      (ignore-errors (package-vc-upgrade (cadr (assq pkg package-alist))))))
+  (message "包升级完成，重启 Emacs 后生效。"))
 #+end_src
 
 * macOS 专项配置
@@ -115,7 +147,7 @@
 ;; macOS GUI 启动时不走 shell，所以 PATH 要手动设置
 (use-package exec-path-from-shell
   :ensure nil
-  :if (my/package-installed-p 'exec-path-from-shell)
+  :if (package-installed-p 'exec-path-from-shell)
   :config
   (when (memq window-system '(mac ns))
     (exec-path-from-shell-initialize)))
@@ -180,16 +212,14 @@
 ;; 高亮当前行
 (global-hl-line-mode 1)
 
-;; 用 modus-themes，对 org-mode 非常友好
-(use-package modus-themes
+;; Solarized：最通用的一套配色，浅色深色都有
+(use-package solarized-theme
   :ensure nil
-  :if (my/package-installed-p 'modus-themes)
+  :if (package-installed-p 'solarized-theme)
   :config
-  (setq modus-themes-org-blocks 'gray-background
-        modus-themes-headings '((1 . (bold 1.3))
-                                (2 . (bold 1.15))
-                                (3 . (1.05))
-                                (t . (1.0))))
+  ;; 默认会把标题换成比例字体，和上面的等宽字体设置打架，关掉。
+  ;; 其余保持 solarized 的默认值（org 标题仍然按层级放大）。
+  (setq solarized-use-variable-pitch nil)
   (load-theme my/theme :no-confirm))
 #+end_src
 
@@ -250,7 +280,7 @@
 ;; Vertico — 竖向候选列表，替换默认 minibuffer
 (use-package vertico
   :ensure nil
-  :if (my/package-installed-p 'vertico)
+  :if (package-installed-p 'vertico)
   :init
   (vertico-mode 1)
   :config
@@ -260,7 +290,7 @@
 ;; Orderless — 空格分隔的多词模糊匹配，比如 "org cap" 能匹配 "org-capture"
 (use-package orderless
   :ensure nil
-  :if (my/package-installed-p 'orderless)
+  :if (package-installed-p 'orderless)
   :config
   (setq completion-styles '(orderless basic)
         completion-category-overrides
@@ -269,14 +299,14 @@
 ;; Marginalia — 在候选项旁边显示文档注释、快捷键等
 (use-package marginalia
   :ensure nil
-  :if (my/package-installed-p 'marginalia)
+  :if (package-installed-p 'marginalia)
   :init
   (marginalia-mode 1))
 
 ;; Consult — 强力搜索命令集合
 (use-package consult
   :ensure nil
-  :if (my/package-installed-p 'consult)
+  :if (package-installed-p 'consult)
   :bind
   (("M-y"   . consult-yank-pop)       ; 剪贴板历史
    ("C-x b" . consult-buffer)          ; 切换 buffer（含最近文件）
@@ -291,7 +321,7 @@
 ;; Embark — 在任意候选项上触发动作（类似右键菜单）
 (use-package embark
   :ensure nil
-  :if (my/package-installed-p 'embark)
+  :if (package-installed-p 'embark)
   :bind
   (("C-." . embark-act)       ; 对当前光标处的东西触发动作
    ("C-;" . embark-dwim)      ; 智能默认动作
@@ -302,16 +332,16 @@
 ;; Embark + Consult 集成
 (use-package embark-consult
   :ensure nil
-  :if (and (my/package-installed-p 'embark)
-           (my/package-installed-p 'embark-consult)
-           (my/package-installed-p 'consult))
+  :if (and (package-installed-p 'embark)
+           (package-installed-p 'embark-consult)
+           (package-installed-p 'consult))
   :hook
   (embark-collect-mode . consult-preview-at-point-mode))
 
 ;; Which-key — 输入前缀后弹出所有后续可用键
+;; which-key 是 Emacs 30 内置的，不需要 :if 守卫
 (use-package which-key
   :ensure nil
-  :if (my/package-installed-p 'which-key)
   :init
   (which-key-mode 1)
   :config
@@ -537,7 +567,7 @@
 #+begin_src emacs-lisp
 (use-package org-superstar
   :ensure nil
-  :if (my/package-installed-p 'org-superstar)
+  :if (package-installed-p 'org-superstar)
   :hook (org-mode . org-superstar-mode)
   :config
   (setq org-superstar-headline-bullets-list '("◉" "○" "◈" "◇" "▷")
@@ -599,7 +629,7 @@
 ;; Markdown 支持（写文章时用得到）
 (use-package markdown-mode
   :ensure nil
-  :if (my/package-installed-p 'markdown-mode)
+  :if (package-installed-p 'markdown-mode)
   :mode ("\\.md\\'" . markdown-mode)
   :config
   (setq markdown-command "pandoc"))
@@ -633,7 +663,7 @@
 ;; dired-sidebar — 侧边栏文件树
 (use-package dired-sidebar
   :ensure nil
-  :if (my/package-installed-p 'dired-sidebar)
+  :if (package-installed-p 'dired-sidebar)
   :bind ("C-c t" . dired-sidebar-toggle-sidebar)
   :config
   (setq dired-sidebar-should-follow-file t))
@@ -800,27 +830,24 @@ macOS GUI 版 Emacs 通常能自动同步剪贴板，但终端版（=emacs -nw=�
 
 用 LLM 自动分类自然语言输入，写入对应的 org 文件。
 
+安装走 =M-x my/install-missing-packages=（=my/vc-packages= 里已登记仓库地址），
+启动时只负责加载，不联网、不安装。
+
 #+begin_src emacs-lisp
-;; 确保 quelpa 已安装
-(unless (package-installed-p 'quelpa)
-  (package-install 'quelpa))
+;; 装不上或没装（新机器还没跑安装命令）时静默跳过，不能让它中断整个配置加载。
+(when (require 'capture-llm nil t)
+  (require 'llm-deepseek nil t)          ; make-llm-deepseek 不会被 autoload
+  (setq llm-warn-on-nonfree nil)         ; 关闭非自由 API 警告
 
-;; 从 GitHub 安装 capture-llm（新装机自动拉取，无需手动 clone）
-(unless (package-installed-p 'capture-llm)
-  (quelpa '(capture-llm :fetcher github :repo "danliustc/capture-llm")))
+  ;; DeepSeek provider（API key 在 user-settings.el 里设置 my/deepseek-api-key）
+  (when (and (bound-and-true-p my/deepseek-api-key)
+             (fboundp 'make-llm-deepseek))
+    (setq capture-llm-provider
+          (make-llm-deepseek :key my/deepseek-api-key
+                             :chat-model "deepseek-chat")))
 
-(require 'capture-llm)
-(require 'llm-deepseek)   ; make-llm-deepseek 不会被 autoload
-(setq llm-warn-on-nonfree nil)         ; 关闭非自由 API 警告
-
-;; DeepSeek provider（API key 在 user-settings.el 里设置 my/deepseek-api-key）
-(when (bound-and-true-p my/deepseek-api-key)
-  (setq capture-llm-provider
-        (make-llm-deepseek :key my/deepseek-api-key
-                           :chat-model "deepseek-chat")))
-
-;; 快捷键：C-c C-l
-(global-set-key (kbd "C-c C-l") 'capture-llm-capture)
+  ;; 快捷键：C-c C-l
+  (global-set-key (kbd "C-c C-l") 'capture-llm-capture))
 #+end_src
 
 使用方法：按 =C-c C-l=，输入一句话（如"明天下午3点去医院体检"），LLM 自动判断分类、打标签、提取时间，预览后确认写入。
@@ -834,6 +861,11 @@ macOS GUI 版 Emacs 通常能自动同步剪贴板，但终端版（=emacs -nw=�
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (when (file-exists-p custom-file)
   (load custom-file))
+
+;; 交互式 M-x package-install 会把 package-selected-packages 写进 custom.el，
+;; 而 custom.el 是后加载的，会盖掉「包管理」一节的设置（历史上就被写成过 nil，
+;; 结果 package-autoremove 把所有包都判为孤儿）。以配置文件为准，重新赋值一次。
+(setq package-selected-packages my/selected-packages)
 
 (message "✅ Emacs 配置加载完成！")
 #+end_src

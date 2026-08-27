@@ -37,7 +37,10 @@ cp user-settings.example.el ~/.emacs.d/user-settings.el
 
 # 3. 首次安装第三方包
 # 启动 Emacs 后运行：M-x my/install-missing-packages
+# 装完重启一次 Emacs，配置才会生效
 ```
+
+之后升级所有包用 `M-x my/upgrade-packages`，清理不再需要的包用 `M-x package-autoremove`。
 
 ------
 
@@ -192,12 +195,12 @@ SCHEDULED: <2026-04-29 Wed>
 
 在 `user-settings.el` 里改 `my/theme`：
 
-| 值                      | 外观             |
-| ----------------------- | ---------------- |
-| `modus-operandi`        | 标准亮色         |
-| `modus-operandi-tinted` | 暖调亮色（默认） |
-| `modus-vivendi`         | 标准暗色         |
-| `modus-vivendi-tinted`  | 暖调暗色         |
+| 值                              | 外观               |
+| ------------------------------- | ------------------ |
+| `solarized-light`               | 标准亮色（默认）   |
+| `solarized-light-high-contrast` | 高对比亮色         |
+| `solarized-dark`                | 标准暗色           |
+| `solarized-dark-high-contrast`  | 高对比暗色         |
 
 ------
 

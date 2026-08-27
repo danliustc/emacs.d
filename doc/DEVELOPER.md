@@ -164,12 +164,15 @@ Current package themes:
 - `vertico`, `orderless`, `marginalia`: completion
 - `consult`: search and navigation
 - `embark`, `embark-consult`: actions on completion candidates
-- `which-key`: key discovery
-- `modus-themes`: stable built-in-feeling theme
+- `solarized-theme`: theme
 - `org-superstar`: Org readability
 - `markdown-mode`: writing
 - `dired-sidebar`: lightweight file tree
 - `exec-path-from-shell`: macOS PATH integration
+- `llm`: LLM abstraction used by `capture-llm`
+
+`which-key` and `use-package` are built into Emacs 30 and are deliberately not
+listed as third-party packages.
 
 Avoid adding packages for:
 
@@ -180,10 +183,28 @@ Avoid adding packages for:
 
 When adding a package:
 
-1. Add it to `my/packages`.
+1. Add it to `my/packages` (or `my/vc-packages` if it only exists on Git).
 2. Configure it with `use-package`.
-3. Guard optional behavior with `:if` or fallback helpers.
+3. Guard optional behavior with `:if (package-installed-p 'pkg)` or fallback
+   helpers, so a missing package can never break startup.
 4. Keep related config in the same section of `config.org`.
+
+### Package management rules
+
+- `my/packages` + `my/vc-packages` are the single source of truth. They feed
+  `package-selected-packages`, which is what `package-autoremove` and
+  `package-upgrade-all` rely on. `config.org` re-asserts that value after
+  loading `custom.el`, because interactive `M-x package-install` writes its own
+  version of it into `custom.el` and `custom.el` loads last.
+- Prefer stable releases: `package-archive-priorities` ranks GNU > NonGNU >
+  MELPA, so MELPA's rolling date-versioned snapshots are only used for packages
+  that exist nowhere else.
+- Install packages from Git with the built-in `package-vc-install`, not quelpa
+  (quelpa clones a 40MB+ MELPA checkout to do the same job).
+- Never install or fetch packages during startup. Installation belongs in
+  `my/install-missing-packages`; startup only loads what is already present.
+  After installing, Emacs must be restarted for the `use-package` `:if` guards
+  to re-evaluate.
 
 ## Keybinding Policy
 
@@ -250,10 +271,22 @@ catch stale references and wrong file names.
 
 ## Common Tasks
 
-Install missing packages inside Emacs:
+Install missing packages inside Emacs (restart afterwards):
 
 ```text
 M-x my/install-missing-packages
+```
+
+Upgrade everything, including Git-installed packages:
+
+```text
+M-x my/upgrade-packages
+```
+
+Remove packages no longer listed in `my/packages`:
+
+```text
+M-x package-autoremove
 ```
 
 Regenerate tangled config manually:

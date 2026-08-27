@@ -13,10 +13,10 @@
 ;; Font size in 1/10 pt. 150 means 15 pt.
 (setq my/font-size 150)
 
-;; Theme.
-;; Light: modus-operandi, modus-operandi-tinted
-;; Dark:  modus-vivendi, modus-vivendi-tinted
-(setq my/theme 'modus-operandi-tinted)
+;; Theme (solarized-theme).
+;; Light: solarized-light, solarized-light-high-contrast
+;; Dark:  solarized-dark, solarized-dark-high-contrast
+(setq my/theme 'solarized-light)
 
 ;; Additional agenda files for larger projects.
 ;; (setq my/org-extra-agenda-files

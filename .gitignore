@@ -27,7 +27,9 @@ auto-saves/
 # Emacs 运行时状态（自动生成，机器各自维护）
 bookmarks
 recentf
+projects
 projectile-bookmarks.eld
+eln-cache/
 
 # macOS
 .DS_Store
