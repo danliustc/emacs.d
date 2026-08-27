@@ -42,9 +42,9 @@
     ("✅ 任务"
      "s TODO f tasks.org n \"[%now%]\"")
 
-    ;; 想法 / 笔记
+    ;; 想法 / 笔记（不指定状态：写 s NONE 的话 beorg 会把 NONE 当关键词写进标题）
     ("💭 想法"
-     "s NONE f ideas.org n \"[%now%]\"")
+     "f ideas.org n \"[%now%]\"")
   ))
 #+end_src
 
