@@ -68,64 +68,69 @@ Examples:
 
 ## Org Workflow
 
-The configuration is organized around a small GTD file set derived from
-`my/org-dir`:
+Three files derived from `my/org-dir`, and one rule that decides between them:
 
 ```text
-inbox.org      # unprocessed capture inbox
-tasks.org      # all clarified action items
-ideas.org      # low-friction thoughts and notes
+tasks.org      # what needs doing
+ideas.org      # what is merely recorded
+archive.org    # what is finished
 ```
 
-The intended flow is:
+> A captured item either needs doing (`tasks.org`) or does not (`ideas.org`).
+> There is no third case.
+
+The whole daily loop is two keys:
 
 ```text
-Capture -> inbox.org -> clarify -> refile to tasks.org -> agenda review
+C-c c   capture   t = task -> tasks.org, n = idea -> ideas.org
+C-c a d review    today's due items + every unscheduled TODO
 ```
 
-Core Org behavior:
+`tasks.org` is initialized with two top-level headings:
 
-- `C-c c` opens `org-capture`.
-- `C-c a` opens `org-agenda`.
-- `C-c g i/t/e` opens the core Org files.
-- `C-c g d` opens the daily agenda dashboard.
-- `C-c g n` opens the inbox for processing.
+```org
+* Tasks        ; one-off tasks; every capture lands here
+* Routines     ; recurring chores, each carrying a SCHEDULED repeater
+```
 
-The GTD/Things mapping is:
+`* Routines` exists so daily/weekly chores (check work email, file timesheets)
+surface only on their day instead of permanently occupying the todo list.
+
+TODO states:
 
 ```text
-Inbox     -> inbox.org
-Today     -> agenda daily view
-Upcoming  -> agenda 14-day view
-Anytime   -> unscheduled NEXT tasks
-Someday   -> SOMEDAY tasks in tasks.org
-Personal  -> personal tag
-Work      -> work tag
-Logbook   -> CLOSED/LOGBOOK on completed tasks
-Ideas     -> ideas.org for low-friction thoughts
+TODO -> DONE
+WAITING / SOMEDAY -> CANCELLED     (used on demand, not required)
 ```
 
-TODO states are intentionally small:
-
-```text
-TODO -> NEXT -> DONE
-WAITING/SOMEDAY -> CANCELLED
-```
-
-Tags are similarly constrained:
+Tags:
 
 ```text
 personal work home errands computer health learning travel energy_high energy_low quick
 ```
 
-When extending the Org system, prefer improving this workflow over adding new
-parallel systems.
+### What was deliberately removed, and why
 
-`tasks.org` is initialized with:
+This section is the important one — each item below was tried and abandoned
+because measured usage showed it did not work. Do not reintroduce them without
+the owner explicitly asking.
 
-```org
-* Tasks
-```
+- **`inbox.org` and the clarify/refile step.** The inbox held four items, two of
+  them completed months earlier and never archived; nothing was ever refiled out
+  of it. Captures now go straight to `tasks.org`.
+- **The `NEXT` state.** Zero `NEXT` items existed across three months, so every
+  view built on it was permanently empty. `NEXT` required an organizing action
+  that never happened.
+- **Six of eight agenda views.** Four of them could only ever be empty given the
+  data. One view remains.
+- **Four of six capture templates.** Choosing a template is a decision at the
+  worst possible moment; two remain.
+- **`capture-llm`.** Its `C-c C-l` binding is shadowed by `org-insert-link`
+  inside Org buffers, so it was unreachable exactly where it would be used, and
+  classifying into two destinations does not need an LLM.
+
+The guiding lesson: **adding structure does not produce order, it produces more
+structure to maintain.** The system must stay usable when nothing is organized.
 
 Personal/work/health and similar dimensions should be expressed as tags, not
 separate files.
@@ -146,14 +151,17 @@ The expected mobile role is:
 
 The expected desktop Emacs role is:
 
-- inbox processing
-- refiling
+- tagging and scheduling
 - larger edits
-- weekly review
+- archiving
+
+Both sides must stay in sync on three things, or the two clients show different
+worlds: the TODO keywords, the two capture templates, and the excluded files
+(`init.org` and `archive.org`).
 
 Because Dropbox sync can create conflicted copies when both sides edit the same
 file, avoid simultaneous edits from Emacs and beorg. Prefer using beorg mostly
-for quick capture into `inbox.org`.
+for quick capture.
 
 ## Package Policy
 
@@ -169,7 +177,6 @@ Current package themes:
 - `markdown-mode`: writing
 - `dired-sidebar`: lightweight file tree
 - `exec-path-from-shell`: macOS PATH integration
-- `llm`: LLM abstraction used by `capture-llm`
 
 `which-key` and `use-package` are built into Emacs 30 and are deliberately not
 listed as third-party packages.
@@ -183,7 +190,7 @@ Avoid adding packages for:
 
 When adding a package:
 
-1. Add it to `my/packages` (or `my/vc-packages` if it only exists on Git).
+1. Add it to `my/packages`.
 2. Configure it with `use-package`.
 3. Guard optional behavior with `:if (package-installed-p 'pkg)` or fallback
    helpers, so a missing package can never break startup.
@@ -191,7 +198,7 @@ When adding a package:
 
 ### Package management rules
 
-- `my/packages` + `my/vc-packages` are the single source of truth. They feed
+- `my/packages` is the single source of truth. It feeds
   `package-selected-packages`, which is what `package-autoremove` and
   `package-upgrade-all` rely on. `config.org` re-asserts that value after
   loading `custom.el`, because interactive `M-x package-install` writes its own
@@ -199,8 +206,9 @@ When adding a package:
 - Prefer stable releases: `package-archive-priorities` ranks GNU > NonGNU >
   MELPA, so MELPA's rolling date-versioned snapshots are only used for packages
   that exist nowhere else.
-- Install packages from Git with the built-in `package-vc-install`, not quelpa
-  (quelpa clones a 40MB+ MELPA checkout to do the same job).
+- Every package comes from a package archive. There is deliberately no Git or
+  `package-vc` package: the one that existed (`capture-llm`, via quelpa, which
+  cloned a 40MB+ MELPA checkout) was removed.
 - Never install or fetch packages during startup. Installation belongs in
   `my/install-missing-packages`; startup only loads what is already present.
   After installing, Emacs must be restarted for the `use-package` `:if` guards
@@ -277,7 +285,7 @@ Install missing packages inside Emacs (restart afterwards):
 M-x my/install-missing-packages
 ```
 
-Upgrade everything, including Git-installed packages:
+Upgrade every package:
 
 ```text
 M-x my/upgrade-packages
@@ -301,13 +309,13 @@ Open the main config:
 C-c g c
 ```
 
-Open the inbox:
+Open tasks.org:
 
 ```text
-C-c g i
+C-c g t
 ```
 
-Daily review:
+Today's view:
 
 ```text
 C-c g d

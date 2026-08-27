@@ -1,6 +1,8 @@
 # Emacs 配置 — 快速上手
 
-基于 org-mode 文学编程的 Emacs 配置，专为 GTD 任务管理和写作设计。 配置文件通过 Dropbox 同步，手机端用 beorg 配合使用。
+基于 org-mode 文学编程的 Emacs 配置，专为任务管理和写作设计。配置文件通过 Dropbox 同步，手机端用 beorg 配合使用。
+
+日常只有两个动作：**记一笔 `C-c c`，看一眼 `C-c a d`。**
 
 ------
 
@@ -15,9 +17,9 @@
 └── user-settings.el     # 本机个人设置，Git 不跟踪
 
 ~/Dropbox/orgfiles/
-├── inbox.org            # 收集箱
-├── tasks.org            # 所有已明确的行动任务
-├── ideas.org            # 碎碎念 / 想法
+├── tasks.org            # 要做的（* Tasks 一次性任务 / * Routines 日常杂务）
+├── ideas.org            # 只是记的：想法、碎碎念、笔记
+├── archive.org          # 完事的
 └── init.org             # beorg（手机）配置
 ```
 
@@ -63,60 +65,59 @@ cp user-settings.example.el ~/.emacs.d/user-settings.el
 
 ## 日常工作流
 
-### 收集想法
+### 记一笔
 
-随时用 `C-c c` 打开捕获菜单：
+`C-c c` 只有两个选项，捕获时只需回答一个问题：**这需要我做点什么吗？**
 
-| 按键             | 动作                 |
-| ---------------- | -------------------- |
-| `C-c c` 然后 `i` | 扔进 Inbox（最常用） |
-| `C-c c` 然后 `p` | 个人任务，写入 tasks.org 并加 `:personal:` |
-| `C-c c` 然后 `w` | 工作任务，写入 tasks.org 并加 `:work:`     |
-| `C-c c` 然后 `s` | 放入 Someday / Maybe |
-| `C-c c` 然后 `n` | 记一条碎碎念 / 想法  |
+| 按键             | 动作                          |
+| ---------------- | ----------------------------- |
+| `C-c c` 然后 `t` | 要做的事 → `tasks.org`        |
+| `C-c c` 然后 `n` | 想法 / 笔记 → `ideas.org`     |
 
-### 每日回顾
+不选文件、不选标签、不填时间。
 
-```
-C-c a d      打开今日仪表盘
-  → 显示今天的日程、NEXT 任务、等待中的事、待处理 Inbox
-C-c a n      Anytime / 下一步行动
-C-c a i      Inbox
-C-c a s      Someday / Maybe
-C-c a u      Upcoming（未来 14 天）
-C-c a W      本周概览
-C-c a p      个人任务列表
-C-c a k      工作任务列表
-```
-
-### 处理 Inbox
+### 看一眼
 
 ```
-C-c g n      打开 inbox.org
-C-c C-t      切换 TODO 状态（TODO → NEXT → DONE；WAITING/SOMEDAY 可用快捷键直接选）
-C-c C-w      Refile 到 tasks.org
-C-c C-s      设置 Scheduled 时间
-C-c C-d      设置 Deadline
-C-c C-c      打标签（personal work health computer 等）
+C-c a d      今天
+  → 第一块：今天到期的（含日常杂务）
+  → 第二块：所有没排期的待办
+C-c a t      内置的全部待办列表（含 SOMEDAY）
 ```
 
-### 任务与搜索
+只有这一个自定义视图。想整理的时候再整理，不整理也照样能用。
 
-所有已明确要做的任务统一放在 `tasks.org`。个人、工作、健康、学习等维度用标签表达，不再按文件硬分类。
+### 想整理的时候
+
+```
+C-c C-t      切换 TODO 状态（TODO → DONE；WAITING/SOMEDAY 按首字母直接选）
+C-c C-s      排期（这是让任务出现在「今天」的唯一方式）
+C-c C-c      打标签
+C-c C-w      挪到别处（Tasks ↔ Routines，或归档）
+C-c C-x C-a  归档到 archive.org
+```
+
+### tasks.org 的结构
 
 ```org
 * Tasks
-** NEXT 预约体检 :personal:health:
-SCHEDULED: <2026-04-29 Wed>
+** TODO 第三次整牙 :personal:health:
+** TODO 和法务制定与kimi合作的合同 :work:
+** WAITING 等对方确认 :work:
+** SOMEDAY 学摄影 :personal:
 
-** NEXT 写项目周报 :work:
-
-** WAITING 等朋友确认旅行日期 :personal:travel:
-
-** SOMEDAY 学摄影 :personal:learning:
+* Routines
+** TODO 查看公司邮箱 :work:
+SCHEDULED: <2026-08-27 Thu .+1d>
+** TODO 填写项目工时 :work:
+SCHEDULED: <2026-08-28 Fri .+1w>
 ```
 
-项目很大时，可以在 `tasks.org` 里建一个普通标题组织子任务；真的需要单独文件时，再加到 `user-settings.el` 的 `my/org-extra-agenda-files` 里。
+`* Routines` 放每天/每周重复的杂务，靠 `.+1d` / `.+1w` 这样的 repeater 到期才冒出来，
+平时不占待办列表。做完按 `C-c C-t` 标 DONE，它会自动排到下一次。
+
+个人、工作、健康等维度用标签表达，不按文件分。真的需要单独文件时，加到
+`user-settings.el` 的 `my/org-extra-agenda-files` 里。
 
 ------
 
@@ -132,22 +133,23 @@ SCHEDULED: <2026-04-29 Wed>
 
 > `M-x` 支持空格分隔的多词匹配：输入 `org cap` 找到 `org-capture`，输入 `buf sw` 找到 `switch-to-buffer`，顺序不限。
 
-### GTD 核心
+### 核心（只有这两个要记）
+
+| 按键        | 功能                        |
+| ----------- | --------------------------- |
+| `C-c c t`   | 记一件要做的事              |
+| `C-c c n`   | 记一个想法                  |
+| `C-c a d`   | 看今天                      |
+
+其余的：
 
 | 按键      | 功能                          |
 | --------- | ----------------------------- |
-| `C-c c`   | 捕获任务 / 笔记               |
-| `C-c a d` | 今日仪表盘                    |
-| `C-c a n` | 下一步行动 / Anytime          |
-| `C-c a i` | Inbox                         |
-| `C-c a s` | Someday / Maybe               |
-| `C-c a u` | Upcoming                      |
-| `C-c a`   | Agenda 菜单（再按字母选视图） |
-| `C-c g i` | 打开 inbox.org                |
+| `C-c a t` | 内置全部待办列表（含 SOMEDAY）|
+| `C-c a`   | Agenda 菜单                   |
 | `C-c g t` | 打开 tasks.org                |
 | `C-c g e` | 打开 ideas.org                |
-| `C-c g d` | 今日 Agenda（同 `C-c a d`）   |
-| `C-c g n` | 处理 Inbox                    |
+| `C-c g d` | 看今天（同 `C-c a d`）        |
 
 ### Org 文件内操作
 
@@ -206,6 +208,11 @@ SCHEDULED: <2026-04-29 Wed>
 
 ## 手机端（beorg）
 
-将 `init.org` 放入 `~/Dropbox/orgfiles/`，beorg 启动时自动读取。 配置了和 Emacs 一致的 TODO 关键词（`TODO → NEXT → WAITING → SOMEDAY → DONE`）、捕获模板、以及排除 `init.org` 本身不出现在任务列表里。
+将 `init.org` 放入 `~/Dropbox/orgfiles/`，beorg 启动时自动读取。和 Emacs 两端保持一致：
+
+- 同样的 TODO 关键词（`TODO / DONE`，加上按需使用的 `WAITING`、`SOMEDAY`、`CANCELLED`）
+- 同样的两个捕获模板（任务 → `tasks.org`，想法 → `ideas.org`）
+- 排除 `init.org` 和 `archive.org`，两端看到的文件一致
+- 默认打开 todo 页（排期还不多的时候，agenda 页会是空的）
 
 修改后在 beorg 的 REPL 里输入 `(load 'init)` 立即生效，无需重启。

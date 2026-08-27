@@ -42,19 +42,23 @@ Adding a user-facing setting means three edits: the `defvar` fallback in §用�
 ## config.org conventions
 
 - File-level `#+PROPERTY: header-args:emacs-lisp :tangle yes`. Illustrative blocks must carry `:tangle no` or they land in `config.el`.
-- Third-party packages: add the symbol to `my/packages` (archives) or `my/vc-packages` (Git-only, installed with the built-in `package-vc-install`), and declare with `use-package … :ensure nil :if (package-installed-p 'pkg)`. `use-package-always-ensure` is nil on purpose — a missing package must never break a batch load, and nothing installs or hits the network during startup; `my/install-missing-packages` does that, and Emacs must be restarted afterwards for the `:if` guards to re-evaluate.
-- `my/selected-packages` (= both lists) is assigned to `package-selected-packages` in §包管理 **and again in §收尾 after `custom.el` loads**, because interactive `M-x package-install` writes that variable into `custom.el`, which loads last. Do not drop the second assignment: when it was absent the value ended up nil and `M-x package-autoremove` treated every installed package as an orphan.
+- Third-party packages: add the symbol to `my/packages` and declare with `use-package … :ensure nil :if (package-installed-p 'pkg)`. `use-package-always-ensure` is nil on purpose — a missing package must never break a batch load, and nothing installs or hits the network during startup; `my/install-missing-packages` does that, and Emacs must be restarted afterwards for the `:if` guards to re-evaluate.
+- `my/packages` is assigned to `package-selected-packages` in §包管理 **and again in §收尾 after `custom.el` loads**, because interactive `M-x package-install` writes that variable into `custom.el`, which loads last. Do not drop the second assignment: when it was absent the value ended up nil and `M-x package-autoremove` treated every installed package as an orphan.
 - `package-archive-priorities` ranks GNU > NonGNU > MELPA so stable releases win over MELPA's date-versioned snapshots. `which-key` and `use-package` are built into Emacs 30 and must not be re-added to `my/packages`.
 - Commands bound to keys wrap optional packages in a fallback (`my/search-ripgrep`, `my/find-file-by-name`, `my/jump-outline`, `my/switch-buffer`, `my/toggle-file-sidebar`) so bindings work on a bare Emacs. Follow that pattern for new bindings that depend on `consult`/`embark`/`dired-sidebar`.
 - Keybinding policy: personal globals under `C-c`, GTD file/workflow commands under `C-c g`. All `global-set-key` calls live in the §快捷键总览 section — keep them there rather than scattering them into package sections.
-- `capture-llm` comes from GitHub (`danliustc/capture-llm`) via `my/vc-packages`. Startup only does `(require 'capture-llm nil t)` and configures the DeepSeek provider (which needs `my/deepseek-api-key` in `user-settings.el`) inside that `when` — keep it non-fatal.
+- Every package comes from a package archive. There is deliberately no Git/`package-vc` package and no network dependency at runtime; `capture-llm` was removed in favour of the two plain capture templates.
 - macOS: Option is Meta, Command is Super (`mac-command-modifier 'super`). Terminal Emacs gets pbcopy/pbpaste bridges; GUI uses the system clipboard directly.
 
 ## Org data lives outside this repo
 
-Agenda/capture targets are under `my/org-dir` (typically `~/Dropbox/orgfiles`), not in `.emacs.d`. `my/gtd-initialize` runs on `emacs-startup-hook` and creates `inbox.org`, `tasks.org`, `ideas.org`, `archive.org` with their top-level headings if missing — so a config change can create or modify files in the user's Dropbox. Batch runs do this too.
+Agenda/capture targets are under `my/org-dir` (typically `~/Dropbox/orgfiles`), not in `.emacs.d`. `my/gtd-initialize` runs on `emacs-startup-hook` and creates `tasks.org`, `ideas.org`, `archive.org` with their top-level headings if missing — so a config change can create or modify files in the user's Dropbox. Batch runs do this too.
 
-The GTD model: capture → `inbox.org` → refile → `tasks.org`. Everything actionable lives in `tasks.org`; personal/work/health are **tags, not files**. TODO states are `TODO → NEXT → DONE` plus `WAITING`/`SOMEDAY`/`CANCELLED`. Do not introduce parallel file-based categorization. The iOS app beorg reads the same directory (`beorg-init.sample.org` is the template for its `init.org`), so keep TODO keywords and capture templates consistent between the two.
+**Three files, one rule:** `tasks.org` is what needs doing, `ideas.org` is what is merely recorded, `archive.org` is what is finished. There is no inbox and no clarify step — both were removed because they were never performed, which left the dashboard empty. `tasks.org` has two top-level headings: `* Tasks` (one-off, where all captures land) and `* Routines` (recurring chores carrying `SCHEDULED` repeaters, so they surface only on their day).
+
+TODO states are `TODO → DONE` plus `WAITING`/`SOMEDAY`/`CANCELLED` on demand. **`NEXT` was deliberately removed** — it required an organizing action that never happened, so every view depending on it stayed empty. Do not reintroduce it, or any second organizing ritual, without the user asking. personal/work/health are **tags, not files**.
+
+Deliberate minimalism, all of it hard-won: exactly two capture templates (`t` task, `n` idea), exactly one custom agenda view (`d`). The iOS app beorg reads the same directory (`beorg-init.sample.org` is the template for its `init.org`); keep its TODO keywords, capture templates and excluded files in sync with the desktop side.
 
 ## Docs to keep in sync
 
