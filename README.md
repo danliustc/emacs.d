@@ -17,7 +17,7 @@
 └── user-settings.el     # 本机个人设置，Git 不跟踪
 
 ~/Dropbox/orgfiles/
-├── tasks.org            # 要做的（* Tasks 一次性任务 / * Routines 日常杂务）
+├── tasks.org            # 要做的（平铺，日常杂务排在最前）
 ├── ideas.org            # 只是记的：想法、碎碎念、笔记
 ├── archive.org          # 完事的
 └── init.org             # beorg（手机）配置
@@ -54,7 +54,7 @@ cp user-settings.example.el ~/.emacs.d/user-settings.el
 (setq my/org-dir "~/Dropbox/orgfiles")  ; org 文件夹路径
 (setq my/font "Iosevka")                 ; 字体
 (setq my/font-size 150)                  ; 字号（150 = 15pt）
-(setq my/theme 'modus-operandi-tinted)   ; 主题
+(setq my/theme 'solarized-light)         ; 主题
 
 ; 有复杂项目时，取消注释加入额外文件
 ; (setq my/org-extra-agenda-files
@@ -93,28 +93,33 @@ C-c a t      内置的全部待办列表（含 SOMEDAY）
 C-c C-t      切换 TODO 状态（TODO → DONE；WAITING/SOMEDAY 按首字母直接选）
 C-c C-s      排期（这是让任务出现在「今天」的唯一方式）
 C-c C-c      打标签
-C-c C-w      挪到别处（Tasks ↔ Routines，或归档）
+C-c C-w      挪到别处（另一个文件，或归档）
 C-c C-x C-a  归档到 archive.org
 ```
 
 ### tasks.org 的结构
 
-```org
-* Tasks
-** TODO 第三次整牙 :personal:health:
-** TODO 和法务制定与kimi合作的合同 :work:
-** WAITING 等对方确认 :work:
-** SOMEDAY 学摄影 :personal:
+**没有结构——所有条目都是一级标题，平铺。**
 
-* Routines
-** TODO 查看公司邮箱 :work:
+```org
+* TODO 查看公司邮箱 :work:
 SCHEDULED: <2026-08-27 Thu .+1d>
-** TODO 填写项目工时 :work:
+
+* TODO 填写项目工时 :work:
 SCHEDULED: <2026-08-28 Fri .+1w>
+
+* TODO 第三次整牙 :personal:health:
+* WAITING 等对方确认 :work:
+* SOMEDAY 学摄影 :personal:
 ```
 
-`* Routines` 放每天/每周重复的杂务，靠 `.+1d` / `.+1w` 这样的 repeater 到期才冒出来，
-平时不占待办列表。做完按 `C-c C-t` 标 DONE，它会自动排到下一次。
+之所以不设 `* Tasks` / `* Routines` 这类容器标题：**beorg 捕获时会在文件末尾新建
+一级标题，不认容器**（实测确认）。与其两端打架，不如两端都平铺——桌面的 capture
+也用 `(file ...)` 追加到末尾，行为完全一致。
+
+每天/每周重复的杂务靠 `.+1d` / `.+1w` 这样的 repeater 到期才冒出来，平时不占待办
+列表（「今天」的待办块会跳过所有已排期的条目）。做完按 `C-c C-t` 标 DONE，它会自动
+排到下一次。把它们放在文件最前面，新捕获永远追加在末尾，看文件时自然是分开的。
 
 个人、工作、健康等维度用标签表达，不按文件分。真的需要单独文件时，加到
 `user-settings.el` 的 `my/org-extra-agenda-files` 里。

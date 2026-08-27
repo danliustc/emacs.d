@@ -86,15 +86,19 @@ C-c c   capture   t = task -> tasks.org, n = idea -> ideas.org
 C-c a d review    today's due items + every unscheduled TODO
 ```
 
-`tasks.org` is initialized with two top-level headings:
+`tasks.org` and `ideas.org` are **flat**: every item is a level-1 heading, with
+no container headings at all. This is not a stylistic choice — beorg appends a
+captured item as a new level-1 heading at the end of the file and does not
+honour container headings (verified on device). Rather than fight it, the
+desktop capture templates use `(file ...)` instead of `(file+headline ...)` so
+both ends behave identically. Only `archive.org` keeps a heading, because
+`org-archive-location` targets one.
 
-```org
-* Tasks        ; one-off tasks; every capture lands here
-* Routines     ; recurring chores, each carrying a SCHEDULED repeater
-```
-
-`* Routines` exists so daily/weekly chores (check work email, file timesheets)
-surface only on their day instead of permanently occupying the todo list.
+Recurring chores (check work email, file timesheets) are ordinary items carrying
+a `SCHEDULED` repeater such as `.+1d` / `.+1w`. They stay out of the todo list on
+their own, because the "today" view's second block skips everything scheduled.
+They live at the top of the file; since every capture appends to the end, they
+stay visually grouped without needing a heading.
 
 TODO states:
 
@@ -115,6 +119,10 @@ This section is the important one — each item below was tried and abandoned
 because measured usage showed it did not work. Do not reintroduce them without
 the owner explicitly asking.
 
+- **Container headings inside `tasks.org` / `ideas.org`.** `* Tasks` and
+  `* Routines` lasted a few hours: beorg files captures as top-level siblings, so
+  the containers would have collected only desktop captures while phone captures
+  piled up beside them.
 - **`inbox.org` and the clarify/refile step.** The inbox held four items, two of
   them completed months earlier and never archived; nothing was ever refiled out
   of it. Captures now go straight to `tasks.org`.

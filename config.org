@@ -428,14 +428,17 @@ which-key、use-package 是 Emacs 30 内置的，不需要列在这里。")
   ;; 只有两个模板，捕获时只需回答一个问题：这需要我做点什么吗？
   ;;   是 → t，进 tasks.org；否 → n，进 ideas.org
   ;; 不选文件、不选标签、不填时间。要整理的时候再整理，不整理也能用。
+  ;; 用 (file ...) 而不是 (file+headline ...)：追加到文件末尾，一级标题。
+  ;; beorg 的捕获就是这么写的（实测：它在文件末尾新建一级标题，不认容器标题），
+  ;; 两端保持一致，文件里也就不需要维护任何容器结构。
   (setq org-capture-templates
         `(("t" "✅ 任务" entry
-           (file+headline ,my/org-tasks "Tasks")
+           (file ,my/org-tasks)
            "* TODO %?\n:PROPERTIES:\n:CREATED: %U\n:END:\n%i\n"
            :empty-lines 1)
 
           ("n" "💭 想法 / 笔记" entry
-           (file+headline ,my/org-ideas "Ideas")
+           (file ,my/org-ideas)
            "* %?\n:PROPERTIES:\n:CREATED: %U\n:END:\n%i\n"
            :empty-lines 1)))
 
@@ -532,14 +535,11 @@ which-key、use-package 是 Emacs 30 内置的，不需要列在这里。")
   "创建三个 org 文件（如果不存在）。"
   (interactive)
   (make-directory my/org-dir t)
-  (dolist (path (list my/org-ideas my/org-archive))
+  ;; tasks.org / ideas.org 是平的：条目都是一级标题，没有容器标题。
+  ;; 只有 archive.org 需要一个标题，因为 org-archive-location 指向它。
+  (dolist (path (list my/org-tasks my/org-ideas my/org-archive))
     (my/gtd-create-file path))
-  (my/gtd-ensure-top-level-headings my/org-ideas '("Ideas"))
-  (my/gtd-ensure-top-level-headings my/org-archive '("Archived"))
-  ;; Tasks 在前、Routines 在后：捕获都落在 Tasks，日常杂务单独一块，
-  ;; 它们靠 SCHEDULED 的 repeater 到期才出现，平时不占待办列表。
-  (my/gtd-create-file my/org-tasks "* Tasks\n\n* Routines\n")
-  (my/gtd-ensure-top-level-headings my/org-tasks '("Tasks" "Routines")))
+  (my/gtd-ensure-top-level-headings my/org-archive '("Archived")))
 
 ;; 启动时自动初始化
 (add-hook 'emacs-startup-hook #'my/gtd-initialize)

@@ -54,7 +54,9 @@ Adding a user-facing setting means three edits: the `defvar` fallback in §用�
 
 Agenda/capture targets are under `my/org-dir` (typically `~/Dropbox/orgfiles`), not in `.emacs.d`. `my/gtd-initialize` runs on `emacs-startup-hook` and creates `tasks.org`, `ideas.org`, `archive.org` with their top-level headings if missing — so a config change can create or modify files in the user's Dropbox. Batch runs do this too.
 
-**Three files, one rule:** `tasks.org` is what needs doing, `ideas.org` is what is merely recorded, `archive.org` is what is finished. There is no inbox and no clarify step — both were removed because they were never performed, which left the dashboard empty. `tasks.org` has two top-level headings: `* Tasks` (one-off, where all captures land) and `* Routines` (recurring chores carrying `SCHEDULED` repeaters, so they surface only on their day).
+**Three files, one rule:** `tasks.org` is what needs doing, `ideas.org` is what is merely recorded, `archive.org` is what is finished. There is no inbox and no clarify step — both were removed because they were never performed, which left the dashboard empty.
+
+`tasks.org` and `ideas.org` are **flat** — every item is a level-1 heading, no container headings. Capture templates therefore use `(file ...)`, never `(file+headline ...)`. This is forced by beorg: it appends captures as level-1 siblings at the end of the file and ignores container headings (verified on device), so containers would only ever hold the desktop's captures. Only `archive.org` keeps a heading, because `org-archive-location` targets `* Archived`. Recurring chores are ordinary items with a `SCHEDULED` repeater (`.+1d`, `.+1w`); the "today" view's second block skips everything scheduled, so they hide themselves.
 
 TODO states are `TODO → DONE` plus `WAITING`/`SOMEDAY`/`CANCELLED` on demand. **`NEXT` was deliberately removed** — it required an organizing action that never happened, so every view depending on it stayed empty. Do not reintroduce it, or any second organizing ritual, without the user asking. personal/work/health are **tags, not files**.
 
