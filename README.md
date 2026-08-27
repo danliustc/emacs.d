@@ -216,3 +216,24 @@ SCHEDULED: <2026-08-28 Fri .+1w>
 - 默认打开 todo 页（排期还不多的时候，agenda 页会是空的）
 
 beorg 只在**启动时**读一次 `init.org`。改完之后要让它生效，得把 app 彻底退出（从多任务界面划掉，切后台不算）再重新打开——官方文档没有提供热加载的方法。
+
+### 有一项必须在 app 里手动设
+
+**Settings → QUICK CAPTURE → Add to file**，要改成 `tasks`。
+
+这是那个悬浮 ➕ 快速捕获用的目标文件，属于 beorg 的 GUI 设置，**`init.org` 里的
+`item-templates` 管不到它**。它默认指向 `inbox`，而这套配置里没有 inbox.org——
+不改的话，从快速捕获记一笔会重新造出一个 `inbox.org`。
+
+### 改完之后怎么确认生效
+
+- 捕获菜单只剩 2 个（✅ 任务 / 💭 想法）
+- Settings → Action States 显示 `TODO,WAITING,SOMEDAY`（没有 NEXT）
+- Tasks 页看不到 `archive.org` 的条目，也没有 Inbox 分组
+- 打开 app 默认进 todo 页
+
+如果这几条还是旧的样子，说明文件没同步下来，先去 Files 页手动同步，
+并检查 beorg 的 Dropbox 授权指向的是不是这个 `orgfiles` 文件夹。
+
+> ⚠️ 两端不一致的时候，先让手机同步到最新再动手机上的任务。拿着旧版本改，
+> Dropbox 会产生冲突副本。
