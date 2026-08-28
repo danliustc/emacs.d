@@ -51,32 +51,23 @@
 * 编辑器工具栏
 
 #+begin_src scheme
-;; 编辑笔记时键盘上方的快捷按钮
-(defvar editor-toolbar-items
+;; 编辑笔记时键盘上方的快捷按钮。
+;; 左右移动用文档里的内置图标名（icon-left / icon-right）；前两个是自定义
+;; 动作，文档没有对应图标，用 emoji 当标签。如果手机上显示不出来，
+;; 换成 icon-list / icon-change 之类的内置名即可。
+(set! editor-toolbar-items
   '(
     ("📅" (insert (date->string (current-date) "<~Y-~m-~d ~a ~H:~M>")))
     ("✅" (insert "- [ ] "))
-    ("◀"  (backward-char))
-    ("▶"  (forward-char))
+    ("icon-left"  (backward-char))
+    ("icon-right" (forward-char))
   ))
-#+end_src
-
-* 快捷操作
-
-#+begin_src scheme
-;; 安排到今天
-(define (my/schedule-today)
-  (set-current-item-scheduled! (current-date)))
-
-;; 安排到明天
-(define (my/schedule-tomorrow)
-  (set-current-item-scheduled!
-    (date-add (current-date) 1 'day)))
 #+end_src
 
 * 外观
 
 #+begin_src scheme
-;; 启动后默认显示 todo 页：在补上排期之前，agenda 页会是空的
-(set! startup-tab "todo")
+;; 启动后默认显示哪个 tab。变量名是 ui-start-tab（不是 startup-tab，
+;; 后者不存在，写了也不会报错，只是静默失效）。取值：todo / agenda / files
+(set! ui-start-tab "todo")
 #+end_src
