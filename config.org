@@ -143,9 +143,12 @@ which-key、use-package 是 Emacs 30 内置的，不需要列在这里。")
 ;; 标题栏显示文件名
 (setq frame-title-format '("%b — Emacs"))
 
-;; 让删除键行为和 macOS 一致
-(setq delete-by-moving-to-trash t
-      trash-directory "~/.Trash")
+;; 删除文件走废纸篓，而不是真删。
+;; 刻意不设 trash-directory：Emacs 30 的 move-file-to-trash 先判
+;; system-move-file-to-trash，macOS 上它有定义，所以走的是系统原生废纸篓
+;; （Finder 里能「放回原处」）。设了 trash-directory 反而会绕开原生接口，
+;; 变成一次普通 rename，重名还要加后缀。
+(setq delete-by-moving-to-trash t)
 
 ;; 在 macOS 上禁用右键菜单弹出（避免和系统冲突）
 (when (display-graphic-p)
@@ -204,8 +207,16 @@ which-key、use-package 是 Emacs 30 内置的，不需要列在这里。")
   :config
   ;; 默认会把标题换成比例字体，和上面的等宽字体设置打架，关掉。
   ;; 其余保持 solarized 的默认值（org 标题仍然按层级放大）。
-  (setq solarized-use-variable-pitch nil)
-  (load-theme my/theme :no-confirm))
+  ;; 必须在 load-theme 之前设好，所以留在这里。
+  (setq solarized-use-variable-pitch nil))
+
+;; 主题统一在这里加载，不放进 solarized 的 :config：
+;;   my/theme 填的是内置主题（modus-* 之类）而 solarized-theme 没装时，
+;;   写在 :config 里会导致一个主题都不加载，而且没有任何提示。
+;; my/theme 为 nil 表示不加载主题——(load-theme nil) 会直接报错，要守卫。
+(when my/theme
+  (unless (ignore-errors (load-theme my/theme :no-confirm) t)
+    (message "提示：主题 %s 加载失败，沿用 Emacs 默认外观。" my/theme)))
 #+end_src
 
 * 编辑体验 — 顺手的基础设置
@@ -222,8 +233,8 @@ which-key、use-package 是 Emacs 30 内置的，不需要列在这里。")
 (setq-default tab-width 4)
 
 ;; 自动换行（仅 text/org 模式）
+;; org-mode 派生自 text-mode，挂 text-mode-hook 就够了；两个都挂会跑两遍。
 (add-hook 'text-mode-hook 'visual-line-mode)
-(add-hook 'org-mode-hook  'visual-line-mode)
 
 ;; 保存代码/配置文件时删除行尾空格；写作类文本保留原样。
 (defun my/enable-delete-trailing-whitespace ()
@@ -262,6 +273,15 @@ which-key、use-package 是 Emacs 30 内置的，不需要列在这里。")
 - =C-h K= → 查某个命令的快捷键是什么
 
 #+begin_src emacs-lisp
+;; savehist — 记住 minibuffer 历史。vertico 靠它把常用命令排到前面，
+;; 不开的话每次重启 M-x 的顺序都是从零开始。
+(savehist-mode 1)
+
+;; recentf — 最近打开过的文件。consult-buffer 的「最近文件」那一档完全靠它，
+;; 不开的话那一档永远是空的（下面 C-x b 的注释说的就是这个）。
+(setq recentf-max-saved-items 200)
+(recentf-mode 1)
+
 ;; Vertico — 竖向候选列表，替换默认 minibuffer
 (use-package vertico
   :ensure nil
@@ -414,15 +434,31 @@ which-key、use-package 是 Emacs 30 内置的，不需要列在这里。")
   (setq org-archive-location (concat my/org-archive "::* Archived"))
 
   ;; --- Refile ---
-  ;; 只允许 refile 到各文件的一级容器标题（Inbox / Tasks / Ideas / Reading / Archived）。
-  ;; 任务本身从二级开始，避免误把一个任务 refile 到另一个任务下面。
+  ;; tasks.org / ideas.org 是平的：每个条目都是一级标题，没有容器。
+  ;; 所以在这套配置里 refile 只有一个含义：把条目整个挪到另一个文件的顶层。
+  ;; 绝不能塞到某个条目下面——那会造出二级标题，而 beorg 只认一级平铺。
+  ;;
+  ;; 两个关键点，改之前先看清楚：
+  ;;
+  ;; 1. org-refile-use-outline-path 必须是 'file，不能是 t。
+  ;;    org-refile.el 里只有 'file / 'title / 'buffer-name / 'full-file-path
+  ;;    这几个取值会把「文件本身」推进候选列表（见 org-refile-get-targets）。
+  ;;    用 t 的话文件顶层根本选不中，唯一能做的就是往某个条目下面塞，
+  ;;    正好是这里要避免的事。
+  ;;
+  ;; 2. tasks/ideas 用一个永不匹配的 :regexp（\` 和 \' 只能在空 buffer 里
+  ;;    同时成立），于是候选里只剩两个文件名，从源头杜绝误挂到别的条目下面。
+  ;;    archive.org 用 :level 1，因为它确实有个 * Archived 容器要能选中。
+  ;;
+  ;; 顺带 org-refile-allow-creating-parent-nodes 设成 nil：目标就这几个，
+  ;; 允许现造父节点只会重新打开「制造二级标题」这个口子。
   (setq org-refile-targets
-        `((nil :maxlevel . 2)            ; 同文件内挪动（Tasks ↔ Routines）
-          (org-agenda-files :level . 1)
-          (,my/org-archive :level . 1)))
-  (setq org-refile-use-outline-path t)
+        `((,my/org-tasks   :regexp . "\\`\\'")
+          (,my/org-ideas   :regexp . "\\`\\'")
+          (,my/org-archive :level  . 1)))
+  (setq org-refile-use-outline-path 'file)
   (setq org-outline-path-complete-in-steps nil)  ; 一步完成，配合 vertico
-  (setq org-refile-allow-creating-parent-nodes 'confirm)
+  (setq org-refile-allow-creating-parent-nodes nil)
 
   ;; --- Capture ---
   ;; 只有两个模板，捕获时只需回答一个问题：这需要我做点什么吗？
@@ -514,8 +550,15 @@ which-key、use-package 是 Emacs 30 内置的，不需要列在这里。")
                       (or body ""))))))
 
 (defun my/gtd-ensure-top-level-headings (path headings)
-  "Append missing top-level HEADINGS to PATH."
-  (let ((buf (find-file-noselect path)))
+  "Append missing top-level HEADINGS to PATH.
+
+PATH 可能已经被用户打开着（这个函数是 interactive 命令 `my/gtd-initialize'
+的一部分，也可能碰上会话恢复出来的 buffer）。所以：
+- 只 kill 自己新建的 buffer，别人开的原样留着；
+- 只在自己确实改了东西的时候存盘，不替用户决定要不要保存他的未存修改。"
+  (let* ((existing (find-buffer-visiting path))
+         (buf (or existing (find-file-noselect path)))
+         (changed nil))
     (with-current-buffer buf
       (save-excursion
         (dolist (heading headings)
@@ -524,12 +567,14 @@ which-key、use-package 是 Emacs 30 内置的，不需要列在这里。")
                     (re-search-forward
                      (format "^\\* %s\\(?:[ \t\n]\\|$\\)" (regexp-quote heading))
                      nil t))
+            (setq changed t)
             (goto-char (point-max))
             (unless (bolp) (insert "\n"))
             (insert (format "\n* %s\n" heading)))))
-      (when (buffer-modified-p)
+      (when changed
         (save-buffer)))
-    (kill-buffer buf)))
+    (unless existing
+      (kill-buffer buf))))
 
 (defun my/gtd-initialize ()
   "创建三个 org 文件（如果不存在）。"
@@ -567,8 +612,8 @@ which-key、use-package 是 Emacs 30 内置的，不需要列在这里。")
       (setq ispell-program-name spell-program)
       (when (string-match-p "aspell\\'" spell-program)
         (setq ispell-extra-args '("--sug-mode=ultra" "--lang=en_US")))
-      (add-hook 'text-mode-hook #'flyspell-mode)
-      (add-hook 'org-mode-hook  #'flyspell-mode))))
+      ;; org-mode 派生自 text-mode，挂一个就够（挂两个会跑两遍）。
+      (add-hook 'text-mode-hook #'flyspell-mode))))
 #+end_src
 
 * 文件管理 — Dired 增强
@@ -577,16 +622,19 @@ which-key、use-package 是 Emacs 30 内置的，不需要列在这里。")
 (use-package dired
   :ensure nil
   :config
+  ;; delete-by-moving-to-trash 是全局变量，已经在 macOS 一节设过，
+  ;; 不在这里重复——写在包配置里会让人误以为它只影响 dired。
   (setq dired-dwim-target t          ; 双窗口时自动以另一个为目标
         dired-recursive-copies 'always
-        dired-recursive-deletes 'always
-        delete-by-moving-to-trash t))
+        dired-recursive-deletes 'always))
 
 ;; dired-sidebar — 侧边栏文件树
+;; 不在这里 :bind C-c t：按键统一在「快捷键总览」一节绑到 my/toggle-file-sidebar
+;; （没装这个包时会回退到 dired）。两处都绑的话谁生效只取决于本文件的先后顺序。
 (use-package dired-sidebar
   :ensure nil
   :if (package-installed-p 'dired-sidebar)
-  :bind ("C-c t" . dired-sidebar-toggle-sidebar)
+  :defer t
   :config
   (setq dired-sidebar-should-follow-file t))
 #+end_src
@@ -644,7 +692,8 @@ which-key、use-package 是 Emacs 30 内置的，不需要列在这里。")
 ;; 快速打开三个 org 文件和今天的视图
 (defun my/open-tasks   () (interactive) (find-file my/org-tasks))
 (defun my/open-ideas   () (interactive) (find-file my/org-ideas))
-(defun my/open-config  () (interactive) (find-file "~/.emacs.d/config.org"))
+(defun my/open-config  () (interactive)
+  (find-file (expand-file-name "config.org" user-emacs-directory)))
 (defun my/gtd-daily-review ()
   "打开今天的 Agenda。"
   (interactive)

@@ -94,6 +94,28 @@ desktop capture templates use `(file ...)` instead of `(file+headline ...)` so
 both ends behave identically. Only `archive.org` keeps a heading, because
 `org-archive-location` targets one.
 
+Flatness has to be defended in `org-refile-targets`, and the settings that do it
+are unobvious enough to be worth spelling out:
+
+- `org-refile-use-outline-path` must be `'file`, never `t`. Only `'file` (and
+  `'title` / `'buffer-name` / `'full-file-path`) pushes the *file itself* into
+  the candidate list; see the `(eq org-refile-use-outline-path 'file)` branch in
+  `org-refile-get-targets`. With `t` there is no way to refile to a file's top
+  level at all — the only thing `C-c C-w` can do is nest the item under an
+  existing heading, which is exactly what must not happen.
+- `tasks.org` and `ideas.org` use `:regexp "\\`\\'"`, a pattern that can only
+  match in an empty buffer and therefore contributes no headings. The candidate
+  list is then just the three file names plus `archive.org/Archived`, so
+  accidentally nesting one item under another is impossible rather than merely
+  discouraged.
+- `org-refile-allow-creating-parent-nodes` is nil for the same reason: creating a
+  parent on the fly would reopen the level-2 hole.
+
+This replaced an earlier `((nil :maxlevel . 2) (org-agenda-files :level . 1))`
+setup that was written for the old container layout. After the files were
+flattened it offered all 39 items as refile targets while making the files
+themselves unreachable — the precise inverse of what the design needs.
+
 Recurring chores (check work email, file timesheets) are ordinary items carrying
 a `SCHEDULED` repeater such as `.+1d` / `.+1w`. They stay out of the todo list on
 their own, because the "today" view's second block skips everything scheduled.
@@ -163,9 +185,25 @@ The expected desktop Emacs role is:
 - larger edits
 - archiving
 
-Both sides must stay in sync on three things, or the two clients show different
-worlds: the TODO keywords, the two capture templates, and the excluded files
-(`init.org` and `archive.org`).
+Both sides must stay in sync on four things, or the two clients show different
+worlds: the TODO keywords, the two capture templates, the excluded files
+(`init.org` and `archive.org`), and the logging settings.
+
+The logging one is easy to miss because beorg's defaults disagree with Org's.
+`org-log-into-drawer` defaults to `#f` in beorg and takes a *drawer name string*,
+not a boolean, so `init.org` sets `"LOGBOOK"` explicitly. Without it every task
+completed on the phone writes its state-change note as a bare list item in the
+body while the desktop writes a `:LOGBOOK:` drawer — the two shapes then sit
+side by side in the same file. `org-todo-repeat-to-state` is pinned to `"TODO"`
+for the same reason; it happens to match today by accident of keyword ordering,
+and pinning it makes that no longer an accident. `org-log-done` and
+`org-log-repeat` already default to `'time` on both sides.
+
+The two clients also select files by opposite mechanisms: Emacs uses an
+allowlist (`org-agenda-files`), beorg a denylist (`agenda-exclude-files` /
+`todo-exclude-files`). They agree only because the folder currently holds
+exactly the four known files. Any new `.org` dropped into `my/org-dir` appears
+in beorg and not in Emacs, and both sides need editing.
 
 Because Dropbox sync can create conflicted copies when both sides edit the same
 file, avoid simultaneous edits from Emacs and beorg. Prefer using beorg mostly
@@ -245,7 +283,8 @@ source configuration and should generally remain ignored by Git:
 
 - `config.el`
 - `bookmarks`
-- `recentf`
+- `recentf` (recent file list, feeds `consult-buffer`)
+- `history` (savehist: minibuffer history, feeds Vertico's sorting)
 - `projectile-bookmarks.eld`
 - `auto-save-list/`
 - `auto-saves/`

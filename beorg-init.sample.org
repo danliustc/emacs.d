@@ -13,21 +13,59 @@
       '("DONE" "CANCELLED"))
 #+end_src
 
+* 日志记录
+
+和桌面端的 =org-log-done 'time= / =org-log-into-drawer t= 对齐。
+
+#+begin_src scheme
+;; 这一条必须显式设置：beorg 的 org-log-into-drawer 默认是 #f，
+;; 不设的话手机上完成任务写出来的状态记录是条目正文里一行裸列表项
+;;   - State "DONE"       from "TODO"       [2026-08-28 Fri 00:02]
+;; 而桌面端写的是 :LOGBOOK: 抽屉。同一个文件里两种格式混着，很难看。
+;; 值是抽屉名（字符串），不是布尔量。
+(set! org-log-into-drawer "LOGBOOK")
+
+;; 重复任务标完成后回到哪个状态。beorg 默认 #f（沿用原状态），
+;; 桌面端因为 TODO 是序列里第一个未完成状态，天然会回到 TODO。
+;; 显式写死，两端就不用靠巧合一致。
+(set! org-todo-repeat-to-state "TODO")
+
+;; org-log-done 和 org-log-repeat 的默认值都是 'time，
+;; 和桌面端一致，不用再设。
+#+end_src
+
 * Agenda 设置
 
 #+begin_src scheme
-;; init.org 是配置、archive.org 是已完事的，都不该出现在任务列表里
+;; init.org 是配置、archive.org 是已完事的，都不该出现在任务列表里。
+;;
+;; 注意两端机制是相反的：桌面端 org-agenda-files 是白名单（只有 tasks.org
+;; 和 ideas.org），这里是黑名单。目前文件夹里正好只有这四个文件，所以结果
+;; 一样。以后往 orgfiles/ 里丢别的 .org，beorg 会显示、Emacs 不会——
+;; 那时候要么把它加进桌面的 my/org-extra-agenda-files，要么加进下面两行。
 (set! agenda-exclude-files '("init.org" "archive.org"))
 (set! todo-exclude-files   '("init.org" "archive.org"))
 #+end_src
 
 * Tasks 页默认过滤
 
+beorg 有两套搜索语法，这里两套都用到了，是刻意的，别去「统一」它们：
+
+- 以 =/= 开头 → 新语法（beorg 3.39.0 起），关键字式，=state:= / =group:= / =order:= 。
+- 不以 =/= 开头 → 旧语法，单字母命令，=o= 逾期、=k= 未完成、=s= 状态……
+
 #+begin_src scheme
-;; 显示未完成任务，高优先级排前面
+;; 显示未完成任务，按状态分组，高优先级排前面。
+;; 用的是新语法，需要 beorg ≥ 3.39.0。版本不够的话整个串会掉进旧语法的
+;; 单字母解析器（s/t/a/e 会被当成过滤命令），不报错但结果是乱的——
+;; 如果 Tasks 页看着不对，先去 Settings 里确认 beorg 版本。
 (set! todo-default-filter "/(state:TODO OR state:WAITING) group:state order:>priority")
 
-;; App 图标角标只统计逾期且未完成的任务
+;; SOMEDAY 刻意不在上面这个过滤器里，和桌面端「今天」视图的取舍一致。
+;; 想看 SOMEDAY 就在 Tasks 页临时搜 /state:SOMEDAY。
+
+;; App 图标角标只统计逾期且未完成的任务。
+;; "o k" 是旧语法，也正好是 beorg 文档里 badge-filter 的默认值。
 (set! badge-filter "o k")
 #+end_src
 
@@ -47,6 +85,16 @@
      "f ideas.org n \"[%now%]\"")
   ))
 #+end_src
+
+想法模板整个省掉了 =s= 。这是唯一能让条目「没有状态」的写法，但要在手机上验一次：
+**用 💭 想法记一条，然后看 ideas.org 里出来的是 =* 标题= 还是 =* TODO 标题= 。**
+如果带了 TODO，说明 beorg 在模板没指定时会套自己的默认状态，那条想法会跟着冒到
+桌面 =C-c a d= 的「待办」块里（ideas.org 在桌面的 agenda 文件列表里，这是故意的：
+万一有任务被记错地方，不至于彻底消失）。
+
+两端记录创建时间的形状不一样，这是已知且接受的：桌面写 =:CREATED:= 属性，
+beorg 写正文里一行裸时间戳（=n "[%now%]"= ）。beorg 的模板语言没有「设置属性」
+这个动作，两种都是合法 Org，也不影响任何视图，所以不折腾。
 
 * 编辑器工具栏
 

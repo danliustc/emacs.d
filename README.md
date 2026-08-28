@@ -16,12 +16,16 @@
 ├── user-settings.example.el # 个人设置模板
 └── user-settings.el     # 本机个人设置，Git 不跟踪
 
-~/Dropbox/orgfiles/
+~/Library/CloudStorage/Dropbox/orgfiles/
 ├── tasks.org            # 要做的（平铺，日常杂务排在最前）
 ├── ideas.org            # 只是记的：想法、碎碎念、笔记
 ├── archive.org          # 完事的
 └── init.org             # beorg（手机）配置
 ```
+
+> 新版 Dropbox 的路径是 `~/Library/CloudStorage/Dropbox/`，老版才是 `~/Dropbox/`。
+> 填错不会报错——`my/gtd-initialize` 会照着你给的路径把目录建出来，看起来一切正常，
+> 但那份文件根本不同步，手机上永远看不到。先确认哪个路径真实存在再填。
 
 ------
 
@@ -51,15 +55,17 @@ cp user-settings.example.el ~/.emacs.d/user-settings.el
 只需编辑 `user-settings.el`，其他文件不用动。
 
 ```elisp
-(setq my/org-dir "~/Dropbox/orgfiles")  ; org 文件夹路径
+(setq my/org-dir "~/Library/CloudStorage/Dropbox/orgfiles")  ; org 文件夹路径
 (setq my/font "Iosevka")                 ; 字体
 (setq my/font-size 150)                  ; 字号（150 = 15pt）
-(setq my/theme 'solarized-light)         ; 主题
+(setq my/theme 'solarized-light)         ; 主题（nil 表示不加载主题）
 
 ; 有复杂项目时，取消注释加入额外文件
 ; (setq my/org-extra-agenda-files
-;       '("~/Dropbox/orgfiles/project-x.org"))
+;       '("~/Library/CloudStorage/Dropbox/orgfiles/project-x.org"))
 ```
+
+这四个之外的变量写在 `user-settings.el` 里不会有任何效果，config.org 只读这几个。
 
 ------
 
@@ -93,9 +99,14 @@ C-c a t      内置的全部待办列表（含 SOMEDAY）
 C-c C-t      切换 TODO 状态（TODO → DONE；WAITING/SOMEDAY 按首字母直接选）
 C-c C-s      排期（这是让任务出现在「今天」的唯一方式）
 C-c C-c      打标签
-C-c C-w      挪到别处（另一个文件，或归档）
+C-c C-w      挪到另一个文件的顶层（只有 4 个目标，见下）
 C-c C-x C-a  归档到 archive.org
 ```
+
+`C-c C-w` 的候选**只有四个**：`tasks.org`、`ideas.org`、`archive.org`、
+`archive.org/Archived`。这是刻意限死的——文件是平铺的，能选到别的条目就意味着
+能把任务塞到另一个任务下面，造出二级标题，而 beorg 只认一级平铺。
+挪过去之后仍然是一级标题，追加在文件末尾。
 
 ### tasks.org 的结构
 
@@ -217,8 +228,14 @@ SCHEDULED: <2026-08-28 Fri .+1w>
 
 - 同样的 TODO 关键词（`TODO / DONE`，加上按需使用的 `WAITING`、`SOMEDAY`、`CANCELLED`）
 - 同样的两个捕获模板（任务 → `tasks.org`，想法 → `ideas.org`）
-- 排除 `init.org` 和 `archive.org`，两端看到的文件一致
+- 同样把状态变更记进 `:LOGBOOK:` 抽屉（beorg 默认**不**这么做，必须显式设）
+- 重复任务完成后同样回到 `TODO`
 - 默认打开 todo 页（排期还不多的时候，agenda 页会是空的）
+
+两端排除文件的机制是相反的：Emacs 用白名单（`org-agenda-files` 只有 `tasks.org`
+和 `ideas.org`），beorg 用黑名单（排除 `init.org` 和 `archive.org`）。目前文件夹里
+正好只有这四个文件，所以结果一样。**以后往 `orgfiles/` 里丢别的 `.org`，beorg 会
+显示、Emacs 不会**，那时候两边都要改一下。
 
 beorg 只在**启动时**读一次 `init.org`。改完之后要让它生效，得把 app 彻底退出（从多任务界面划掉，切后台不算）再重新打开——官方文档没有提供热加载的方法。
 
@@ -236,6 +253,10 @@ beorg 只在**启动时**读一次 `init.org`。改完之后要让它生效，�
 - Settings → Action States 显示 `TODO,WAITING,SOMEDAY`（没有 NEXT）
 - Tasks 页看不到 `archive.org` 的条目，也没有 Inbox 分组
 - 打开 app 默认进 todo 页
+- 在手机上把一条重复杂务标 DONE，回桌面看 `tasks.org`：状态记录应该在
+  `:LOGBOOK:` 抽屉里，而不是正文里裸着一行 `- State "DONE" from "TODO" ...`
+- 用 💭 想法记一条，看 `ideas.org` 里出来的是 `* 标题` 而不是 `* TODO 标题`
+  （带 TODO 的话说明 beorg 补了默认状态，那条想法会冒到桌面的「待办」块里）
 
 如果这几条还是旧的样子，说明文件没同步下来，先去 Files 页手动同步，
 并检查 beorg 的 Dropbox 授权指向的是不是这个 `orgfiles` 文件夹。
