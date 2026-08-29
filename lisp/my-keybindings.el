@@ -13,7 +13,7 @@
 (defvar-keymap my/leader-buffer-map
   :doc "Buffer commands under the leader key.")
 (keymap-set my/leader-buffer-map "b" #'my/switch-buffer)
-(keymap-set my/leader-buffer-map "k" #'kill-current-buffer)
+(keymap-set my/leader-buffer-map "d" #'kill-current-buffer)
 
 (defvar-keymap my/leader-search-map
   :doc "Search commands under the leader key.")

@@ -112,7 +112,8 @@ SCHEDULED: <2026-08-29 Sat .+1d>
 - 重复任务恢复状态
 - 从任务视图排除的文件
 
-仓库中的样例是 `beorg-init.sample.org`。设置和检查方式见[配套软件](COMPANION-TOOLS.md)。
+仓库中的 `beorg-init.sample.org` 只管理官方文档明确支持的 Scheme 设置。任务和
+想法的捕获模板在 App 界面中创建。设置和检查方式见[配套软件](COMPANION-TOOLS.md)。
 
 ## 数据安全
 

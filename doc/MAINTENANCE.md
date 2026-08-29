@@ -88,7 +88,9 @@ M-x my/check-environment
 ```
 
 如果 beorg 行为发生变化，还要执行 `COMPANION-TOOLS.md` 中的手机检查清单。
-目前没有自动化的手机测试。
+更新样例前，先核对 beorg 官网的 Scripting、library.org、Search 和 Templates
+文档。官网版本与手机内置版本不一致时，以 beorg REPL 帮助中显示的 `library.org`
+为准。目前没有自动化的手机测试。
 
 ## 运行时文件
 

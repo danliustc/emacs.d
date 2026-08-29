@@ -2,6 +2,7 @@
 #+STARTUP: overview
 
 这是 beorg 的 =init.org= 样例，最后核对日期为 2026-08-29。
+它使用 beorg 3.39.0 引入的新搜索语法，因此需要 beorg 3.39.0 或更高版本。
 
 使用时，将它复制到共享 Org 目录并命名为 =init.org=。如果已经有同名文件，先比较
 差异，不要直接覆盖。完全退出再启动 beorg 可以重新加载配置；也可以打开 beorg REPL
@@ -45,25 +46,7 @@ Agenda 和 Tasks 不应显示配置文件与归档文件。
 (set! badge-filter "o k")
 #+end_src
 
-如果 beorg 升级后 Tasks 视图异常，先检查当前版本的搜索语法，再修改这个值。
-
-* 捕获模板
-
-只保留两个选项。任务进入 =tasks.org=，普通笔记进入 =ideas.org=。
-
-#+begin_src scheme
-(set! item-templates
-  '(
-    ("✅ 任务"
-     "s TODO f tasks.org n \"[%now%]\"")
-
-    ("💭 想法"
-     "f ideas.org n \"[%now%]\"")
-  ))
-#+end_src
-
-修改后，用两个模板分别创建一个条目。想法必须是普通的 =*= 标题，不能是
-=* TODO=。
+如果版本低于 3.39.0，先升级 beorg，不要把这行换成未经核对的搜索语法。
 
 * 编辑器工具栏
 
@@ -83,13 +66,35 @@ Agenda 和 Tasks 不应显示配置文件与归档文件。
 (set! ui-start-tab "todo")
 #+end_src
 
-* 需要在 App 中设置的内容
+* 在 App 中创建捕获模板
+
+模板使用 beorg 自带的界面管理，不放进 =init.org=。长按 Agenda、Tasks 或 Files
+页面底部的 =+=，选择 =Manage Templates…=，然后创建两个模板：
+
+1. =✅ 任务=
+   - Save To：=tasks.org=
+   - State：=TODO=
+   - 保持默认的追加到文件末尾
+2. =💭 想法=
+   - Save To：=ideas.org=
+   - 不设置 State
+   - 保持默认的追加到文件末尾
+
+将 =✅ 任务= 设为默认模板。修改后分别创建一个条目：任务必须进入 =tasks.org=
+并带有 =TODO=；想法必须进入 =ideas.org=，而且不能带 TODO 状态。
+
+* 其他 App 设置
 
 请在 beorg 界面中检查：
 
 - Dropbox 账号和同步目录
-- 快速捕获目标
-- 默认捕获模板
 - 同步权限
 
 这些设置不适合由本文件管理。
+
+* 官方资料
+
+- [[https://www.beorgapp.com/manual/scripting/][脚本指南]]
+- [[https://www.beorgapp.com/manual/library-org/][library.org 参考]]
+- [[https://www.beorgapp.com/manual/search/][搜索语法]]
+- [[https://www.beorgapp.com/manual/templates/][模板设置]]

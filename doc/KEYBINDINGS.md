@@ -20,7 +20,7 @@
 | `SPC f r` | `M-m f r` | 打开最近文件 |
 | `SPC f t` | `M-m f t` | 开关文件侧边栏 |
 | `SPC b b` | `M-m b b` | 切换 buffer 或最近文件 |
-| `SPC b k` | `M-m b k` | 关闭当前 buffer |
+| `SPC b d` | `M-m b d` | 关闭当前 buffer，但不删除文件 |
 | `SPC s p` | `M-m s p` | 搜索项目内容 |
 | `SPC p p` | `M-m p p` | 切换已知项目 |
 | `SPC j i` | `M-m j i` | 跳转到标题或符号 |

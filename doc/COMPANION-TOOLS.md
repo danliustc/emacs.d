@@ -42,15 +42,27 @@ beorg 可以在 iPhone 和 iPad 上读取普通 Org 文件。仓库中的配置�
 (load 'init)
 ```
 
-`init.org` 管理状态、日志、过滤器、模板、编辑器工具栏和启动页面。
+`init.org` 管理状态、日志、过滤器、编辑器工具栏和启动页面。仓库样例中的搜索
+语法需要 beorg 3.39.0 或更高版本。
 
 以下内容仍然需要在 App 界面中设置：
 
 - Dropbox 账号
 - 同步目录
 - 同步权限
-- 快速捕获目标
+- 两个捕获模板
 - 默认模板
+
+长按 Agenda、Tasks 或 Files 页面底部的 `+`，选择 `Manage Templates…`：
+
+| 模板 | Save To | State | 用途 |
+| --- | --- | --- | --- |
+| ✅ 任务 | `tasks.org` | `TODO` | 设为默认模板 |
+| 💭 想法 | `ideas.org` | 不设置 | 创建普通标题 |
+
+两个模板都使用默认行为，将条目追加到文件末尾。模板由 App 管理，不在
+`init.org` 中使用 `item-templates` 维护。这样可以使用 beorg 当前文档支持的模板
+界面，也能避免依赖没有完整公开说明的模板字符串格式。
 
 不要在本仓库保存 Dropbox 凭据。
 
@@ -58,17 +70,25 @@ beorg 可以在 iPhone 和 iPad 上读取普通 Org 文件。仓库中的配置�
 
 在手机上完成以下短测试：
 
-1. 同步并确认可以看到 `tasks.org` 和 `ideas.org`。
-2. 创建一个任务，确认它以 `TODO` 状态进入 `tasks.org`。
-3. 创建一个想法，确认它进入 `ideas.org` 且没有 TODO 状态。
-4. 完成一个重复任务，确认它恢复为 `TODO`。
-5. 确认状态记录位于 `LOGBOOK` 中。
-6. 确认任务视图不显示 `init.org` 和 `archive.org`。
+1. 确认 beorg 版本不低于 3.39.0。
+2. 同步并确认可以看到 `tasks.org` 和 `ideas.org`。
+3. 在 REPL 运行 `(load 'init)`，确认没有错误。
+4. 创建一个任务，确认它以 `TODO` 状态进入 `tasks.org`。
+5. 创建一个想法，确认它进入 `ideas.org` 且没有 TODO 状态。
+6. 完成一个重复任务，确认它恢复为 `TODO`。
+7. 确认状态记录位于 `LOGBOOK` 中。
+8. 确认 Tasks 只显示 `TODO` 和 `WAITING`，并按状态分组、按优先级排序。
+9. 确认 Tasks 不显示 `init.org` 和 `archive.org`。
 
 beorg 更新前后，应将样例与当前官方的
-[脚本指南](https://www.beorg.app/manual/scripting/)、
-[library.org 参考](https://www.beorg.app/manual/library-org/) 和
-[同步指南](https://www.beorg.app/manual/sync/) 进行核对。
+[脚本指南](https://www.beorgapp.com/manual/scripting/)、
+[library.org 参考](https://www.beorgapp.com/manual/library-org/)、
+[搜索指南](https://www.beorgapp.com/manual/search/)、
+[模板指南](https://www.beorgapp.com/manual/templates/)和
+[同步指南](https://www.beorgapp.com/manual/sync/)进行核对。
+
+官网展示的 `library.org` 可能与手机中安装的版本不同。需要确认实际变量时，在
+beorg REPL 中点击帮助图标，查看 App 自带的 `library.org`。
 
 ## Dropbox
 

@@ -45,7 +45,8 @@
   (should (eq (lookup-key my/leader-map (kbd "f r")) #'my/open-recent-file))
   (should (eq (lookup-key my/leader-map (kbd "f t")) #'my/toggle-file-sidebar))
   (should (eq (lookup-key my/leader-map (kbd "b b")) #'my/switch-buffer))
-  (should (eq (lookup-key my/leader-map (kbd "b k")) #'kill-current-buffer))
+  (should (eq (lookup-key my/leader-map (kbd "b d")) #'kill-current-buffer))
+  (should-not (lookup-key my/leader-map (kbd "b k")))
   (should (eq (lookup-key my/leader-map (kbd "s p")) #'my/search-ripgrep))
   (should (eq (lookup-key my/leader-map (kbd "p p")) #'project-switch-project))
   (should (eq (lookup-key my/leader-map (kbd "j i")) #'my/jump-outline))
@@ -120,8 +121,19 @@
                       "org-todo-repeat-to-state \"TODO\""
                       "agenda-exclude-files '(\"init.org\" \"archive.org\")"
                       "todo-exclude-files   '(\"init.org\" \"archive.org\")"
-                      "item-templates" "f tasks.org" "f ideas.org"))
+                      "todo-default-filter \"/(state:TODO OR state:WAITING) group:state order:>priority\""
+                      "beorg 3.39.0" "Save To：=tasks.org=" "Save To：=ideas.org="))
         (goto-char (point-min))
-        (should (search-forward text nil t))))))
+        (should (search-forward text nil t)))
+      (goto-char (point-min))
+      (should-not (search-forward "(set! item-templates" nil t)))))
+
+(ert-deftest my/beorg-docs-use-the-current-official-domain ()
+  (dolist (path '("beorg-init.sample.org" "doc/COMPANION-TOOLS.md"))
+    (with-temp-buffer
+      (insert-file-contents (expand-file-name path my/test-root))
+      (should (search-forward "https://www.beorgapp.com/" nil t))
+      (goto-char (point-min))
+      (should-not (search-forward "https://www.beorg.app/" nil t)))))
 
 ;;; config-tests.el ends here

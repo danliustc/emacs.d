@@ -138,7 +138,7 @@
              (mapconcat #'abbreviate-file-name conflicts ", ")
            "none found"))
         (insert "\nMANUAL checks\n")
-        (insert "- Check the beorg app version and Dropbox account on the phone.\n")
+        (insert "- Check that beorg is version 3.39.0 or newer and uses the expected Dropbox account.\n")
         (insert "- Check the beorg sync folder and default capture template.\n")
         (insert "- This report cannot prove that Dropbox has finished syncing.\n")
         (goto-char (point-min))
