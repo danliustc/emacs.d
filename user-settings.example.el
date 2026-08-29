@@ -1,29 +1,28 @@
 ;; ~/.emacs.d/user-settings.el
-;; Copy this file to user-settings.el and adjust it for the local machine.
+;; 将本文件复制为 user-settings.el，再按本机情况修改。
 
-;; Org files root directory.
-;; Local:    "~/org"
+;; Org 文件根目录。
+;; 本地目录："~/org"
 ;; Dropbox:  "~/Library/CloudStorage/Dropbox/orgfiles"
-;;           (older Dropbox installs use "~/Dropbox/orgfiles" — check which one
-;;           actually exists, the config silently creates the directory it is
-;;           given and an unsynced copy looks exactly like a working one)
+;;           旧版 Dropbox 可能使用 "~/Dropbox/orgfiles"。请先确认真实路径。
+;;           配置会自动创建目录，因此错误路径表面上也可能看起来正常。
 ;; iCloud:   "~/Library/Mobile Documents/com~apple~CloudDocs/orgfiles"
 (setq my/org-dir "~/org")
 
-;; Font name. Use "" to let config.org fall back to system fonts.
+;; 字体名称。设为 "" 时，my-ui.el 会使用系统回退字体。
 (setq my/font "Iosevka")
 
-;; Font size in 1/10 pt. 150 means 15 pt.
+;; 字号单位为 1/10 pt，150 表示 15 pt。
 (setq my/font-size 150)
 
-;; Theme (solarized-theme).
-;; Light: solarized-light, solarized-light-high-contrast
-;; Dark:  solarized-dark, solarized-dark-high-contrast
-;; Built-in themes (modus-operandi, modus-vivendi, ...) work too.
-;; nil loads no theme at all.
+;; 主题（solarized-theme）。
+;; 亮色：solarized-light、solarized-light-high-contrast
+;; 暗色：solarized-dark、solarized-dark-high-contrast
+;; 也可以使用内置主题，例如 modus-operandi、modus-vivendi。
+;; 设为 nil 时不加载主题。
 (setq my/theme 'solarized-light)
 
-;; Additional agenda files for larger projects.
+;; 大型项目可以增加额外的 Agenda 文件。
 ;; (setq my/org-extra-agenda-files
 ;;       '("~/org/renovation.org"
 ;;         "~/org/book-draft.org"))
