@@ -25,16 +25,7 @@
           ("CANCELLED" . (:foreground "#6b7280" :strike-through t)))
         org-tag-alist
         '(("personal" . ?p)
-          ("work" . ?w)
-          ("home" . ?h)
-          ("errands" . ?e)
-          ("computer" . ?c)
-          ("health" . ?m)
-          ("learning" . ?l)
-          ("travel" . ?v)
-          ("energy_high" . ?H)
-          ("energy_low" . ?L)
-          ("quick" . ?q))
+          ("work" . ?w))
         org-log-done 'time
         org-log-into-drawer t
         org-archive-location (concat my/org-archive "::* Archived")

@@ -89,6 +89,11 @@
   (require 'org-agenda)
   (should (equal (mapcar #'car org-agenda-custom-commands) '("d"))))
 
+(ert-deftest my/org-tag-list-stays-small ()
+  (should (equal org-tag-alist
+                 '(("personal" . ?p)
+                   ("work" . ?w)))))
+
 (ert-deftest my/org-refile-keeps-flat-files-flat ()
   (should (eq org-refile-use-outline-path 'file))
   (should-not org-refile-allow-creating-parent-nodes)
