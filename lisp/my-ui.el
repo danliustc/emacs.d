@@ -1,7 +1,15 @@
 ;;; my-ui.el --- Interface and theme -*- lexical-binding: t; -*-
 
 (setq inhibit-startup-message t
-      initial-scratch-message "stay hungry , stay foolish 🍎\n\n"
+      initial-scratch-message
+      (concat
+       ";; Welcome back.\n"
+       ";;\n"
+       ";; SPC b b    继续最近的工作\n"
+       ";; SPC p p    选择项目\n"
+       ";; SPC f f    打开文件\n"
+       ";; SPC a o o  查看任务\n"
+       ";; SPC a o c  快速记录\n\n")
       frame-title-format '("%b — Emacs"))
 
 (menu-bar-mode -1)

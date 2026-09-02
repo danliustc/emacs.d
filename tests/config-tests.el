@@ -27,6 +27,14 @@
                     my-completion my-org my-writing my-files my-keybindings))
     (should (featurep feature))))
 
+(ert-deftest my/scratch-buffer-is-a-minimal-home-page ()
+  (should inhibit-startup-message)
+  (should (string-prefix-p ";; Welcome back." initial-scratch-message))
+  (dolist (shortcut '("SPC b b" "SPC p p" "SPC f f"
+                      "SPC a o o" "SPC a o c"))
+    (should (string-match-p (regexp-quote shortcut)
+                            initial-scratch-message))))
+
 (ert-deftest my/package-list-is-authoritative ()
   (should (equal package-selected-packages my/packages))
   (setq package-selected-packages nil)
