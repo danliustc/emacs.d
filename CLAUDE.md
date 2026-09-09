@@ -1,7 +1,8 @@
 # 项目指南
 
 这是一套用于 Org、写作和简单文件导航的个人 Emacs 配置。
-它使用 Evil 和一小套 Spacemacs 风格的 leader 快捷键。请保持配置简洁。
+它定位为轻量的 Spacemacs：优先借鉴 Spacemacs 的社区交互约定，以 Evil 和原生 keymap 做最小实现。
+调整快捷键前先核对上游行为；避免自创同功能约定或引入 layer 框架。请保持配置简洁。
 
 ## 修改前先读
 

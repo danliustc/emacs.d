@@ -71,13 +71,17 @@ emacs --batch -Q -l tests/config-tests.el -f ert-run-tests-batch-and-exit
 emacs --batch -l init.el
 ```
 
-编译模块并检查告警：
+完整验证源码和编译产物：
 
 ```sh
-emacs --batch -L lisp -f batch-byte-compile lisp/*.el
+sh tests/check-config.sh
 ```
 
-检查后删除生成的 `.elc` 文件。Git 会忽略它们。
+脚本在临时副本中运行四组 ERT：源码／字节码分别搭配本机 `elpa/` 和空软件包目录。
+编译不会激活第三方包，因此仍可能输出可选包缺失或未声明名称的告警；成功与否还要
+看编译后的实际加载和测试结果。未安装 Evil 时，专属 Evil 测试会跳过。
+所有 Org 数据和编译产物都在临时目录内，退出时删除；不会在工作区留下 `.elc`。
+本机未安装第三方包时，两种包环境都只能验证降级行为。
 
 ## 检查配套软件
 

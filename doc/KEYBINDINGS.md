@@ -8,8 +8,9 @@
 - Insert 或 Emacs 状态使用 `M-m`。
 - 当前 major mode 的命令放在 `SPC m` 下。
 - Org 和 Agenda 使用 `,` 作为 `SPC m` 的简写。
-- 在非 Normal 状态下，Org 和 Agenda 使用 `M-RET` 进入同一套 local map。
+- Insert／Emacs 状态下，GUI 使用 Option＋Return（`M-<return>`），终端使用 `C-M-m` 进入 local map。
 - 输入前缀后稍等，which-key 会显示后续按键。
+- 未安装 Evil 时，仍可使用 `M-m` 和上述 Org／Agenda local leader 入口。
 
 ## 全局 Leader
 
@@ -37,7 +38,17 @@
 | `, T T` 或 `SPC m T T` | `M-RET T T` | 切换 TODO 状态 |
 | `, d s` 或 `SPC m d s` | `M-RET d s` | 设置排期 |
 
-Agenda 对光标所在条目使用相同的路径。
+表中的 `M-RET` 指 GUI 的 Option＋Return；终端将此前缀替换为 `C-M-m`。
+Agenda 对光标所在条目使用相同的状态和排期路径。
+
+Org 编辑中，GUI 连续按两次 Option＋Return 执行 `org-meta-return`，按上下文新建
+标题或列表项；终端使用 `C-M-m M-RET`。`C-M-m` 与 `M-RET` 是同一个按键事件，
+因此单独按 `M-RET` 会进入 local leader，不再直接新建条目。
+Agenda 默认的 Motion 状态下，Option＋Return 执行 `org-agenda-show-and-scroll-up`，
+显示并滚动对应条目；local leader 仍可使用 `,` 或 `SPC m`。
+
+这些约定参考 [Spacemacs 核心设置](https://github.com/syl20bnr/spacemacs/blob/develop/core/core-dotspacemacs.el)
+及 [Org layer](https://www.spacemacs.org/layers/+emacs/org/README.html)。
 
 ## Evil Escape
 

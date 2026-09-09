@@ -2,7 +2,7 @@
 
 这是一套用于 Org 任务管理、笔记和写作的个人 Emacs 配置。
 
-它使用 Evil 提供 Vim 风格的编辑体验，并采用一小部分 Spacemacs 风格的快捷键。
+它定位为轻量的 Spacemacs：优先沿用社区的交互和快捷键约定，使用 Evil 与原生 keymap 实现所需功能。
 它不是 Spacemacs、Doom Emacs，也不是完整的 IDE。
 
 日常流程只有两个主要入口：
@@ -40,6 +40,9 @@ M-x my/install-missing-packages
 
 安装完成后重启 Emacs。
 
+确认 `my/org-dir` 指向正确的同步目录。已有数据时先等待同步完成；全新使用时运行
+`M-x my/gtd-initialize`，创建缺失的三个 Org 文件。该命令保留已有文件。
+
 ## 个人设置
 
 编辑 `user-settings.el`。Git 会忽略这个文件。
@@ -57,7 +60,7 @@ M-x my/install-missing-packages
 
 请先确认这台 Mac 上真实的 Dropbox 路径。新版 Dropbox 通常使用
 `~/Library/CloudStorage/Dropbox/orgfiles`，旧版可能使用 `~/Dropbox/orgfiles`。
-路径填错后，Emacs 仍可能创建一个新的本地目录，因此表面上看不出问题。
+启动时只提示缺失的数据文件，不会自动创建目录或文件。运行初始化命令前请核对路径。
 
 ## 日常使用
 
@@ -74,7 +77,11 @@ SPC a o c n   想法或笔记 -> ideas.org
 SPC a o o d
 ```
 
-这个视图显示今天的项目，以及所有未排期的活动任务。它不会显示 `SOMEDAY`。
+这个视图显示今天的日程、排期，以及到期和逾期事项，不包含未排期任务池。
+`SOMEDAY`、`DONE` 和 `CANCELLED` 不会显示。
+
+在 Agenda 菜单中按 `t` 查看未排期待办，按 `r` 回顾全部 `TODO`（包括带旧日期的任务）。
+等待和以后事项分别按 `w`、`s` 查看。完整规则见 [Org 工作流](doc/ORG-WORKFLOW.md)。
 
 需要整理条目时使用：
 

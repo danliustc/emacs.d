@@ -1,5 +1,7 @@
 ;;; my-org.el --- Org and GTD workflow -*- lexical-binding: t; -*-
 
+(require 'seq)
+
 (defvar org-agenda-custom-commands)
 (defvar org-agenda-window-setup)
 (defvar org-agenda-block-separator)
@@ -26,6 +28,7 @@
         org-tag-alist
         '(("personal" . ?p)
           ("work" . ?w))
+        org-todo-repeat-to-state "TODO"
         org-log-done 'time
         org-log-into-drawer t
         org-archive-location (concat my/org-archive "::")
@@ -70,6 +73,9 @@
            ((org-agenda-overriding-header "待办：未排期，已决定做")
             (org-agenda-skip-function
              '(org-agenda-skip-entry-if 'scheduled 'deadline 'timestamp))))
+          ("r" "回顾：全部 TODO" todo "TODO"
+           ((org-agenda-overriding-header "回顾：全部 TODO，含已安排和旧日期事项")
+            (org-agenda-skip-function nil)))
           ("w" "等待：需要回顾" todo "WAITING"
            ((org-agenda-overriding-header "等待：检查进展，必要时安排跟进")))
           ("s" "以后：暂未承诺" todo "SOMEDAY"
@@ -113,7 +119,17 @@
   (dolist (path (list my/org-tasks my/org-ideas my/org-archive))
     (my/gtd-create-file path)))
 
-(add-hook 'emacs-startup-hook #'my/gtd-initialize)
+(defun my/org-check-data-files ()
+  "Report missing Org data files without creating directories or files."
+  (let ((missing (seq-remove #'file-exists-p
+                             (list my/org-tasks my/org-ideas my/org-archive))))
+    (when missing
+      (message "Org files missing: %s. Check my/org-dir and sync; for new data run M-x my/gtd-initialize"
+               (mapconcat #'abbreviate-file-name missing ", ")))))
+
+;; Remove the old startup writer when reloading this module.
+(remove-hook 'emacs-startup-hook #'my/gtd-initialize)
+(add-hook 'emacs-startup-hook #'my/org-check-data-files)
 
 (defun my/org-capture-enter-insert-state ()
   "Enter Evil Insert state when an Org capture or log note buffer opens."

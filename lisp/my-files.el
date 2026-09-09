@@ -17,7 +17,7 @@
 (defun my/search-ripgrep ()
   "Search with Consult, falling back to the built-in rgrep command."
   (interactive)
-  (if (fboundp 'consult-ripgrep)
+  (if (and (fboundp 'consult-ripgrep) (executable-find "rg"))
       (call-interactively #'consult-ripgrep)
     (call-interactively #'rgrep)))
 

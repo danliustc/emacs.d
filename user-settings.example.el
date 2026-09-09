@@ -5,7 +5,7 @@
 ;; 本地目录："~/org"
 ;; Dropbox:  "~/Library/CloudStorage/Dropbox/orgfiles"
 ;;           旧版 Dropbox 可能使用 "~/Dropbox/orgfiles"。请先确认真实路径。
-;;           配置会自动创建目录，因此错误路径表面上也可能看起来正常。
+;;           启动只检查路径；确认路径正确后，用 M-x my/gtd-initialize 创建缺失数据。
 ;; iCloud:   "~/Library/Mobile Documents/com~apple~CloudDocs/orgfiles"
 (setq my/org-dir "~/org")
 

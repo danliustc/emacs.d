@@ -1,5 +1,8 @@
 ;;; my-keybindings.el --- Small Spacemacs-style key map -*- lexical-binding: t; -*-
 
+(declare-function evil-define-key* "evil-core" (state keymap key def &rest bindings))
+
+(defvar org-mode-map)
 (defvar org-agenda-mode-map)
 (declare-function org-agenda-todo "org-agenda" ())
 (declare-function org-agenda-schedule "org-agenda" (&optional arg))
@@ -54,6 +57,9 @@
   :doc "Minimal Org local leader map.")
 (keymap-set my/org-local-leader-map "T" my/org-toggle-leader-map)
 (keymap-set my/org-local-leader-map "d" my/org-date-leader-map)
+;; Preserve Org's original Meta-Return behind the Spacemacs local leader.
+(keymap-set my/org-local-leader-map "M-RET" #'org-meta-return)
+(keymap-set my/org-local-leader-map "M-<return>" #'org-meta-return)
 
 (defvar-keymap my/org-agenda-toggle-leader-map)
 (keymap-set my/org-agenda-toggle-leader-map "T" #'org-agenda-todo)
@@ -74,23 +80,31 @@
 
 (keymap-global-set "M-m" my/leader-map)
 
+(with-eval-after-load 'org
+  (define-key org-mode-map (kbd "M-m") my/org-leader-root-map)
+  (define-key org-mode-map (kbd "C-M-m") my/org-local-leader-map)
+  (define-key org-mode-map (kbd "M-<return>") my/org-local-leader-map))
+(with-eval-after-load 'org-agenda
+  (define-key org-agenda-mode-map (kbd "M-m") my/org-agenda-leader-root-map)
+  (define-key org-agenda-mode-map (kbd "C-M-m") my/org-agenda-local-leader-map)
+  (define-key org-agenda-mode-map (kbd "M-<return>") my/org-agenda-local-leader-map))
+
+;; These callbacks already wait for each keymap, so no deferred Evil macro is needed.
 (with-eval-after-load 'evil
   (define-key evil-normal-state-map (kbd "SPC") my/leader-map)
   (define-key evil-motion-state-map (kbd "SPC") my/leader-map)
   (define-key evil-visual-state-map (kbd "SPC") my/leader-map)
   (with-eval-after-load 'org
-    (evil-define-key '(normal motion visual) org-mode-map
+    (evil-define-key* '(normal motion visual) org-mode-map
       (kbd "SPC") my/org-leader-root-map
-      (kbd ",") my/org-local-leader-map)
-    (define-key org-mode-map (kbd "M-m") my/org-leader-root-map)
-    (define-key org-mode-map (kbd "M-<return>") my/org-local-leader-map))
+      (kbd ",") my/org-local-leader-map))
   (with-eval-after-load 'org-agenda
-    (evil-define-key '(normal motion visual) org-agenda-mode-map
+    (evil-define-key* '(normal motion visual) org-agenda-mode-map
       (kbd "SPC") my/org-agenda-leader-root-map
       (kbd ",") my/org-agenda-local-leader-map)
-    (define-key org-agenda-mode-map (kbd "M-m") my/org-agenda-leader-root-map)
-    (define-key org-agenda-mode-map (kbd "M-<return>")
-                my/org-agenda-local-leader-map)))
+    (evil-define-key* 'motion org-agenda-mode-map
+      (kbd "M-RET") #'org-agenda-show-and-scroll-up
+      (kbd "M-<return>") #'org-agenda-show-and-scroll-up)))
 
 (when (fboundp 'which-key-add-keymap-based-replacements)
   (which-key-add-keymap-based-replacements my/leader-map

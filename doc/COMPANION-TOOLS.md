@@ -21,6 +21,7 @@ M-x my/check-environment
 - 可能的 Dropbox 冲突副本
 
 检查过程是只读的，不会安装工具、复制文件或修改同步设置。
+冲突扫描失败或 Org 目录不存在时显示 `WARN`；只有完成扫描且未发现冲突时才显示 `PASS`。
 
 它无法证明 Dropbox 已经完成同步，也无法从手机读取 beorg 版本和设置。
 
@@ -129,3 +130,11 @@ beorg REPL 中点击帮助图标，查看 App 自带的 `library.org`。
 | JetBrains Mono | 可选 | 回退到 SF Mono，再到 Menlo |
 
 本仓库只报告缺少的工具，不会运行 `brew install` 或 `brew upgrade`。
+
+## 终端剪贴板
+
+macOS 终端中，配置通过 Emacs 原生剪贴板接口调用 `pbcopy` 和 `pbpaste`。
+`C-k`、`C-w` 和 `M-w` 产生的 kill ring 内容都可以同步到系统剪贴板；`C-y`
+保留原生 yank 行为，也能读取其他程序新复制的文本。未获取到新文本时使用 kill ring。
+工具缺失时保留 Emacs 原生行为；剪贴板读取失败时仍可从 kill ring 粘贴。
+图形界面继续使用 Emacs 自带的剪贴板支持。

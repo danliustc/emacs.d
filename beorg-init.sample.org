@@ -21,7 +21,9 @@
 
 * 状态日志和重复任务
 
-将状态变化写入和桌面 Org 相同的抽屉。
+将已启用的状态日志写入和桌面 Org 相同的抽屉。本设置只决定日志位置，
+不决定哪些转换需要记录；beorg 默认还会记录已有条目的完成状态转换。
+桌面端的具体记录规则见仓库 =doc/ORG-WORKFLOW.md=。
 
 #+begin_src scheme
 (set! org-log-into-drawer "LOGBOOK")

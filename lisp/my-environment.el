@@ -23,33 +23,38 @@
 (when (display-graphic-p)
   (context-menu-mode -1))
 
-(unless (display-graphic-p)
-  (defun my/pbcopy ()
-    "Copy the newest kill to the macOS clipboard."
-    (interactive)
-    (let ((text (current-kill 0 t)))
+(defvar my/environment--last-clipboard nil
+  "Last clipboard text written or read by this Emacs instance.")
+
+(defun my/environment--clipboard-cut (text)
+  "Send TEXT to the macOS clipboard, preserving the kill ring on failure."
+  (condition-case err
       (with-temp-buffer
         (insert text)
-        (call-process-region (point-min) (point-max) "pbcopy"))))
+        (let ((coding-system-for-write 'utf-8-unix))
+          (if (eq 0 (call-process-region (point-min) (point-max) "pbcopy"))
+              (setq my/environment--last-clipboard text)
+            (message "Clipboard copy failed; text remains in the kill ring"))))
+    (file-error (message "Clipboard copy failed: %s" (error-message-string err)))))
 
-  (defun my/pbpaste ()
-    "Insert the macOS clipboard and add it to the kill ring."
-    (interactive)
-    (let ((text (shell-command-to-string "pbpaste")))
-      (kill-new text)
-      (insert text)))
+(defun my/environment--clipboard-paste ()
+  "Return new macOS clipboard text, or nil to use the Emacs kill ring."
+  (condition-case nil
+      (with-temp-buffer
+        (let ((coding-system-for-read 'utf-8-unix))
+          (when (eq 0 (call-process "pbpaste" nil (list t nil) nil))
+            (let ((text (buffer-string)))
+              (unless (equal text my/environment--last-clipboard)
+                (setq my/environment--last-clipboard text)
+                (unless (string-empty-p text) text))))))
+    (file-error nil)))
 
-  (global-set-key (kbd "M-w")
-                  (lambda ()
-                    (interactive)
-                    (call-interactively #'kill-ring-save)
-                    (my/pbcopy)))
-  (global-set-key (kbd "C-w")
-                  (lambda ()
-                    (interactive)
-                    (call-interactively #'kill-region)
-                    (my/pbcopy)))
-  (global-set-key (kbd "C-y") #'my/pbpaste))
+(when (and (eq system-type 'darwin)
+           (not (display-graphic-p))
+           (executable-find "pbcopy")
+           (executable-find "pbpaste"))
+  (setq interprogram-cut-function #'my/environment--clipboard-cut
+        interprogram-paste-function #'my/environment--clipboard-paste))
 
 (defun my/environment--file-digest (path)
   "Return a SHA-256 digest for PATH, or nil when PATH is absent."
@@ -59,14 +64,11 @@
       (secure-hash 'sha256 (current-buffer)))))
 
 (defun my/environment--conflict-files ()
-  "Return likely sync conflict files below `my/org-dir'."
-  (when (file-directory-p my/org-dir)
-    (condition-case nil
-        (directory-files-recursively
-         my/org-dir
-         "\\(conflicted copy\\|conflict copy\\|冲突\\)"
-         nil nil)
-      (file-error nil))))
+  "Return likely sync conflict files below `my/org-dir', or signal an error."
+  (unless (file-directory-p my/org-dir)
+    (signal 'file-missing (list "Org directory is unavailable" my/org-dir)))
+  (directory-files-recursively
+   my/org-dir "\\(conflicted copy\\|conflict copy\\|冲突\\)" nil nil))
 
 (defun my/environment--insert-check (state name detail)
   "Insert one environment check with STATE, NAME, and DETAIL."
@@ -78,7 +80,12 @@
   (let* ((buffer (get-buffer-create "*Emacs Config Check*"))
          (beorg-file (expand-file-name "init.org" my/org-dir))
          (sample-file (expand-file-name "beorg-init.sample.org" my/config-root))
-         (conflicts (my/environment--conflict-files)))
+         (conflict-error nil)
+         (conflicts (condition-case err
+                        (my/environment--conflict-files)
+                      (file-error
+                       (setq conflict-error (error-message-string err))
+                       nil))))
     (with-current-buffer buffer
       (let ((inhibit-read-only t))
         (erase-buffer)
@@ -132,11 +139,11 @@
                  ((equal actual sample) "init.org matches the tracked sample.")
                  (t "init.org differs; review it, but do not overwrite it blindly."))))
         (my/environment--insert-check
-         (if conflicts "WARN" "PASS")
+         (if (or conflict-error conflicts) "WARN" "PASS")
          "Sync conflict files"
-         (if conflicts
-             (mapconcat #'abbreviate-file-name conflicts ", ")
-           "none found"))
+         (cond (conflict-error (concat "Scan incomplete: " conflict-error))
+               (conflicts (mapconcat #'abbreviate-file-name conflicts ", "))
+               (t "none found")))
         (insert "\nMANUAL checks\n")
         (insert "- Check that beorg is version 3.39.0 or newer and uses the expected Dropbox account.\n")
         (insert "- Check the beorg sync folder and default capture template.\n")
