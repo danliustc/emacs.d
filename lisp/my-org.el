@@ -28,12 +28,12 @@
           ("work" . ?w))
         org-log-done 'time
         org-log-into-drawer t
-        org-archive-location (concat my/org-archive "::* Archived")
+        org-archive-location (concat my/org-archive "::")
         ;; Flat files must remain selectable without offering task headings.
         org-refile-targets
         `((,my/org-tasks :regexp . "\\`\\'")
           (,my/org-ideas :regexp . "\\`\\'")
-          (,my/org-archive :level . 1))
+          (,my/org-archive :regexp . "\\`\\'"))
         org-refile-use-outline-path 'file
         org-outline-path-complete-in-steps nil
         org-refile-allow-creating-parent-nodes nil
@@ -56,15 +56,24 @@
 
 (with-eval-after-load 'org-agenda
   (setq org-agenda-custom-commands
-        '(("d" "📅 今天"
-           ((agenda ""
-                    ((org-agenda-span 1)
-                     (org-agenda-show-all-dates nil)
-                     (org-agenda-start-on-weekday nil)))
-            (todo "TODO|WAITING"
-                  ((org-agenda-overriding-header "待办")
-                   (org-agenda-skip-function
-                    '(org-agenda-skip-entry-if 'scheduled 'deadline)))))))
+        '(("d" "📅 今天" agenda ""
+           ((org-agenda-span 1)
+            (org-agenda-start-day "0d")
+            (org-agenda-show-all-dates nil)
+            (org-agenda-start-on-weekday nil)
+            (org-deadline-warning-days 0)
+            (org-agenda-skip-scheduled-if-done t)
+            (org-agenda-skip-deadline-if-done t)
+            (org-agenda-skip-function
+             '(org-agenda-skip-entry-if 'todo '("SOMEDAY" "DONE" "CANCELLED")))))
+          ("t" "待办：未排期" todo "TODO"
+           ((org-agenda-overriding-header "待办：未排期，已决定做")
+            (org-agenda-skip-function
+             '(org-agenda-skip-entry-if 'scheduled 'deadline 'timestamp))))
+          ("w" "等待：需要回顾" todo "WAITING"
+           ((org-agenda-overriding-header "等待：检查进展，必要时安排跟进")))
+          ("s" "以后：暂未承诺" todo "SOMEDAY"
+           ((org-agenda-overriding-header "以后：暂未承诺，定期回顾"))))
         org-agenda-window-setup 'current-window
         org-agenda-block-separator ?─
         org-agenda-time-grid '((daily today require-timed)
@@ -97,46 +106,23 @@
                       (my/gtd-file-title path)
                       (or body ""))))))
 
-(defun my/gtd-ensure-top-level-headings (path headings)
-  "Append missing top-level HEADINGS to PATH without closing user buffers."
-  (let* ((existing (find-buffer-visiting path))
-         (buffer (or existing (find-file-noselect path)))
-         (changed nil))
-    (with-current-buffer buffer
-      (save-excursion
-        (dolist (heading headings)
-          (unless (save-excursion
-                    (goto-char (point-min))
-                    (re-search-forward
-                     (format "^\\* %s\\(?:[ \t\n]\\|$\\)" (regexp-quote heading))
-                     nil t))
-            (setq changed t)
-            (goto-char (point-max))
-            (unless (bolp)
-              (insert "\n"))
-            (insert (format "\n* %s\n" heading)))))
-      (when changed
-        (save-buffer)))
-    (unless existing
-      (kill-buffer buffer))))
-
 (defun my/gtd-initialize ()
   "Create the three GTD files when they do not exist."
   (interactive)
   (make-directory my/org-dir t)
   (dolist (path (list my/org-tasks my/org-ideas my/org-archive))
-    (my/gtd-create-file path))
-  (my/gtd-ensure-top-level-headings my/org-archive '("Archived")))
+    (my/gtd-create-file path)))
 
 (add-hook 'emacs-startup-hook #'my/gtd-initialize)
 
 (defun my/org-capture-enter-insert-state ()
-  "Enter Evil Insert state when an Org capture buffer opens."
+  "Enter Evil Insert state when an Org capture or log note buffer opens."
   (when (and (bound-and-true-p evil-local-mode)
              (fboundp 'evil-insert-state))
     (evil-insert-state)))
 
 (add-hook 'org-capture-mode-hook #'my/org-capture-enter-insert-state)
+(add-hook 'org-log-buffer-setup-hook #'my/org-capture-enter-insert-state)
 
 (provide 'my-org)
 ;;; my-org.el ends here

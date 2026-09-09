@@ -87,7 +87,7 @@
   (should (equal (nth 1 (assoc "t" org-capture-templates)) "✅ 任务"))
   (should (equal (nth 1 (assoc "n" org-capture-templates)) "💭 想法 / 笔记"))
   (require 'org-agenda)
-  (should (equal (mapcar #'car org-agenda-custom-commands) '("d"))))
+  (should (equal (mapcar #'car org-agenda-custom-commands) '("d" "t" "w" "s"))))
 
 (ert-deftest my/org-tag-list-stays-small ()
   (should (equal org-tag-alist
@@ -95,23 +95,21 @@
                    ("work" . ?w)))))
 
 (ert-deftest my/org-refile-keeps-flat-files-flat ()
+  (should (equal org-archive-location (concat my/org-archive "::")))
   (should (eq org-refile-use-outline-path 'file))
   (should-not org-refile-allow-creating-parent-nodes)
   (should (equal org-refile-targets
                  `((,my/org-tasks :regexp . "\\`\\'")
                    (,my/org-ideas :regexp . "\\`\\'")
-                   (,my/org-archive :level . 1)))))
+                   (,my/org-archive :regexp . "\\`\\'")))))
 
 (ert-deftest my/gtd-initialize-creates-only-the-required-shape ()
   (my/gtd-initialize)
   (dolist (path (list my/org-tasks my/org-ideas my/org-archive))
-    (should (file-exists-p path)))
-  (with-temp-buffer
-    (insert-file-contents my/org-archive)
-    (should (re-search-forward "^\\* Archived$" nil t)))
-  (with-temp-buffer
-    (insert-file-contents my/org-tasks)
-    (should-not (re-search-forward "^\\* " nil t))))
+    (should (file-exists-p path))
+    (with-temp-buffer
+      (insert-file-contents path)
+      (should-not (re-search-forward "^\\* " nil t)))))
 
 (ert-deftest my/environment-check-is-read-only-and-clear ()
   (make-directory my/test-org-dir t)
@@ -148,5 +146,41 @@
       (should (search-forward "https://www.beorgapp.com/" nil t))
       (goto-char (point-min))
       (should-not (search-forward "https://www.beorg.app/" nil t)))))
+
+(ert-deftest my/org-views-separate-action-waiting-and-someday ()
+  (require 'org-agenda)
+  (let* ((file (make-temp-file "org-views-" nil ".org"))
+         (org-agenda-files (list file))
+         (org-agenda-sticky nil)
+         (org-agenda-buffer-name "*Org Agenda*")
+         (today (format-time-string "<%Y-%m-%d %a>"))
+         (past (format-time-string "<%Y-%m-%d %a>"
+                                   (time-subtract (current-time) (days-to-time 2))))
+         (future (format-time-string "<%Y-%m-%d %a>"
+                                     (time-add (current-time) (days-to-time 2)))))
+    (unwind-protect
+        (progn
+          (with-temp-file file
+            (insert (format
+                     "* TODO PoolItem\n* WAITING WaitingItem\n* SOMEDAY LaterItem\n* TODO TodayItem\nSCHEDULED: %s\n* TODO OverdueItem\nDEADLINE: %s\n* TODO FutureItem\nDEADLINE: %s\n* WAITING FollowupItem\nSCHEDULED: %s\n* SOMEDAY StaleItem\nSCHEDULED: %s\n* DONE FinishedItem\nSCHEDULED: %s\n* CANCELLED CancelledItem\nDEADLINE: %s\n* CalendarItem\n%s\n* TODO TimestampItem\n%s\n"
+                     today past future today past today today today today)))
+          (dolist (view '(("d" ("TodayItem" "OverdueItem" "FollowupItem" "CalendarItem" "TimestampItem")
+                          ("PoolItem" "WaitingItem" "LaterItem" "FutureItem" "StaleItem" "FinishedItem" "CancelledItem"))
+                         ("t" ("PoolItem")
+                          ("TodayItem" "OverdueItem" "FutureItem" "WaitingItem" "LaterItem" "TimestampItem"))
+                         ("w" ("WaitingItem" "FollowupItem") ("PoolItem" "LaterItem"))
+                         ("s" ("LaterItem" "StaleItem") ("PoolItem" "WaitingItem"))))
+            (save-window-excursion
+              (org-agenda nil (car view))
+              (with-current-buffer org-agenda-buffer-name
+                (dolist (item (nth 1 view))
+                  (should (string-match-p item (buffer-string))))
+                (dolist (item (nth 2 view))
+                  (should-not (string-match-p item (buffer-string))))))))
+      (when (get-buffer org-agenda-buffer-name)
+        (kill-buffer org-agenda-buffer-name))
+      (when (get-file-buffer file)
+        (kill-buffer (get-file-buffer file)))
+      (delete-file file))))
 
 ;;; config-tests.el ends here
