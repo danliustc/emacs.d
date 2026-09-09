@@ -111,7 +111,7 @@
                        my/font))
                  (fallback
                   (seq-find (lambda (font) (find-font (font-spec :name font)))
-                            '("JetBrains Mono" "SF Mono" "Menlo")))
+                            my/font-fallbacks))
                  (selected (or configured fallback)))
             (my/environment--insert-check
              (if selected "PASS" "WARN")

@@ -18,19 +18,14 @@
 (blink-cursor-mode -1)
 (global-hl-line-mode 1)
 
-(when (and my/font
-           (not (string-empty-p my/font))
-           (find-font (font-spec :name my/font)))
-  (set-face-attribute 'default nil :font my/font :height my/font-size))
-
-(unless (and my/font
-             (not (string-empty-p my/font))
-             (find-font (font-spec :name my/font)))
-  (catch 'font-set
-    (dolist (font '("JetBrains Mono" "SF Mono" "Menlo"))
-      (when (find-font (font-spec :name font))
-        (set-face-attribute 'default nil :font font :height my/font-size)
-        (throw 'font-set font)))))
+(let ((font (or (and my/font
+                     (not (string-empty-p my/font))
+                     (find-font (font-spec :name my/font))
+                     my/font)
+                (seq-find (lambda (name) (find-font (font-spec :name name)))
+                          my/font-fallbacks))))
+  (when font
+    (set-face-attribute 'default nil :font font :height my/font-size)))
 
 (when (display-graphic-p)
   (dolist (charset '(han cjk-misc))

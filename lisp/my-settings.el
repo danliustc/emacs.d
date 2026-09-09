@@ -17,6 +17,8 @@
   "Theme to load, or nil to keep the default theme.")
 (defvar my/org-extra-agenda-files nil
   "Extra files to include in Org Agenda.")
+(defconst my/font-fallbacks '("JetBrains Mono" "SF Mono" "Menlo")
+  "Fonts tried in order when `my/font' is unset or unavailable.")
 
 (setq my/org-dir (expand-file-name my/org-dir))
 

@@ -27,6 +27,16 @@
               (delete-directory my/test-user-dir t)))
           t)
 
+(ert-deftest my/font-fallbacks-are-shared-between-ui-and-check ()
+  (should (consp my/font-fallbacks))
+  (should (seq-every-p #'stringp my/font-fallbacks))
+  (dolist (path (mapcar (lambda (name) (expand-file-name name my/test-root))
+                        '("lisp/my-ui.el" "lisp/my-environment.el")))
+    (with-temp-buffer
+      (insert-file-contents path)
+      (should (string-match-p "my/font-fallbacks" (buffer-string)))
+      (should-not (string-match-p "JetBrains Mono" (buffer-string))))))
+
 (ert-deftest my/modules-are-loaded ()
   (dolist (feature '(my-settings my-packages my-environment my-ui my-editing
                     my-completion my-org my-writing my-files my-keybindings))
