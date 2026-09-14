@@ -1,6 +1,5 @@
 ;;; my-editing.el --- Editing and Evil -*- lexical-binding: t; -*-
 
-(declare-function evil-define-key* "evil-core" (state keymap key def &rest bindings))
 (declare-function keyfreq-show "keyfreq" (&optional major-mode-symbol))
 (declare-function keyfreq-table-load "keyfreq" (table))
 (defvar keyfreq-table)
@@ -95,31 +94,7 @@
   :config
   (evil-mode 1)
   (dolist (mode '(special-mode dired-mode dired-sidebar-mode help-mode org-agenda-mode))
-    (evil-set-initial-state mode 'motion))
-  (with-eval-after-load 'dired
-    (evil-define-key* 'motion dired-mode-map
-      (kbd "j") #'dired-next-line
-      (kbd "k") #'dired-previous-line
-      (kbd "RET") #'dired-find-file
-      (kbd "q") #'quit-window))
-  (with-eval-after-load 'dired-sidebar
-    (evil-define-key* 'motion dired-sidebar-mode-map
-      (kbd "j") #'dired-next-line
-      (kbd "k") #'dired-previous-line
-      (kbd "RET") #'dired-sidebar-find-file
-      (kbd "q") #'dired-sidebar-hide-sidebar))
-  (with-eval-after-load 'help-mode
-    (evil-define-key* 'motion help-mode-map
-      (kbd "j") #'next-line
-      (kbd "k") #'previous-line
-      (kbd "RET") #'push-button
-      (kbd "q") #'quit-window))
-  (with-eval-after-load 'org-agenda
-    (evil-define-key* 'motion org-agenda-mode-map
-      (kbd "j") #'org-agenda-next-line
-      (kbd "k") #'org-agenda-previous-line
-      (kbd "RET") #'org-agenda-switch-to
-      (kbd "q") #'org-agenda-quit)))
+    (evil-set-initial-state mode 'motion)))
 
 (use-package evil-escape
   :ensure nil

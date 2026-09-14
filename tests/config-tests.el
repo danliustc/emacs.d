@@ -288,10 +288,35 @@
     (should (eq (lookup-key evil-normal-state-map (kbd "SPC f r"))
                 #'my/open-recent-file))))
 
-(ert-deftest my/old-global-c-c-bindings-are-absent ()
-  (dolist (key '("C-c c" "C-c a" "C-c l" "C-c s" "C-c f"
-                 "C-c o" "C-c t" "C-c b" "C-c m" "C-c e" "C-c g"))
-    (should-not (lookup-key global-map (kbd key)))))
+(ert-deftest my/keybinding-module-preserves-user-c-c-bindings ()
+  (let ((global-binding (lookup-key global-map (kbd "C-c c")))
+        (org-binding (lookup-key org-mode-map (kbd "C-c o"))))
+    (unwind-protect
+        (progn
+          (define-key global-map (kbd "C-c c") #'ignore)
+          (define-key org-mode-map (kbd "C-c o") #'ignore)
+          (load (expand-file-name "lisp/my-keybindings.el" my/test-root)
+                nil 'nomessage)
+          (should (eq (lookup-key global-map (kbd "C-c c")) #'ignore))
+          (should (eq (lookup-key org-mode-map (kbd "C-c o")) #'ignore)))
+      (define-key global-map (kbd "C-c c") global-binding)
+      (define-key org-mode-map (kbd "C-c o") org-binding))))
+
+(ert-deftest my/custom-keybindings-are-centralized ()
+  (dolist (name '("my-completion.el" "my-editing.el" "my-environment.el"
+                  "my-files.el" "my-org.el" "my-packages.el"
+                  "my-settings.el" "my-ui.el" "my-writing.el"))
+    (with-temp-buffer
+      (insert-file-contents (expand-file-name (concat "lisp/" name) my/test-root))
+      (should-not
+       (re-search-forward
+        (concat "^[ \\t]*"
+                (regexp-opt '(":bind" "(define-key" "(keymap-set"
+                              "(keymap-unset" "(keymap-global-set"
+                              "(keymap-global-unset" "(global-set-key"
+                              "(local-set-key" "(evil-define-key"
+                              "(evil-define-key*")))
+        nil t)))))
 
 (ert-deftest my/org-capture-and-agenda-stay-small ()
   (should (equal (mapcar #'car org-capture-templates) '("t" "n")))

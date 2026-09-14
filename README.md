@@ -2,7 +2,8 @@
 
 这是一套用于 Org 任务管理、笔记和写作的个人 Emacs 配置。
 
-它定位为轻量的 Spacemacs：优先沿用社区的交互和快捷键约定，使用 Evil 与原生 keymap 实现所需功能。
+它定位为轻量的 Spacemacs：认可并延续 Spacemacs 的人体工学设计，优先沿用其社区交互和快捷键约定，使用 Evil 与原生 keymap 实现所需功能。
+快捷键设计兼顾按键舒适度、助记性和一致性，具体原则见[快捷键](doc/KEYBINDINGS.md)。
 它不是 Spacemacs、Doom Emacs，也不是完整的 IDE。
 
 日常流程只有两个主要入口：

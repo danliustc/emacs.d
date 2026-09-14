@@ -4,10 +4,21 @@
 
 (defvar org-mode-map)
 (defvar org-agenda-mode-map)
+(defvar dired-mode-map)
+(defvar dired-sidebar-mode-map)
+(defvar help-mode-map)
 (declare-function org-agenda-todo "org-agenda" ())
 (declare-function org-agenda-schedule "org-agenda" (&optional arg))
 (declare-function org-agenda-deadline "org-agenda" (&optional arg))
 (declare-function org-agenda-refile "org-agenda" (&optional goto rfloc no-update))
+(declare-function consult-yank-pop "consult" (&optional arg))
+(declare-function consult-buffer "consult" (&optional sources))
+(declare-function consult-line "consult" (&optional initial start))
+(declare-function embark-act "embark" (&optional arg))
+(declare-function embark-dwim "embark" (&optional arg))
+(declare-function embark-bindings "embark" (global))
+(declare-function dired-sidebar-find-file "dired-sidebar" (&optional dir))
+(declare-function dired-sidebar-hide-sidebar "dired-sidebar" ())
 
 (defvar-keymap my/leader-file-map
   :doc "File commands under the leader key.")
@@ -126,6 +137,17 @@
 
 (keymap-global-set "M-m" my/leader-map)
 
+;; Keep all non-leader custom bindings here as well. Optional packages retain
+;; the native bindings when unavailable.
+(when (package-installed-p 'consult)
+  (keymap-global-set "M-y" #'consult-yank-pop)
+  (keymap-global-set "C-x b" #'consult-buffer)
+  (keymap-global-set "C-s" #'consult-line))
+(when (package-installed-p 'embark)
+  (keymap-global-set "C-." #'embark-act)
+  (keymap-global-set "C-;" #'embark-dwim)
+  (keymap-global-set "C-h B" #'embark-bindings))
+
 (with-eval-after-load 'org
   (define-key org-mode-map (kbd "M-m") my/org-leader-root-map)
   (define-key org-mode-map (kbd "C-M-m") my/org-local-leader-map)
@@ -150,7 +172,31 @@
       (kbd ",") my/org-agenda-local-leader-map)
     (evil-define-key* 'motion org-agenda-mode-map
       (kbd "M-RET") #'org-agenda-show-and-scroll-up
-      (kbd "M-<return>") #'org-agenda-show-and-scroll-up)))
+      (kbd "M-<return>") #'org-agenda-show-and-scroll-up))
+  (with-eval-after-load 'dired
+    (evil-define-key* 'motion dired-mode-map
+      (kbd "j") #'dired-next-line
+      (kbd "k") #'dired-previous-line
+      (kbd "RET") #'dired-find-file
+      (kbd "q") #'quit-window))
+  (with-eval-after-load 'dired-sidebar
+    (evil-define-key* 'motion dired-sidebar-mode-map
+      (kbd "j") #'dired-next-line
+      (kbd "k") #'dired-previous-line
+      (kbd "RET") #'dired-sidebar-find-file
+      (kbd "q") #'dired-sidebar-hide-sidebar))
+  (with-eval-after-load 'help-mode
+    (evil-define-key* 'motion help-mode-map
+      (kbd "j") #'next-line
+      (kbd "k") #'previous-line
+      (kbd "RET") #'push-button
+      (kbd "q") #'quit-window))
+  (with-eval-after-load 'org-agenda
+    (evil-define-key* 'motion org-agenda-mode-map
+      (kbd "j") #'org-agenda-next-line
+      (kbd "k") #'org-agenda-previous-line
+      (kbd "RET") #'org-agenda-switch-to
+      (kbd "q") #'org-agenda-quit)))
 
 (when (fboundp 'which-key-add-keymap-based-replacements)
   (which-key-add-keymap-based-replacements my/leader-map
@@ -166,13 +212,6 @@
     "T" "toggle" "d" "dates" "s" "subtrees")
   (which-key-add-keymap-based-replacements my/org-agenda-local-leader-map
     "T" "toggle" "d" "dates" "s" "subtrees"))
-
-;; Remove keys from older versions when this file is reloaded in a live session.
-(dolist (key '("C-c c" "C-c a" "C-c l" "C-c s" "C-c f"
-               "C-c o" "C-c t" "C-c b" "C-c m" "C-c e" "C-c g"))
-  (keymap-global-unset key t))
-(with-eval-after-load 'org
-  (keymap-unset org-mode-map "C-c o" t))
 
 (provide 'my-keybindings)
 ;;; my-keybindings.el ends here

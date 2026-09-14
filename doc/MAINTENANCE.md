@@ -44,6 +44,7 @@ M-x package-autoremove
 
 所有自定义快捷键都放在 `lisp/my-keybindings.el`。
 
+- 调整前先核对 Spacemacs 上游行为，并遵循[人体工学原则](KEYBINDINGS.md#人体工学原则)。
 - 优先复用现有 leader 分组。
 - 保持 leader 数量很小。
 - 不要增加自定义的全局 `C-c` 快捷键。

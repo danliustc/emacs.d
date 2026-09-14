@@ -29,18 +29,14 @@
 (use-package consult
   :ensure nil
   :if (package-installed-p 'consult)
-  :bind (("M-y" . consult-yank-pop)
-         ("C-x b" . consult-buffer)
-         ("C-s" . consult-line))
+  :defer t
   :config
   (setq consult-preview-key 'any))
 
 (use-package embark
   :ensure nil
   :if (package-installed-p 'embark)
-  :bind (("C-." . embark-act)
-         ("C-;" . embark-dwim)
-         ("C-h B" . embark-bindings))
+  :defer t
   :config
   (setq prefix-help-command #'embark-prefix-help-command))
 
