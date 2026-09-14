@@ -29,6 +29,7 @@
     embark-consult
     evil
     evil-escape
+    keyfreq
     org-superstar
     markdown-mode
     dired-sidebar)

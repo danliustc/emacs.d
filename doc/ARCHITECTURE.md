@@ -26,6 +26,7 @@ tests/
 doc/
   ARCHITECTURE.md
   KEYBINDINGS.md
+  USAGE.md
   ORG-WORKFLOW.md
   COMPANION-TOOLS.md
   MAINTENANCE.md
@@ -66,7 +67,7 @@ doc/
 
 `my-ui.el` 管理界面、字体和主题。
 
-`my-editing.el` 管理 Evil、`fd`、空白处理、备份和通用编辑设置。
+`my-editing.el` 管理 Evil、`fd`、空白处理、备份、通用编辑设置和 Keyfreq 使用统计。
 
 `my-completion.el` 管理 minibuffer 补全、候选动作和历史记录。
 
@@ -74,7 +75,7 @@ doc/
 
 `my-writing.el` 管理 Markdown 和拼写检查。
 
-`my-files.el` 管理 Dired、项目、最近文件和导航 wrapper。
+`my-files.el` 管理 Dired、项目、最近文件、导航 wrapper 和窗口布局历史。
 
 `my-keybindings.el` 管理所有自定义快捷键。其他模块只提供命令，不直接增加
 leader 键。
@@ -97,6 +98,7 @@ leader 键。
 - `recentf`
 - `history`
 - `projects`
+- `usage/` 中的累计统计和快照
 - 备份和自动保存目录
 
 Org 任务数据也位于本仓库之外。

@@ -99,6 +99,16 @@ SPC a o o d
 
 完整列表见[快捷键](doc/KEYBINDINGS.md)。
 
+## 使用统计
+
+Keyfreq 已列入软件包清单，安装后重启 Emacs 即开始统计命令使用次数。
+可以通过 applications 下的 usage 分组查看排行、导出带日期的快照。
+具体入口见[快捷键](doc/KEYBINDINGS.md)。
+
+建议开始时保留一份基线，之后每周手动导出一次，使用两周后结合实际体验回顾。
+累计计数会自动保存；每周快照需要手动导出。数据保存在本机 `usage/` 目录，
+不纳入 Git。记录范围、比较方法和暂停方式见[使用统计](doc/USAGE.md)。
+
 ## Org 文件
 
 Org 目录包含：
@@ -130,6 +140,7 @@ M-x my/check-environment
 
 - [项目结构](doc/ARCHITECTURE.md)
 - [快捷键](doc/KEYBINDINGS.md)
+- [使用统计与每周回顾](doc/USAGE.md)
 - [Org 工作流](doc/ORG-WORKFLOW.md)
 - [配套软件](doc/COMPANION-TOOLS.md)
 - [维护指南](doc/MAINTENANCE.md)

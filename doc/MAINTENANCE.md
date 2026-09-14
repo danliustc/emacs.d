@@ -79,8 +79,10 @@ sh tests/check-config.sh
 
 脚本在临时副本中运行四组 ERT：源码／字节码分别搭配本机 `elpa/` 和空软件包目录。
 编译不会激活第三方包，因此仍可能输出可选包缺失或未声明名称的告警；成功与否还要
-看编译后的实际加载和测试结果。未安装 Evil 时，专属 Evil 测试会跳过。
-所有 Org 数据和编译产物都在临时目录内，退出时删除；不会在工作区留下 `.elc`。
+看编译后的实际加载和测试结果。未安装 Evil 或 Keyfreq 时，各自的专属测试会跳过，
+缺包提示和基础快捷键仍会检查。
+所有测试 Org 数据、使用统计、快照和编译产物都在临时目录内，退出时删除；
+不会在工作区留下 `.elc`，也不会向真实的 `usage/` 写入测试计数。
 本机未安装第三方包时，两种包环境都只能验证降级行为。
 
 ## 检查配套软件
@@ -108,6 +110,7 @@ M-x my/check-environment
 - `projects`
 - `backups/`
 - `auto-saves/`
+- `usage/`
 - `.elc` 文件
 
 修改配置时，不要直接编辑 `elpa/` 中的软件包文件。
@@ -127,6 +130,7 @@ M-x my/check-environment
 - 安装和日常使用：`README.md`
 - 代码结构：`ARCHITECTURE.md`
 - 快捷键：`KEYBINDINGS.md`
+- 使用统计、快照和回顾：`USAGE.md`
 - Org 数据规则：`ORG-WORKFLOW.md`
 - beorg 和系统工具：`COMPANION-TOOLS.md`
 - 修改与测试步骤：`MAINTENANCE.md`

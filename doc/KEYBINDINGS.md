@@ -17,19 +17,45 @@
 | Normal 或 Motion | Insert 或 Emacs | 功能 |
 | --- | --- | --- |
 | `SPC SPC` | `M-m SPC` | 运行命令 |
+| `SPC TAB` | `M-m TAB` | 在最近两个 buffer 间往返 |
 | `SPC f f` | `M-m f f` | 打开文件 |
 | `SPC f r` | `M-m f r` | 打开最近文件 |
+| `SPC f s` | `M-m f s` | 保存当前文件 |
 | `SPC f t` | `M-m f t` | 开关文件侧边栏 |
 | `SPC b b` | `M-m b b` | 切换 buffer 或最近文件 |
 | `SPC b d` | `M-m b d` | 关闭当前 buffer，但不删除文件 |
 | `SPC s p` | `M-m s p` | 搜索项目内容 |
+| `SPC s s` | `M-m s s` | 搜索当前 buffer |
 | `SPC p p` | `M-m p p` | 切换已知项目 |
+| `SPC p f` | `M-m p f` | 查找当前项目中的文件 |
 | `SPC j i` | `M-m j i` | 跳转到标题或符号 |
 | `SPC a o c` | `M-m a o c` | 打开 Org Capture |
 | `SPC a o o` | `M-m a o o` | 打开 Org Agenda |
+| `SPC a u s` | `M-m a u s` | 查看累计命令使用次数 |
+| `SPC a u e` | `M-m a u e` | 导出带日期的本地统计快照 |
+| `SPC w h/j/k/l` | `M-m w h/j/k/l` | 切换到左／下／上／右窗口 |
+| `SPC w v` | `M-m w v` | 左右分屏，光标留在原窗口 |
+| `SPC w s` | `M-m w s` | 上下分屏，光标留在原窗口 |
+| `SPC w d` | `M-m w d` | 关闭当前窗口，保留 buffer |
+| `SPC w =` | `M-m w =` | 均衡窗口面积 |
+| `SPC w u` | `M-m w u` | 撤销窗口布局变化 |
+| `SPC h d k` | `M-m h d k` | 查看按键说明 |
+| `SPC h d f` | `M-m h d f` | 查看函数说明 |
+| `SPC h d v` | `M-m h d v` | 查看变量说明 |
 
 `SPC p p` 使用 Emacs 内置的 `project.el`。第一次使用时选择项目目录，Emacs 会将它
 保存在本机的 `projects` 文件中。
+
+`SPC s s` 使用现有的 `consult-line`；未安装 Consult 时降级为原生增量搜索。
+
+`SPC a u` 是本配置自定义的使用统计分组，需要 `keyfreq`；未安装时会提示安装入口。
+快照和每周回顾方法见[使用统计](USAGE.md)。Insert 或 Emacs 状态下，
+`C-u M-m a u s` 只显示当前 major mode 的统计。
+
+窗口布局历史由内置的 `winner-mode` 记录，`SPC w u` 不会撤销文字编辑。
+窗口操作使用内置功能。Spacemacs 风格键位参考
+[Spacemacs 默认绑定](https://github.com/syl20bnr/spacemacs/blob/develop/layers/%2Bspacemacs/spacemacs-defaults/keybindings.el)
+及[官方文档](https://www.spacemacs.org/doc/DOCUMENTATION.html)。
 
 ## Org Local Leader
 
@@ -37,9 +63,17 @@
 | --- | --- | --- |
 | `, T T` 或 `SPC m T T` | `M-RET T T` | 切换 TODO 状态 |
 | `, d s` 或 `SPC m d s` | `M-RET d s` | 设置排期 |
+| `, d d` 或 `SPC m d d` | `M-RET d d` | 设置截止日期 |
+| `, s r` 或 `SPC m s r` | `M-RET s r` | Refile，将条目移动到其他文件 |
+| `, s A` 或 `SPC m s A` | `M-RET s A` | 归档当前子树到配置的归档位置 |
+| `, s n` 或 `SPC m s n` | `M-RET s n` | 只显示当前子树 |
+| `, s w` 或 `SPC m s w` | `M-RET s w` | 恢复显示全文 |
 
 表中的 `M-RET` 指 GUI 的 Option＋Return；终端将此前缀替换为 `C-M-m`。
-Agenda 对光标所在条目使用相同的状态和排期路径。
+Agenda 对光标所在条目使用相同的状态、排期、截止日期和 Refile 路径。
+归档和子树显示范围的上述快捷键仅用于 Org 编辑 buffer。
+Refile 和归档沿用[现有的平铺文件规则](ORG-WORKFLOW.md#refile)。
+只显示子树不会删除内容，使用 `, s w` 即可恢复全文。
 
 Org 编辑中，GUI 连续按两次 Option＋Return 执行 `org-meta-return`，按上下文新建
 标题或列表项；终端使用 `C-M-m M-RET`。`C-M-m` 与 `M-RET` 是同一个按键事件，

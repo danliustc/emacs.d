@@ -1,5 +1,8 @@
 ;;; my-files.el --- Files, projects, and navigation -*- lexical-binding: t; -*-
 
+(require 'winner)
+(winner-mode 1)
+
 (use-package dired
   :ensure nil
   :config
@@ -27,6 +30,18 @@
   (if (fboundp 'consult-recent-file)
       (call-interactively #'consult-recent-file)
     (call-interactively #'recentf-open-files)))
+
+(defun my/search-buffer ()
+  "Search the current buffer with Consult or built-in incremental search."
+  (interactive)
+  (if (fboundp 'consult-line)
+      (call-interactively #'consult-line)
+    (call-interactively #'isearch-forward)))
+
+(defun my/alternate-buffer ()
+  "Switch to the most recent other buffer in the current frame."
+  (interactive)
+  (switch-to-buffer (other-buffer (current-buffer) t)))
 
 (defun my/jump-outline ()
   "Jump to a heading with Consult or imenu."
