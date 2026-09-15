@@ -26,7 +26,5 @@
 (defvar my/org-ideas (expand-file-name "ideas.org" my/org-dir))
 (defvar my/org-archive (expand-file-name "archive.org" my/org-dir))
 
-(setq native-comp-async-report-warnings-errors nil)
-
 (provide 'my-settings)
 ;;; my-settings.el ends here

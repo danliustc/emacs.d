@@ -13,6 +13,7 @@ cp "$config_root/tests/config-tests.el" "$check_root/config/tests/"
 
 run_tests() {
     EMACS_CONFIG_PACKAGE_DIR="$1" emacs --batch -Q \
+        --eval '(setq native-comp-enable-subr-trampolines nil)' \
         -l "$check_root/config/tests/config-tests.el" \
         -f ert-run-tests-batch-and-exit
 }

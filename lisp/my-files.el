@@ -8,7 +8,7 @@
   :config
   (setq dired-dwim-target t
         dired-recursive-copies 'always
-        dired-recursive-deletes 'always))
+        dired-recursive-deletes 'top))
 
 (use-package dired-sidebar
   :ensure nil

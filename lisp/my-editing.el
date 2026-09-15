@@ -116,7 +116,12 @@
       `(("." . ,(expand-file-name "backups" user-emacs-directory)))
       auto-save-file-name-transforms
       `((".*" ,(expand-file-name "auto-saves/" user-emacs-directory) t))
-      create-lockfiles nil
+      backup-by-copying t
+      version-control t
+      kept-new-versions 10
+      kept-old-versions 2
+      delete-old-versions t
+      create-lockfiles t
       confirm-kill-emacs #'y-or-n-p
       use-short-answers t)
 

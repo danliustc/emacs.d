@@ -145,6 +145,18 @@
   (should (equal my/org-ideas (expand-file-name "ideas.org" my/test-org-dir)))
   (should (equal my/org-archive (expand-file-name "archive.org" my/test-org-dir))))
 
+(ert-deftest my/file-safety-settings-preserve-recovery-paths ()
+  (should (eq dired-recursive-copies 'always))
+  (should (eq dired-recursive-deletes 'top))
+  (should create-lockfiles)
+  (should backup-by-copying)
+  (should version-control)
+  (should delete-old-versions)
+  (should (= kept-new-versions 10))
+  (should (= kept-old-versions 2))
+  (should (equal (cdr (assoc "." backup-directory-alist))
+                 (expand-file-name "backups" my/test-user-dir))))
+
 (ert-deftest my/global-leader-bindings-match-the-contract ()
   (should (eq (lookup-key my/leader-map (kbd "SPC")) #'execute-extended-command))
   (should (eq (lookup-key my/leader-map (kbd "f f")) #'find-file))
