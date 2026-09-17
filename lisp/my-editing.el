@@ -92,6 +92,10 @@
         evil-respect-visual-line-mode t
         evil-undo-system 'undo-redo)
   :config
+  ;; Evil 1.15 reads this legacy global-mode queue, which Emacs 31 no
+  ;; longer initializes.  Keep the empty default until Evil is upgraded.
+  ;; https://github.com/emacs-evil/evil/issues/1983
+  (defvar evil-mode-buffers nil)
   (evil-mode 1)
   (dolist (mode '(special-mode dired-mode dired-sidebar-mode help-mode org-agenda-mode))
     (evil-set-initial-state mode 'motion)))

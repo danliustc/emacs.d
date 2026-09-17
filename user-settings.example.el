@@ -1,4 +1,4 @@
-;; ~/.emacs.d/user-settings.el
+;;; user-settings.el --- Personal settings -*- lexical-binding: t; -*-
 ;; 将本文件复制为 user-settings.el，再按本机情况修改。
 
 ;; Org 文件根目录。

@@ -293,6 +293,19 @@
   (should (eq (lookup-key my/org-agenda-local-leader-map (kbd "d s"))
               #'org-agenda-schedule)))
 
+(ert-deftest my/evil-normal-command-hook-adjusts-cursor ()
+  (skip-unless (featurep 'evil))
+  (with-temp-buffer
+    (insert "abc\n")
+    (evil-local-mode 1)
+    (evil-normal-state)
+    (goto-char (point-min))
+    (goto-char (line-end-position))
+    (let ((this-command 'forward-char))
+      (evil-normal-post-command))
+    (should (evil-normal-state-p))
+    (should (= (point) 3))))
+
 (ert-deftest my/evil-escape-uses-fd-when-installed ()
   (when (package-installed-p 'evil-escape)
     (should (equal evil-escape-key-sequence "fd")))
